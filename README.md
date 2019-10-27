@@ -34,10 +34,15 @@ Others (such as Autopsy, Axiom, Log2timeline, etc.) are excellent tools small nu
 - Browsing the parsed artifacts on same web interface by team members boost the collaboration among them using **tagging**/**timeline** feature instead of every one work on his/her machine.
 
 # Kuiper Components
+
 **Flask:** A web framework written in Python, used as the primary web application component. 
+
 **Elasticsearch:** A distributed, open source search and analytics engine, used as the primary database to store parser results.
+
 **MongoDB:** A database that stores data in JSON-like documents that can vary in structure, offering a dynamic, flexible schema, used to store Kuiper web application configurations and information about parsed files. 
+
 **Redis:** A in-memory data structure store, used as a database, cache and message broker, used as a message broker to relay tasks to celery workers.
+
 **Celery:** A asynchronous task queue/job queue based on distributed message passing, used as the main processing engine to process relayed tasks from redis.
 
 
@@ -172,5 +177,7 @@ If everything runs correctly now you should be able to use Kuiper, happy hunting
 # Authors
 
 [Saleh Muhaysin](https://github.com/salehmuhaysin), Twitter (@saleh_muhaysin),
+
 Muteb
+
 Abdullah 
