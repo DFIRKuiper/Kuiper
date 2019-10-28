@@ -3,36 +3,27 @@
 [Logo]
 
 
+## Table of Contents
+
 <!-- TOC depthFrom:2 -->
 
-1. [Kuiper](#1-Kuiper)
-
- 1.1. What is Kuiper?
-
-1.2. Why Kuiper?
-
-1.3. How Kuiper Will Help Optimize the Investigation?
-
-1.4. Use Cases
-
-2. Kuiper Components
-
-2.1. Parsers
-
-3. Examples
-
-4. Getting Started
-
-4.1. Requirements
-
-4.2. Installation
-
-5. Licenses
-
-6. Authors
 
 - [1. Kuiper](#kuiper)
-    - [2.1. What is Kuiper?](#what-is-kuiper)
+    - [1.1. What is Kuiper?](#what-is-kuiper)
+    - [1.2. Why Kuiper?](#why-kuiper)
+    - [1.3. How Kuiper Will Help Optimize the Investigation?](#How-Kuiper-Will-Help-Optimize-the-Investigation)
+    - [1.4. Use Cases](#Use-Cases)
+- [2. Kuiper Components](#Kuiper-Components)
+    - [2.1. Parsers](#Parsers)
+- [3. Examples](#Examples)
+- [4. Getting Started](#getting-started)
+    - [4.1. Requirements](#requirements)
+    - [4.1. Installation](#Installation)
+- [5. Licenses](#Licenses)
+- [6. Authors](#Authors)
+
+    
+
 
 <!-- /TOC -->
 
@@ -41,7 +32,6 @@
 
 Digital Investigation Platform
 
-## Table of Contents
 
 ## What is Kuiper?
 Kuiper is a digital investigation platform that provide a capabilities for the investigation team and individuals to parse, search, visualize collected evidences, as well as collaborate with other team members on the same platform by tagging artifacts and present it on a timeline schema. In addition, setting rules for automating the detection on the future cases. The main purpose of this project is to aid in streamlining incident responders investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
