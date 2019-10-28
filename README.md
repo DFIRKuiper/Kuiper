@@ -6,17 +6,29 @@
 <!-- TOC depthFrom:2 -->
 
 1. [Kuiper](#1-Kuiper)
+
  1.1. What is Kuiper?
- 1.2. Why Kuiper?
- 1.3. How Kuiper Will Help Optimize the Investigation?
- 1.4. Use Cases
+
+1.2. Why Kuiper?
+
+1.3. How Kuiper Will Help Optimize the Investigation?
+
+1.4. Use Cases
+
 2. Kuiper Components
- 2.1. Parsers
- 3. Examples
+
+2.1. Parsers
+
+3. Examples
+
 4. Getting Started
- 4.1. Requirements
- 4.2. Installation
+
+4.1. Requirements
+
+4.2. Installation
+
 5. Licenses
+
 6. Authors
 
 <!-- /TOC -->
