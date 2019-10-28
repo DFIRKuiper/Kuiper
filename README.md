@@ -214,6 +214,6 @@ If everything runs correctly now you should be able to use Kuiper, happy hunting
 
 [Saleh Muhaysin](https://github.com/salehmuhaysin), Twitter ([@saleh_muhaysin](https://twitter.com/saleh_muhaysin)),
 
-Muteb, Twitter([@muteb_alqahtani](https://twitter.com/muteb_alqahtani))
+[Muteb](https://github.com/muteb), Twitter([@muteb_alqahtani](https://twitter.com/muteb_alqahtani))
 
 Abdullah 
