@@ -1,12 +1,52 @@
 
+
 [Logo]
+
+
+<!-- TOC depthFrom:2 -->
+
+1. [Kuiper](#1-Kuiper)
+ 1.1. What is Kuiper?
+ 1.2. Why Kuiper?
+ 1.3. How Kuiper Will Help Optimize the Investigation?
+ 1.4. Use Cases
+2. Kuiper Components
+ 2.1. Parsers
+ 3. Examples
+4. Getting Started
+ 4.1. Requirements
+ 4.2. Installation
+5. Licenses
+6. Authors
+
+<!-- /TOC -->
+
+
 # Kuiper
 
 Digital Investigation Platform
 
+## Table of Contents
+
 ## What is Kuiper?
 Kuiper is a digital investigation platform that provide a capabilities for the investigation team and individuals to parse, search, visualize collected evidences, as well as collaborate with other team members on the same platform by tagging artifacts and present it on a timeline schema. In addition, setting rules for automating the detection on the future cases. The main purpose of this project is to aid in streamlining incident responders investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
 ![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/diagram.png?raw=true)
+
+
+## Why Kuiper?
+Today there are a lot of tools used by incident response analysts during the investigation, thou these tools help to identify the malicious activities and findings, as incident response analysts there are some shortages that needs to be optimized:
+- Fasten the work flow.
+- Increase the accuracy.
+- Reduce resources exhaustion.
+
+With a large number of cases (like IR service providing) or large number of team members, it becomes hard for collaboration among team members and correlation and building rules to detect malicious activities on future cases. 
+
+
+## How Kuiper Will Help Optimize the Investigation?
+- Using a single centralized powerful server (**Kuiper**) that do all the processing on the server-side reduce the needed hardware resources (CPU, RAM, Hard-disk) for the analysts team, no need for powerful laptop any more. In addition, all evidences stored in single server instead of copying it on different machines during the investigation.
+- Depending on different parsers by team member to parse same artifacts might provide inconsistency on the generated results, using tested and trusted parser increase the accuracy.
+- Define rules on Kuiper will save a lot of time to trigger alerts on past, current, and future cases, example have you though of creating rule to trigger suspicious encoded powershell command on all parsed artifacts, you can create rule to detect these words [here](https://gist.github.com/Neo23x0/6af876ee72b51676c82a2db8d2cd3639)
+- Browsing the parsed artifacts on same web interface by team members boost the collaboration among them using **tagging**/**timeline** feature instead of every one work on his/her machine.
 
 
 ## Use Cases
@@ -19,21 +59,12 @@ Kuiper is a digital investigation platform that provide a capabilities for the i
  - Tag suspicious/malicious records, and display the tagged records on timeline schema. For records or information without records (such as information collected from external evidences like FW, proxy, WAF, etc. logs) you can add a message on timeline with the specific time.
  - Collected files without predefined parser is not an issue anymore, you can write your own parser and upload it to Kuiper and will parse these files. read more how to add parser from [here]()
 
-## Why Kuiper?
-Today there are a lot of tools used by incident response analysts during the investigation, thou these tools help to identify the malicious activities and findings, as incident response analysts there are some shortages that needs to be optimized:
-- Fasten the work flow.
-- Increase the accuracy.
-- Reduce resources exhaustion.
 
-Others (such as Autopsy, Axiom, Log2timeline, etc.) are excellent tools small number of analysts and cases. However, with large number of cases (like IR service providing) or large number of team members, it becomes hard for collaboration among team members and correlation and building rules to detect malicious activities on future cases. 
 
-## How Kuiper Will Help Optimize the Investigation?
-- Using a single centralized powerful server (**Kuiper**) that do all the processing on the server-side reduce the needed hardware resources (CPU, RAM, Hard-disk) for the analysts team, no need for powerful laptop any more. In addition, all evidences stored in single server instead of copying it on different machines during the investigation.
-- Depending on different parsers by team member to parse same artifacts might provide inconsistency on the generated results, using tested and trusted parser increase the accuracy.
-- Define rules on Kuiper will save a lot of time to trigger alerts on past, current, and future cases, example have you though of creating rule to trigger suspicious encoded powershell command on all parsed artifacts, you can create rule to detect these words [here](https://gist.github.com/Neo23x0/6af876ee72b51676c82a2db8d2cd3639)
-- Browsing the parsed artifacts on same web interface by team members boost the collaboration among them using **tagging**/**timeline** feature instead of every one work on his/her machine.
 
 # Kuiper Components
+
+Kuiper use the following components:
 
 **Flask:** A web framework written in Python, used as the primary web application component. 
 
@@ -46,33 +77,33 @@ Others (such as Autopsy, Axiom, Log2timeline, etc.) are excellent tools small nu
 **Celery:** A asynchronous task queue/job queue based on distributed message passing, used as the main processing engine to process relayed tasks from redis.
 
 
-# Parsers
+## Parsers
 
-The following are parsers used in Kuiper project, some are built custom, and some have been modified to output the results in a compliant format  in order to integrate it with Kuiper and some have been heavily modified to fix issues with pushed data.
+The following are parsers used in Kuiper project, some are built custom, and some have been modified to output the results in a compliant format in order to integrate it with Kuiper and some have been heavily modified to fix issues with pushed data.
 
-Parser 			  | Changes 		 | Author
------------------ | ---------------- | -------------
-BrowserHistory | Custom | [Saleh Muhaysin](https://github.com/salehmuhaysin/BrowserHistory_ELK)
-Srum | Custom | [Saleh Muhaysin](https://github.com/salehmuhaysin/SRUM_parser)
-CSV | Custom | 
-Recyclebin | Custom | 
-Scheduled Tasks | Custom | 
-Prefetch | Added code | [MBromiley](https://github.com/bromiley/tools/tree/master/win10_prefetch)
-Windows Events | Fixed issues | [dgunter](https://github.com/dgunter/evtxtoelk)
-Amcache			  |  Output format | [Willi Ballenthin](https://github.com/williballenthin/python-registry/blob/master/samples/amcache.py) 
-bits_admin | Output format | [ANSSI](https://github.com/ANSSI-FR/bits_parser)
-Jumplist | Output format | [Bhupendra Singh](https://github.com/Bhupipal/JumpListParser)
-MFT | Output format | [dkovar](https://github.com/dkovar/analyzeMFT)
-RUA | Output format | [davidpany](https://github.com/davidpany/WMI_Forensics)
-Shellbags | Output format | [Willi Ballenthin](https://github.com/williballenthin/shellbags)
-Shimcache | Output format | [MANDIANT](https://github.com/mandiant/ShimCacheParser)
-Shortcuts | Output format | [HarmJ0y](https://github.com/HarmJ0y/pylnker)
-UsnJrnl | Output format | [PoorBillionaire](https://github.com/PoorBillionaire/USN-Journal-Parser)
-WMI_Persistence | Output format | [davidpany](https://github.com/davidpany/WMI_Forensics)
+Parser 		         | Author
+----------------- | -------------
+BrowserHistory    | [Saleh Muhaysin](https://github.com/salehmuhaysin/BrowserHistory_ELK)
+Srum              | [Saleh Muhaysin](https://github.com/salehmuhaysin/SRUM_parser)
+CSV               | Custom
+Recyclebin        | Custom
+Scheduled Tasks   | Custom
+Prefetch          | [MBromiley](https://github.com/bromiley/tools/tree/master/win10_prefetch)
+Windows Events    | [dgunter](https://github.com/dgunter/evtxtoelk)
+Amcache	          | [Willi Ballenthin](https://github.com/williballenthin/python-registry/blob/master/samples/amcache.py) 
+bits_admin        | [ANSSI](https://github.com/ANSSI-FR/bits_parser)
+Jumplist          | [Bhupendra Singh](https://github.com/Bhupipal/JumpListParser)
+MFT               | [dkovar](https://github.com/dkovar/analyzeMFT)
+RUA               | [davidpany](https://github.com/davidpany/WMI_Forensics)
+Shellbags         | [Willi Ballenthin](https://github.com/williballenthin/shellbags)
+Shimcache         | [MANDIANT](https://github.com/mandiant/ShimCacheParser)
+Shortcuts         | [HarmJ0y](https://github.com/HarmJ0y/pylnker)
+UsnJrnl           | [PoorBillionaire](https://github.com/PoorBillionaire/USN-Journal-Parser)
+WMI_Persistence   | [davidpany](https://github.com/davidpany/WMI_Forensics)
 
 To upload your own parser on Kuiper, read documentation [upload parser]()
 
-## Examples
+# Examples
 
 1. **Cases page**: from here you can manage cases
 ![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/cases.png?raw=true)
@@ -176,8 +207,8 @@ If everything runs correctly now you should be able to use Kuiper, happy hunting
 
 # Authors
 
-[Saleh Muhaysin](https://github.com/salehmuhaysin), Twitter (@saleh_muhaysin),
+[Saleh Muhaysin](https://github.com/salehmuhaysin), Twitter ([@saleh_muhaysin](https://twitter.com/saleh_muhaysin)),
 
-Muteb
+Muteb, Twitter([@muteb_alqahtani](https://twitter.com/muteb_alqahtani))
 
 Abdullah 
