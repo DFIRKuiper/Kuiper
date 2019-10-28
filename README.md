@@ -31,8 +31,8 @@
 
 6. Authors
 
-- [1. Kuiper](#1-kuiper)
-    - [2.1. What is Kuiper?](#21-what-is-kuiper)
+- [1. Kuiper](#kuiper)
+    - [2.1. What is Kuiper?](#what-is-kuiper)
 
 <!-- /TOC -->
 
