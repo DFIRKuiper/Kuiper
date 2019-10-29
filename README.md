@@ -62,7 +62,7 @@ With a large number of cases (like IR service providing) or large number of team
  - Browse and search within the parsed artifacts for all machines on the opened case.
  - Save search query as rules, these rules could be used to trigger alerts for future cases.
  - Tag suspicious/malicious records, and display the tagged records on timeline schema. For records or information without records (such as information collected from external evidences like FW, proxy, WAF, etc. logs) you can add a message on timeline with the specific time.
- - Collected files without predefined parser is not an issue anymore, you can write your own parser and upload it to Kuiper and will parse these files. read more how to add parser from [here]()
+ - Collected files without predefined parser is not an issue anymore, you can write your own parser and upload it to Kuiper and will parse these files. read more how to add parser from [here](https://github.com/salehmuhaysin/Kuiper/blob/master/Upload_Parser.md)
 
 
 
