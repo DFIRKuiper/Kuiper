@@ -46,7 +46,7 @@ Today there are a lot of tools used by incident response analysts during the inv
 - Reduce resources exhaustion.
 
 With a large number of cases (like IR service providing) or large number of team members, it becomes hard for collaboration among team members and correlation and building rules to detect malicious activities on future cases. 
-
+Kuiper solve these shortages. 
 
 ## How Kuiper Will Help Optimize the Investigation?
 - Using a single centralized powerful server (**Kuiper**) that do all the processing on the server-side reduce the needed hardware resources (CPU, RAM, Hard-disk) for the analysts team, no need for powerful laptop any more. In addition, all evidences stored in single server instead of copying it on different machines during the investigation.
