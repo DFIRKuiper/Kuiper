@@ -1,4 +1,4 @@
-# Add Parser
+# Add Custom Parser
 
 ## Overview
 A parser is a script used to read a row data (artifacts) to parse it and return the results on a structured format that are understandable by Kuiper, such as reading the Windows Events row files (.evtx) and return the result on a readable and understandable format for Kuiper to present it on the case. Kuiper store all parsed data in Elasticsearch, so it will be stored as JSON format. 
