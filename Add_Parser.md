@@ -37,5 +37,7 @@ The field path contains the data json path, example of Windows Events
 ![addparser.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/add_parser5.png?raw=true)
 
 *Note*: this function should return a list of json “[{…},{…},{…}]”, each json represent a record on the database, if there is no records return empty list “[]”, if parser failed return (None). The function should have two parameters (file: path of the file to be parsed, parser: is the parser name). In addition, each Json record on the returned list should include a field named (@timestamp) which will be used on the timeline artifact browser pages.
+
 6.	**Parser Type**: OS General, Web Browser, Program Execution, Logging Information, User Activities, etc.
+
 7.	**File Categorization (comma separated)**: this is how the parser engine will identify if the files exist should be parsed by this parser or not, such as extension (.evtx), file_name (\$MFT), startswith (\$I), magic_number (file content start with provided hex value)
