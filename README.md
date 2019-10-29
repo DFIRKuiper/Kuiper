@@ -14,10 +14,8 @@
     - [1.3. How Kuiper Will Help Optimize the Investigation?](#How-Kuiper-Will-Help-Optimize-the-Investigation)
     - [1.4. Use Cases](#Use-Cases)
 - [2. Kuiper Components](#Kuiper-Components)
-    - [2.1. Overview Components](#Overview-Compoments)
+    - [2.1. Overview Components](#Overview-Components)
     - [2.2. Parsers](#Parsers)
-
-
 - [3. Examples](#Examples)
 - [4. Getting Started](#getting-started)
     - [4.1. Requirements](#requirements)
