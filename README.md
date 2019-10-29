@@ -14,7 +14,8 @@
     - [1.3. How Kuiper Will Help Optimize the Investigation?](#How-Kuiper-Will-Help-Optimize-the-Investigation)
     - [1.4. Use Cases](#Use-Cases)
 - [2. Kuiper Components](#Kuiper-Components)
-    - [2.1. Parsers](#Parsers)
+    - [2.1. Overview Components](#Overview-compoments)
+    - [2.2. Parsers](#Parsers)
 - [3. Examples](#Examples)
 - [4. Getting Started](#getting-started)
     - [4.1. Requirements](#requirements)
@@ -68,6 +69,8 @@ With a large number of cases (like IR service providing) or large number of team
 
 
 # Kuiper Components
+
+## Overview Components
 
 Kuiper use the following components:
 
@@ -210,7 +213,7 @@ If everything runs correctly now you should be able to use Kuiper, happy hunting
 
   
 
-# Authors
+# Creators
 
 [Saleh Muhaysin](https://github.com/salehmuhaysin), Twitter ([@saleh_muhaysin](https://twitter.com/saleh_muhaysin)),
 
