@@ -20,9 +20,10 @@
 - [4. Getting Started](#getting-started)
     - [4.1. Requirements](#requirements)
     - [4.1. Installation](#Installation)
-- [5. Issues Tracking and Contribution](#Issues-Tracking-and-Contribution)
-- [6. Licenses](#Licenses)
-- [7. Authors](#Authors)
+- [5. TODO List](#TODO-List)
+- [6. Issues Tracking and Contribution](#Issues-Tracking-and-Contribution)
+- [7. Licenses](#Licenses)
+- [8. Authors](#Authors)
 
     
 
@@ -212,6 +213,10 @@ $ ./kuiper_install.sh -run
 If everything runs correctly now you should be able to use Kuiper through the link (http://[kuiper-ip]:[kuiper-port]/).
 
 Happy hunting :).
+
+# TODO List:
+
+- Add Wiki
 
 # Issues Tracking and Contribution
 
