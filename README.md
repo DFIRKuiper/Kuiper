@@ -1,6 +1,6 @@
 
 
-[Logo]
+![logo.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/logo.png?raw=true)
 
 
 ## Table of Contents
