@@ -36,35 +36,36 @@ Digital Investigation Platform
 
 
 ## What is Kuiper?
-Kuiper is a digital investigation platform that provide a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast traige script like [Hoarder](https://github.com/muteb/Hoarder)). In additional, collaborate with other team members on the same platform by tagging artifacts and present it on a timeline schema, as well as setting rules for automating the detection on the future cases. The main purpose of this project is to aid in streamlining incident responders investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
+Kuiper is a digital investigation platform that provide a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast traige script like [Hoarder](https://github.com/muteb/Hoarder)). In additional, collaborate with other team members on the same platform by tagging artifacts and present it as a timeline, as well as setting rules for automating the detection. The main purpose of this project is to aid in streamlining digital investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
 ![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/diagram.png?raw=true)
 
 
 ## Why Kuiper?
-Today there are a lot of tools used by incident response analysts during the investigation, thou these tools help to identify the malicious activities and findings, as incident response analysts there are some shortages that needs to be optimized:
+Today there are many tools used during the digital investigation process, though these tools help to identify the malicious activities and findings, as digital analysts there are some shortages that needs to be optimized:
+
 - Speeding the work flow.
 - Increase the accuracy.
 - Reduce resources exhaustion.
 
-With a large number of cases (like IR service providing) and a large number of team members, it becomes hard for collaboration among team members and correlation and building rules to detect malicious activities on future cases. 
-Kuiper solve these shortages. 
+With a large number of cases and a large number of team members, it becomes hard for team members collaboration, as well as events correlation and building rules to detect malicious activities. Kuiper solve these shortages. 
+
 
 ## How Kuiper Will Help Optimize the Investigation?
 - **Centralized server**: Using a single centralized server (**Kuiper**) that do all the processing on the server-side reduce the needed hardware resources (CPU, RAM, Hard-disk) for the analysts team, no need for powerful laptop any more. In addition, all evidences stored in single server instead of copying it on different machines during the investigation.
-- **Consistency**: Depending on different parsers by team member to parse same artifacts might provide inconsistency on the generated results, using tested and trusted parser increase the accuracy.
-- **Predefined rules**: Define rules on Kuiper will save a lot of time to trigger alerts on past, current, and future cases, for example have you thought of creating rule to trigger suspicious encoded powershell commands on all parsed artifacts, or suspicous binary executed from temp folder, in **Kuiper** you can defined these rules and more.
-- **Collaboration**: Browsing the parsed artifacts on same web interface by team members boost the collaboration among them using **tagging** and **timeline** feature instead of every one work on his/her machine.
+- **Consistency**: Depending on different parsers by team members to parse same artifacts might provide inconsistency on the generated results, using tested and trusted parsers increases the accuracy.
+- **Predefined rules**: Define rules on Kuiper will save a lot of time by triggering alerts on past, current, and future cases, for example, creating rule to trigger suspicious encoded powershell commands on all parsed artifacts, or suspicous binary executed from temp folder, within **Kuiper** you can defined these rules and more.
+- **Collaboration**: Browsing the parsed artifacts on same web interface by team members boost the collaboration among them using **tagging** and **timeline** feature instead of every analyst working on his/her own machine.
 
 
 ## Use Cases
 
- - Create cases for the investigation and each case contain the list of machines scoped.
- - Upload multiple files (artifacts) collected from scoped machines via [Hoarder](https://github.com/muteb/Hoarder), [KAPE](https://www.kroll.com/en/services/cyber-risk/investigate-and-respond/kroll-artifact-parser-extractor-kape), or files collected by any other channel.
- - Start parsing these artifact files concurrently for selected machines or all.
- - Browse and search within the parsed artifacts for all machines on the opened case.
- - Save search query as rules, these rules could be used to trigger alerts for future cases.
- - Tag suspicious/malicious records, and display the tagged records on timeline schema. For records or information without records (such as information collected from external evidences like FW, proxy, WAF, etc. logs) you can add a message on timeline with the specific time.
- - Collected files without predefined parser is not an issue anymore, you can write your own parser and add it to Kuiper and will parse these files. read more how to add parser from [Add Custom Parser](https://github.com/salehmuhaysin/Kuiper/blob/master/Add_Custom_Parser.md)
+ - **Case creation**: Create cases for the investigation and each case contain the list of machines scoped.
+ - **Bulk evidences upload**: Upload multiple files (artifacts) collected from scoped machines via [Hoarder](https://github.com/muteb/Hoarder), [KAPE](https://www.kroll.com/en/services/cyber-risk/investigate-and-respond/kroll-artifact-parser-extractor-kape), or files collected by any other channel.
+ - **Evidence processing**: Start parsing these artifact files concurrently for selected machines or all.
+ - **Holistic view of evidences**: Browse and search within the parsed artifacts for all machines on the opened case.
+ - **Rules creation**: Save search query as rules, these rules could be used to trigger alerts for future cases.
+ - **Tagging and timeline**: Tag suspicious/malicious records, and display the tagged records in a timeline. For records or information without records (information collected from other external sources such as FW, proxy, WAF, etc. logs) you can add a message on timeline with the specific time.
+ - **Parsers management**: Collected files without predefined parser is not an issue anymore, you can write your own parser and add it to Kuiper and will parse these files. read more how to add parser from [Add Custom Parser](https://github.com/salehmuhaysin/Kuiper/blob/master/Add_Custom_Parser.md)
 
 
 
@@ -78,14 +79,16 @@ Kuiper solve these shortages.
 3. **Parsers Configuration**: manage the parsers (add, delete, and edit)
 ![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/parsers.png?raw=true)
 
-4. **Case machines**: list all machines on the selected case, from here you can add machine and upload artifacts to it as zip file or raw files. In addition, if you have multiple machines compressed you can upload all of them and the machine name will take the file name.
+4. **Case machines**: list all machines on the selected case, from here you can add machine and upload artifacts to it as zip file or raw files.
 ![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/machines.png?raw=true)
 
 
-5. **Artifacts Browsing**: this is where the hunting exists ;), all records parsed from artifacts will be here, you can search, save search as rule, tag records.
+5. **Artifacts Browsing**: this is where the hunting begins ;), all records parsed from artifacts will be displayed here, you can search and save your search query as rule and tag records.
+
 ![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/browse_artifacts.png?raw=true)
 
-6. **Timeline**: all tagged records and add messages listed on chronological order. You can export it as CSV.
+6. **Timeline**: all tagged records and add messages are displayed in a chronological order as well as it could be exported as CSV.
+
 ![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/timeline.png?raw=true)
 
 
@@ -110,15 +113,15 @@ Kuiper use the following components:
 
 ## Parsers
 
-The following are parsers used in Kuiper project, some are built custom, and some have been modified to output the results in a compliant format in order to integrate it with Kuiper and some have been heavily modified to fix issues with pushed data.
+The following are parsers used in Kuiper project, some are custom built, and others have been modified to output the results in a compliant format in order to integrate it with Kuiper and some have been heavily modified to make it compatible with Kuiper.
 
 Parser 		         | Author
 ----------------- | -------------
 BrowserHistory    | [Saleh Muhaysin](https://github.com/salehmuhaysin/BrowserHistory_ELK)
 Srum              | [Saleh Muhaysin](https://github.com/salehmuhaysin/SRUM_parser)
-CSV               | Custom
-Recyclebin        | Custom
-Scheduled Tasks   | Custom
+CSV               | Custom by Saleh Muhaysin
+Recyclebin        | Custom by Muteb Alqahtani
+Scheduled Tasks   | Custom by Muteb Alqahtani
 Prefetch          | [MBromiley](https://github.com/bromiley/tools/tree/master/win10_prefetch)
 Windows Events    | [dgunter](https://github.com/dgunter/evtxtoelk)
 Amcache	          | [Willi Ballenthin](https://github.com/williballenthin/python-registry/blob/master/samples/amcache.py) 
@@ -214,16 +217,15 @@ Happy hunting :).
 
 We are happy to receive any issues, contribution, and ideas.
 
-we appreciate sharing any parsers you develop, just send a pull request to be able to add it to the parsers list
+we appreciate sharing any parsers you develop, please send a pull request to be able to add it to the parsers list.
 
 
 # Licenses
 
-- Each parser has its own license, all parsers places on one folder  `parsers/` .
+- Each parser has its own license, all parsers placed in the following folder  `parsers/`.
 
-- This project under GPL-3.0 license, unless mentioned otherwise
+- All files in this project under GPL-3.0 license, unless mentioned otherwise.
 
-  
 
 # Creators
 
@@ -231,4 +233,4 @@ we appreciate sharing any parsers you develop, just send a pull request to be ab
 
 [Muteb](https://github.com/muteb), Twitter([@muteb_alqahtani](https://twitter.com/muteb_alqahtani))
 
-Abdullah 
+Abdullah Alrasheed
