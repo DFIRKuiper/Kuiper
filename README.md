@@ -35,24 +35,24 @@ Digital Investigation Platform
 
 
 ## What is Kuiper?
-Kuiper is a digital investigation platform that provide a capabilities for the investigation team and individuals to parse, search, visualize collected evidences, as well as collaborate with other team members on the same platform by tagging artifacts and present it on a timeline schema. In addition, setting rules for automating the detection on the future cases. The main purpose of this project is to aid in streamlining incident responders investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
+Kuiper is a digital investigation platform that provide a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast traige script like [Hoarder](https://github.com/muteb/Hoarder)). In additional, collaborate with other team members on the same platform by tagging artifacts and present it on a timeline schema, as well as setting rules for automating the detection on the future cases. The main purpose of this project is to aid in streamlining incident responders investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
 ![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/diagram.png?raw=true)
 
 
 ## Why Kuiper?
 Today there are a lot of tools used by incident response analysts during the investigation, thou these tools help to identify the malicious activities and findings, as incident response analysts there are some shortages that needs to be optimized:
-- Fasten the work flow.
+- Speeding the work flow.
 - Increase the accuracy.
 - Reduce resources exhaustion.
 
-With a large number of cases (like IR service providing) or large number of team members, it becomes hard for collaboration among team members and correlation and building rules to detect malicious activities on future cases. 
+With a large number of cases (like IR service providing) and a large number of team members, it becomes hard for collaboration among team members and correlation and building rules to detect malicious activities on future cases. 
 Kuiper solve these shortages. 
 
 ## How Kuiper Will Help Optimize the Investigation?
-- Using a single centralized powerful server (**Kuiper**) that do all the processing on the server-side reduce the needed hardware resources (CPU, RAM, Hard-disk) for the analysts team, no need for powerful laptop any more. In addition, all evidences stored in single server instead of copying it on different machines during the investigation.
-- Depending on different parsers by team member to parse same artifacts might provide inconsistency on the generated results, using tested and trusted parser increase the accuracy.
-- Define rules on Kuiper will save a lot of time to trigger alerts on past, current, and future cases, example have you though of creating rule to trigger suspicious encoded powershell command on all parsed artifacts, you can create rule to detect these words [here](https://gist.github.com/Neo23x0/6af876ee72b51676c82a2db8d2cd3639)
-- Browsing the parsed artifacts on same web interface by team members boost the collaboration among them using **tagging**/**timeline** feature instead of every one work on his/her machine.
+- **Centralized server**: Using a single centralized server (**Kuiper**) that do all the processing on the server-side reduce the needed hardware resources (CPU, RAM, Hard-disk) for the analysts team, no need for powerful laptop any more. In addition, all evidences stored in single server instead of copying it on different machines during the investigation.
+- **Consistency**: Depending on different parsers by team member to parse same artifacts might provide inconsistency on the generated results, using tested and trusted parser increase the accuracy.
+- **Predefined rules**: Define rules on Kuiper will save a lot of time to trigger alerts on past, current, and future cases, for example have you thought of creating rule to trigger suspicious encoded powershell commands on all parsed artifacts, or suspicous binary executed from temp folder, in **Kuiper** you can defined these rules and more.
+- **Collaboration**: Browsing the parsed artifacts on same web interface by team members boost the collaboration among them using **tagging** and **timeline** feature instead of every one work on his/her machine.
 
 
 ## Use Cases
@@ -139,7 +139,7 @@ To add your own parser on Kuiper, read documentation [Add Custom Parser](https:/
 - **OS:** 64-bit Ubuntu 16.04.1 LTS (Xenial)  (preferred)
 - **RAM:**  4GB (minimum), 8GB (preferred)
 - **Cores:** 4 (minimum)
-- **Disk:** 25GB for testing purposes and 100GB+ for production (minimum)
+- **Disk:** 25GB for testing purposes and more disk space depends on the amount of data collected.
 
   
 
@@ -203,7 +203,16 @@ After properly modifying the configuration file, use the following bash file to 
 $ ./kuiper_install.sh -run 
 ```
 
-If everything runs correctly now you should be able to use Kuiper, happy hunting :) .
+If everything runs correctly now you should be able to use Kuiper through the link (http://<kuiper-ip>:<kuiper-port>/).
+
+Happy hunting :).
+
+# Issues Tracking and Contribution
+
+We are happy to receive any issues, contribution, and ideas.
+
+we appreciate sharing any parsers you develop, just send a pull request to be able to add it to the parsers list
+
 
 # Licenses
 
