@@ -66,7 +66,7 @@ With a large number of cases and a large number of team members, it becomes hard
  - **Holistic view of evidences**: Browse and search within the parsed artifacts for all machines on the opened case.
  - **Rules creation**: Save search query as rules, these rules could be used to trigger alerts for future cases.
  - **Tagging and timeline**: Tag suspicious/malicious records, and display the tagged records in a timeline. For records or information without records (information collected from other external sources such as FW, proxy, WAF, etc. logs) you can add a message on timeline with the specific time.
- - **Parsers management**: Collected files without predefined parser is not an issue anymore, you can write your own parser and add it to Kuiper and will parse these files. read more how to add parser from [Add Custom Parser](https://github.com/salehmuhaysin/Kuiper/blob/master/Add_Custom_Parser.md)
+ - **Parsers management**: Collected files without predefined parser is not an issue anymore, you can write your own parser and add it to Kuiper and will parse these files. read more how to add parser from [Add Custom Parser](https://github.com/salehmuhaysin/Kuiper/wiki/Add-Custom-Parser)
 
 
 
@@ -136,7 +136,7 @@ Shortcuts         | [HarmJ0y](https://github.com/HarmJ0y/pylnker)
 UsnJrnl           | [PoorBillionaire](https://github.com/PoorBillionaire/USN-Journal-Parser)
 WMI_Persistence   | [davidpany](https://github.com/davidpany/WMI_Forensics)
 
-To add your own parser on Kuiper, read documentation [Add Custom Parser](https://github.com/salehmuhaysin/Kuiper/blob/master/Add_Custom_Parser.md)
+To add your own parser on Kuiper, read documentation [Add Custom Parser](https://github.com/salehmuhaysin/Kuiper/wiki/Add-Custom-Parser)
 
 
 # Getting Started
