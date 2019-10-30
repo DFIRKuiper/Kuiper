@@ -13,15 +13,16 @@
     - [1.2. Why Kuiper?](#why-kuiper)
     - [1.3. How Kuiper Will Help Optimize the Investigation?](#How-Kuiper-Will-Help-Optimize-the-Investigation)
     - [1.4. Use Cases](#Use-Cases)
-- [2. Kuiper Components](#Kuiper-Components)
+- [2. Examples](#Examples)
+- [3. Kuiper Components](#Kuiper-Components)
     - [2.1. Overview Components](#Overview-Components)
     - [2.2. Parsers](#Parsers)
-- [3. Examples](#Examples)
 - [4. Getting Started](#getting-started)
     - [4.1. Requirements](#requirements)
     - [4.1. Installation](#Installation)
-- [5. Licenses](#Licenses)
-- [6. Authors](#Authors)
+- [5. Issues Tracking and Contribution](#Issues-Tracking-and-Contribution)
+- [6. Licenses](#Licenses)
+- [7. Authors](#Authors)
 
     
 
@@ -64,6 +65,28 @@ Kuiper solve these shortages.
  - Save search query as rules, these rules could be used to trigger alerts for future cases.
  - Tag suspicious/malicious records, and display the tagged records on timeline schema. For records or information without records (such as information collected from external evidences like FW, proxy, WAF, etc. logs) you can add a message on timeline with the specific time.
  - Collected files without predefined parser is not an issue anymore, you can write your own parser and add it to Kuiper and will parse these files. read more how to add parser from [Add Custom Parser](https://github.com/salehmuhaysin/Kuiper/blob/master/Add_Custom_Parser.md)
+
+
+
+# Examples
+
+1. **Cases page**: from here you can manage cases
+![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/cases.png?raw=true)
+2. **Rules management**: edit and remove rule
+![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/rules.png?raw=true)
+
+3. **Parsers Configuration**: manage the parsers (add, delete, and edit)
+![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/parsers.png?raw=true)
+
+4. **Case machines**: list all machines on the selected case, from here you can add machine and upload artifacts to it as zip file or raw files. In addition, if you have multiple machines compressed you can upload all of them and the machine name will take the file name.
+![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/machines.png?raw=true)
+
+
+5. **Artifacts Browsing**: this is where the hunting exists ;), all records parsed from artifacts will be here, you can search, save search as rule, tag records.
+![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/browse_artifacts.png?raw=true)
+
+6. **Timeline**: all tagged records and add messages listed on chronological order. You can export it as CSV.
+![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/timeline.png?raw=true)
 
 
 
@@ -110,26 +133,6 @@ UsnJrnl           | [PoorBillionaire](https://github.com/PoorBillionaire/USN-Jou
 WMI_Persistence   | [davidpany](https://github.com/davidpany/WMI_Forensics)
 
 To add your own parser on Kuiper, read documentation [Add Custom Parser](https://github.com/salehmuhaysin/Kuiper/blob/master/Add_Custom_Parser.md)
-
-# Examples
-
-1. **Cases page**: from here you can manage cases
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/cases.png?raw=true)
-2. **Rules management**: edit and remove rule
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/rules.png?raw=true)
-
-3. **Parsers Configuration**: manage the parsers (add, delete, and edit)
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/parsers.png?raw=true)
-
-4. **Case machines**: list all machines on the selected case, from here you can add machine and upload artifacts to it as zip file or raw files. In addition, if you have multiple machines compressed you can upload all of them and the machine name will take the file name.
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/machines.png?raw=true)
-
-
-5. **Artifacts Browsing**: this is where the hunting exists ;), all records parsed from artifacts will be here, you can search, save search as rule, tag records.
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/browse_artifacts.png?raw=true)
-
-6. **Timeline**: all tagged records and add messages listed on chronological order. You can export it as CSV.
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/timeline.png?raw=true)
 
 
 # Getting Started
