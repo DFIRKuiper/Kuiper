@@ -206,7 +206,7 @@ After properly modifying the configuration file, use the following bash file to 
 $ ./kuiper_install.sh -run 
 ```
 
-If everything runs correctly now you should be able to use Kuiper through the link (http://<kuiper-ip>:<kuiper-port>/).
+If everything runs correctly now you should be able to use Kuiper through the link (http://[kuiper-ip]:[kuiper-port]/).
 
 Happy hunting :).
 
