@@ -167,44 +167,9 @@ $ sudo ./kuiper_install.sh -install
 
 The **kuiper_install.sh** bash script will install all Kuiper dependencies such as (python, pip, redis, elasticsearch, mongodb and many others used by Kuiper default parsers).
 
-In order to make the configuration of Kuiper straight forward, a single file named **configuration.yaml** holds all configuration parameters as seen below.
+If you want to change the default configuration of Kuiper, please visit the page [Configuration](https://github.com/salehmuhaysin/Kuiper/wiki/Configuration)
 
-The following section of the configuration file is responsible for setting the parameters for Flask web application. 
-
-~~~yaml
-...
-# ============ Kuiper Platform
-Kuiper:
-  IP    : 0.0.0.0
-  PORT  : 5000
-  Debug : True   # enable debugging mode
-...
-~~~
-
-The following section of the configuration file is responsible for setting the parameters for celery based on redis configurations. 
-
-~~~yaml
-...
-# ============ configuration of celery
-CELERY:
-  CELERY_BROKER_URL     : redis://localhost:6379
-  CELERY_RESULT_BACKEND : redis://localhost:6379
-  CELERY_TASK_ACKS_LATE : True
-...
-~~~
-
-The following section of the configuration file is responsible for setting the parameters for the elasticsearch database. 
-
-~~~yaml
-...
-# ============ Elasticsearch
-ElasticSearch:
-  IP    : 127.0.0.1
-  PORT  : 9200
-...
-~~~
-
-After properly modifying the configuration file, use the following bash file to launch Kuiper.
+Use the following bash file to launch Kuiper.
 
 ```
 $ ./kuiper_install.sh -run 
