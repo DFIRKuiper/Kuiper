@@ -218,7 +218,7 @@ we appreciate sharing any parsers you develop, just send a pull request to be ab
 
 - Each parser has its own license, all parsers places on one folder  `parsers/` .
 
-- what licensing do we want ??
+- This project under GPL-3.0 license, unless mentioned otherwise
 
   
 
