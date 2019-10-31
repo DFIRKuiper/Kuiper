@@ -72,25 +72,11 @@ With a large number of cases and a large number of team members, it becomes hard
 
 # Examples
 
-1. **Cases page**: from here you can manage cases
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/cases.png?raw=true)
-2. **Rules management**: edit and remove rule
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/rules.png?raw=true)
+**Create cases and upload artifacts**
+![create_cases](https://github.com/salehmuhaysin/Kuiper/blob/master/img/create_case.gif?raw=true)
 
-3. **Parsers Configuration**: manage the parsers (add, delete, and edit)
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/parsers.png?raw=true)
-
-4. **Case machines**: list all machines on the selected case, from here you can add machine and upload artifacts to it as zip file or raw files.
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/machines.png?raw=true)
-
-
-5. **Artifacts Browsing**: this is where the hunting begins ;), all records parsed from artifacts will be displayed here, you can search and save your search query as rule and tag records.
-
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/browse_artifacts.png?raw=true)
-
-6. **Timeline**: all tagged records and add messages are displayed in a chronological order as well as it could be exported as CSV.
-
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/timeline.png?raw=true)
+**Analysis example in Kuiper**
+![create_cases](https://github.com/salehmuhaysin/Kuiper/blob/master/img/analysis.gif?raw=true)
 
 
 
