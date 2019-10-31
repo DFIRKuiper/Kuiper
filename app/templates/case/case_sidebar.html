@@ -1,0 +1,36 @@
+{% block leftsidebar %}
+      <aside class="main-sidebar">
+        <!-- sidebar: style can be found in sidebar.less -->
+
+	<section class="sidebar">
+    <!-- sidebar menu: : style can be found in sidebar.less -->
+    <ul class="sidebar-menu">
+        <li class="header">MAIN FORENSICS</li>
+
+        {% for title in SIDEBAR['sidebar'] %}
+            <li class="treeview">
+
+
+            <a href="{{ title['Title'][1].replace('<case_id>' , case_details['casename']) }}"> 
+                <i class="{{title['Title'][2]}}"></i><span> {{title['Title'][0]}} </span>
+                {% if title['Title'][3] is defined %}
+                    <span class="{{title['Title'][3]}}"> {{title['Title'][4]|safe}} </span>
+                {% endif %}
+            </a>
+
+            {% if title['SubTitles'] is not none %}
+                <ul class="treeview-menu">
+                {% for subtitle in title['SubTitles'] %}
+                      <li><a href="{{subtitle[1].replace('<case_id>' , case_details['casename'])}}"><i class="fa fa-circle-o"></i> {{subtitle[0]}}</a></li>
+                {% endfor %}
+                </ul>
+            {% endif %}
+            </li>
+            {% endfor %}
+
+
+    </ul>
+</section>
+<!-- /.sidebar -->
+</aside>
+{% endblock %}

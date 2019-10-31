@@ -1,0 +1,26 @@
+[{
+    "_id" : "amcache",
+    "parser_files_categorization_values" : ".hve,.bcf",
+    "important_field" : [ 
+        {
+            "path" : "file_name",
+            "name" : "File Name"
+        }, 
+        {
+            "path" : "@timestamp",
+            "name" : "Excution Time"
+        }, 
+        {
+            "path" : "path",
+            "name" : "Path"
+        }
+    ],
+    "name" : "amcache",
+    "interface_function" : "amcache_interface.auto_amcache",
+    "parser_files_categorization_type" : "extension",
+    "creation_time" : "2019-07-21T07:52:33.961135",
+    "parser_type_field" : "program_execution",
+    "action" : "edit",
+    "parser_folder" : "amcache",
+    "description" : "parser amcache.hive files, which store program execution including the hashes for executed files"
+}]

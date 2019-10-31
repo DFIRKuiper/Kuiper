@@ -1,0 +1,26 @@
+[{
+    "_id" : "jumplist",
+    "parser_files_categorization_values" : ".automaticDestinations-ms,.customDestinations-ms",
+    "important_field" : [ 
+        {
+            "path" : "Birth_Timestamp",
+            "name" : "First Access"
+        }, 
+        {
+            "path" : "Last_Recorded_Access",
+            "name" : "Last Access"
+        }, 
+        {
+            "path" : "Data",
+            "name" : "Data"
+        }
+    ],
+    "name" : "jumplist",
+    "interface_function" : "jumplist_interface.auto_jumplist",
+    "parser_files_categorization_type" : "extension",
+    "creation_time" : "2019-07-21T18:45:09.043961",
+    "parser_type_field" : "user_activities",
+    "action" : "edit",
+    "parser_folder" : "jumplist",
+    "description" : "jumplist allows you to view recent documents in a program that is pinned to your taskbar"
+}]

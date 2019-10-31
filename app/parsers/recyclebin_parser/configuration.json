@@ -1,0 +1,18 @@
+[{
+    "_id" : "Recyclebin",
+    "parser_files_categorization_values" : "$I",
+    "important_field" : [ 
+        {
+            "path" : "Path",
+            "name" : "Path"
+        }
+    ],
+    "name" : "Recyclebin",
+    "interface_function" : "recyclebin_interface.recyclebin_interface",
+    "parser_files_categorization_type" : "startswith",
+    "creation_time" : "2019-07-28T15:01:11.803845",
+    "parser_type_field" : "os_general",
+    "action" : "add",
+    "parser_folder" : "recyclebin_parser",
+    "description" : "parse deleted files (Recyclebin $I) and show its information"
+}]

@@ -1,0 +1,26 @@
+[{
+    "_id" : "Shimcache",
+    "parser_files_categorization_values" : "SYSTEM",
+    "important_field" : [ 
+        {
+            "path" : "File_Name",
+            "name" : "File_Name"
+        }, 
+        {
+            "path" : "Exec_Flag",
+            "name" : "Exec_Flag"
+        }, 
+        {
+            "path" : "Path",
+            "name" : "Path"
+        }
+    ],
+    "name" : "Shimcache",
+    "interface_function" : "shimcache_interface.shimcache_interface",
+    "parser_files_categorization_type" : "file_name",
+    "creation_time" : "2019-07-30T18:55:29.884393",
+    "parser_type_field" : "program_execution",
+    "action" : "edit",
+    "parser_folder" : "shimcache_parser",
+    "description" : "Shimcache store application compatibility issues, help for identifying executable paths, executed or not, last modified, etc."
+}]

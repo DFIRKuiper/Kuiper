@@ -1,0 +1,18 @@
+[{
+    "_id" : "Shellbags",
+    "parser_files_categorization_values" : "NTUSER.DAT,UsrClass.dat",
+    "important_field" : [ 
+        {
+            "path" : "path",
+            "name" : "Path"
+        }
+    ],
+    "name" : "Shellbags",
+    "interface_function" : "shellbags_interface.auto_shellbags",
+    "parser_files_categorization_type" : "file_name",
+    "creation_time" : "2019-07-30T18:12:58.215938",
+    "parser_type_field" : "user_activities",
+    "action" : "add",
+    "parser_folder" : "shellbags",
+    "description" : "Shellbags store views, sizes and positions of a folder window when viewed through Windows Explorer"
+}]

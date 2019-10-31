@@ -1,0 +1,172 @@
+{% extends  "case/index.html" %}
+
+{% block content %}
+
+
+
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+                <h3 class="box-title"><i class="fa fa-bell"></i> Alerts</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body table-responsive">
+              <table id="alerts_table" class="table table-bordered table-striped dataTable nowrap">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Severity</th>
+                    <th>Description</th>
+                    <th>Rule</th>
+                    <th># Alerts</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                <!-- ============= List all alerts ===============-->
+                {% for rule in all_rules %}
+                <tr>
+                  <td>
+                      <a class="label label-default rule_name" href="{{ url_for('case_browse_artifacts', case_id=case_details['casename'] , rule=rule['rule_name'])}}">
+                        {{rule['rule_name']}}
+                      </a>
+                  </td>
+                  
+                  <td>
+                      {% if "Critical" == rule['rule_severity'] %}
+                          <span class="badge badge-pill bg-gray" style="padding:5px">
+                      {% elif "High" == rule['rule_severity'] %}
+                          <span class="badge badge-pill bg-red" style="padding:5px">
+                      {% elif "Medium" == rule['rule_severity'] %}
+                          <span class="badge badge-pill bg-yellow" style="padding:5px">
+                      {% elif "Low" == rule['rule_severity'] %}
+                          <span class="badge badge-pill bg-green" style="padding:5px">
+                      {% elif "Whitelist" == rule['rule_severity'] %}
+                          <span class="badge badge-pill bg-light-blue" style="padding:5px">
+                      {% endif %}
+                      {{rule['rule_severity']}}</span>
+                  </td>
+                  <td><div class="text-muted well well-sm no-shadow" id="{{rule['rule_description']}}" style="padding: 4px 9px;margin-bottom: 0px;">{{rule['rule_description']}}</div></td>
+                  <td><div class="text-muted well well-sm no-shadow" id="{{rule['rule_name']}}" style="padding: 4px 9px;margin-bottom: 0px;">{{rule['rule']}}</div></td>
+                  <td><span class="badge bg-gray">{{rule['hits']}}</span></td>
+                </tr>
+                {% endfor %}
+
+
+
+                </tbody>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+
+
+
+<!-- jQuery 3 -->
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="../../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="../../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="../../static/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="../../static/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="../../static/dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../static/dist/js/demo.js"></script>
+
+<script src="../../static/json_viewer/json-viewer.js"></script>
+
+
+
+<script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+    <!-- tag input -->
+    
+    <script src="../../static/dist/tagsinput/bootstrap-tagsinput.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput-typeahead.css')}}">
+
+    <!-- toast notifications --> 
+    <script src="../../static/dist/jquery_toast/jquery.toast.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+
+
+    <script src="../../static/dist/air-datepicker/dist/js/datepicker.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/air-datepicker/dist/css/datepicker.min.css')}}">
+    <script src="../../static/dist/air-datepicker/dist/js/i18n/datepicker.en.js"></script>
+
+
+<!-- This will take the AdminLTE input style and use it with the tags input style -->
+<style type="text/css">
+.bootstrap-tagsinput {
+    display: table-cell;
+    z-index: 2;
+    width: 100%;
+
+    height: 44px;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.add_to_search_query{
+    float: right;
+}
+.jq-toast-single {
+    font-size: 12px;
+    width: fit-content;
+    white-space: nowrap;
+}
+.jq-toast-single h2{
+    font-size: 14px;
+        font-weight: bold;
+
+}
+
+
+/* ---------- rule name ------------- */
+.rule_name {
+  cursor: pointer;
+  padding:5px;
+
+}
+.rule_name:hover {
+  background: #b5bbc8;
+}
+
+
+td{
+  vertical-align: middle;
+}
+
+</style>
+
+
+
+<!-- page script -->
+<script>
+
+
+$(function () {
+    $('#alerts_table').DataTable({
+      'paging'      : false,
+      'lengthChange': false,
+      'searching'   : true,
+      'ordering'    : true,
+      'info'        : false,
+      'autoWidth'   : false,
+
+    })
+  })
+
+
+</script>
+
+
+
+{% endblock %}

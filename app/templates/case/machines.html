@@ -1,0 +1,785 @@
+{% extends  "case/index.html" %}
+
+{% block content %}
+<style>
+
+
+.progress {
+    width: 100%;
+    text-align: left;
+}
+
+/* parsers tabs */
+.tabs-left > .nav-tabs {
+  border-bottom: 0;
+}
+
+.tab-content > .tab-pane,
+.pill-content > .pill-pane {
+  display: none;
+}
+
+.tab-content > .active,
+.pill-content > .active {
+  display: block;
+}
+
+.tabs-left > .nav-tabs > li {
+  float: none;
+}
+
+.tabs-left > .nav-tabs > li > a {
+  min-width: 74px;
+  margin-right: 0;
+  margin-bottom: 3px;
+}
+
+.tabs-left > .nav-tabs {
+  float: left;
+  margin-right: 19px;
+  border-right: 1px solid #ddd;
+}
+
+.tabs-left > .nav-tabs > li > a {
+  margin-right: -1px;
+  -webkit-border-radius: 4px 0 0 4px;
+      -moz-border-radius: 4px 0 0 4px;
+          border-radius: 4px 0 0 4px;
+}
+
+.tabs-left > .nav-tabs > li > a:hover,
+.tabs-left > .nav-tabs > li > a:focus {
+  border-color: #eeeeee #dddddd #eeeeee #eeeeee;
+}
+
+.tabs-left > .nav-tabs .active > a,
+.tabs-left > .nav-tabs .active > a:hover,
+.tabs-left > .nav-tabs .active > a:focus {
+  border-color: #ddd transparent #ddd #ddd;
+  *border-right-color: #ffffff;
+}
+
+</style>
+
+
+
+
+
+
+
+<!-- ===================== Add machine modal START ========================= -->
+
+<div class="modal fade" id="add_machine" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title">New Machine</h4>
+            </div>
+            <form action="/case/{{case_details['casename']}}/add_machine/" method="post" class="form-horizontal">
+                <div class="modal-body">
+                
+                    <div class="input-group col-md-12">
+                    <label>Machine Name:</label>
+                    <div class="">
+                    <input type="text" id="machinename" name="machinename" class="form-control"
+                    placeholder="Enter the machine name" value="{{ request.form.machinename }}"
+                    required>
+                    </div>
+                    </div>
+
+                    <div class="input-group col-md-12">
+                    <label>  IP:   </label>
+                    <input type="text" id="ip" name="ip" class="form-control"
+                    placeholder="Enter ip address" value="{{ request.form.ip }}"
+                    required>
+                    </div>
+                
+                    <p>{{ error }}</p>
+                </div>
+                <div class="modal-footer">
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">submit</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<!-- ===================== Add machine modal END ========================= -->
+
+
+<!-- ===================== Processing Window START ========================= -->
+
+<!-- select parsers window  -->
+<div class="box" id="parsers_box_container" style="display: none">
+    <div class="box-header with-border">
+        <h3 class="box-title">Processing Machine <b class="processing_machine_name_title"></b> </h3>
+    </div>
+
+    <div class="box-body">
+
+        <div class="row">
+            <div class="col-md-6">
+                <!-- ============== buttons back/select all ===============-->
+                <div class="btn-group">
+                    <button type="button" class="parsers_back_to_machines btn btn-default">Back</button>
+                    <button type="button" class="parsers_select_all btn btn-default" data-action="select_all">Select All</button>
+                </div>
+                <br /><br />
+
+                <!-- ============== parsers selection ===============-->
+                <div id="parsers_selection_table" class="pull-left"></div>
+            </div>
+            <div class="col-md-6">
+
+            <!-- ============== selected parsers ===============-->
+            <div class="box box-solid">
+                <div class="box-header with-border">
+                    <h3 class="box-title">Selected Parsers: </h3>
+                </div>
+
+                <div class="box-body">
+                    <div id="process_selected_parsers"></div>
+                </div>
+            <!-- /.box-body -->
+            </div>
+
+        </div>
+    </div>
+
+    <br />
+    <button type="button" class="parsers_selection_next_btn btn btn-block btn-success pull-right ">Next</button>
+
+    <br /><br />
+    <div class="callout callout-danger parsers_selection_error_msg" style="display: none">
+        <h4>Warning!</h4>
+        <p></p>
+    </div>
+    </div>
+</div>
+
+<!-- ===================== Processing Window END ========================= -->
+
+
+<!-- ===================== List all Machines START ========================= -->
+
+<!-- list the machines in table  -->
+<div  id="list_of_machines_box_container">
+
+  <div class="box-header">
+    
+    <!-- =============== General Buttons ================ -->
+    <span class="box-tools">
+        <div class="btn-group">
+          
+          <button type="button" class="start_processing_selected btn btn-warning" title="Process all selected machines"><i class="fa fa-play"></i> </button>
+          <button type="button" class="btn_delete_machine btn btn-danger " title="Delete selected machines"><i class="fa fa-close"></i> </button>
+
+          <a href="{{url_for('case_upload_machine', case_id=case_details['casename'] )}}" class="btn btn-success"><i class="fa fa-upload" title="upload machine zip files"></i></a>
+          <button type="button" data-toggle="modal" data-id="Test2" data-target="#add_machine" class="btn btn-primary add_machine_btn" btn="" btn-primary=""><i class="fa fa-plus"></i></button>
+
+          <button type="button" id="process_check_all" data-checked='false' class=" btn btn-gray " title="Select/Deselect all"><i class="fa fa-circle-o"></i> </button>
+
+        </div>
+    </span>
+
+  <br />
+
+    <!-- =============== Info/Error Messages ================ -->
+
+
+      {% if message is not none %}
+        <br />
+        <div class="callout callout-success">
+          <h4>Message</h4>
+          <p>{{message}}</p>
+        </div>
+      {% endif %}
+
+      {% if err_msg is not none %}
+        <br />
+        <div class="callout callout-danger">
+          <h4>Alert</h4>
+          <p>{{err_msg}}</p>
+        </div>
+      {% endif %}
+  </div>
+
+
+  <!-- =========== Machine Card START ============== -->
+
+  <div id="info_boxes_machine" class="row">
+      {% for machine in all_machines %}
+
+          
+          <div class=" col-md-4"> 
+
+              <!-- machine icon  -->
+              <div class="info-box" style="min-width: max-content;">
+                  <span class="info-box-icon bg-aqua elevation-1"><span class="glyphicon glyphicon-hdd"></span></span>
+              <div class="info-box-content">
+
+              <!-- machine information  -->
+              <div class="widget-subheading">
+                  <input type="checkbox" class="checkbox_process" data-machineid="{{machine['_id']}}"  data-machinename="{{machine['machinename']}}" data-caseid="{{machine['main_case']}}">
+                  <b><a href="/case/{{case_details["casename"]}}/browse_artifacts?machine={{machine["_id"]}}" data-toggle="tooltip" data-placement="right" title="Description: "> {{machine['machinename']}} </a></b>
+              </div>
+              <div class="widget-numbers">IP: {{machine['ip']}}</div>
+
+              <!-- Card Buttons -->
+              <div>
+                  <div class="buttons btn-group" style="text-align: center" valign="center">
+                      <a href='/case/{{case_details["casename"]}}/machine_files/{{machine["_id"]}}' class=" btn btn-default" title="Show uploaded files for the machine"><i class="fa fa-file-text-o"></i></a>
+                      <button herf='' data-toggle=modal data-id2="{{machine['_id']}}" data-id="{{machine['main_case']}}" data-target="#add_artifacts"  class="open-caseid btn btn-success" title="Upload artifacts"><i class="fa fa-upload"></i></button>
+                      <button type="button"  data-machineid="{{machine['_id']}}" data-machinename="{{machine['machinename']}}" data-caseid="{{machine['main_case']}}" class="start_processing2 btn btn-warning " title="Process artifacts"><i class="fa fa-play"></i> </button>
+                  </div>
+              </div>
+
+          </div>
+
+
+
+          <!-- Progress -->
+          <div id="status_{{machine['_id']}}" class="progress active" style="margin:0; height: 20px; text-align:center">
+              <div class="progress_label" style="color: white; position: absolute; width:100%"></div>
+              <div class="progress-bar progress-bar-striped" style=" width: 0%;"></div>
+          </div>
+
+
+          </div>
+
+          </div>
+      {% endfor %}
+  </div>
+
+</div>
+
+<!-- ========================= Upload Artifacts Dialog START  ===================== -->
+<div class="modal fade" id="add_artifacts" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <h4 class="modal-title"> Add New Artifacts: <a data-toggle="tooltip" data-placement="bottom" title="You can upload raw file or ZIP file (without password) contains the files "><i class="fa fa-info-circle"></i></a></h4>
+            </div>
+            <div class="modal-body" id="model_body_upload">
+                <form id="upload-file" method="post" enctype="multipart/form-data">
+
+                    <div class="input-group col-md-12">
+                        
+                        <input type="hidden" name="main_case_id" id="main_case_id" />
+                        <input type="hidden" name="machine_case_id" id="machine_case_id" />
+                        
+                        <fieldset id='filesit'>
+                            <label for="file">Select a file</label>
+                            <input name="file" type="file" id="file">
+                        </fieldset>
+                        <div class="progress">
+                            <div id="progressBar" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">0%</div>
+                        </div>
+                        <div class="modal-footer">
+                                <button id="upload-file-btn" type="button" class="btn btn-primary">Upload</button>
+                        </div>
+                </form>
+
+                <p>{{ error }}</p>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+<!-- ========================= Upload Artifacts Dialog END  ===================== -->
+
+
+
+
+
+<!-- jQuery 3 -->
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- jQuery Knob -->
+<script src="../../static/bower_components/jquery-knob/js/jquery.knob.js"></script>
+
+<!-- prograsbar  -->
+<script src="../../static/dist/js/nanobar.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="../../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="../../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="../../static/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="../../static/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="../../static/dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../static/dist/js/demo.js"></script>
+
+<script src="../../static/json_viewer/json-viewer.js"></script>
+
+
+
+
+    <!-- tag input -->
+
+    <script src="../../static/dist/tagsinput/bootstrap-tagsinput.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput-typeahead.css')}}">
+
+    <!-- toast notifications -->
+    <script src="../../static/dist/jquery_toast/jquery.toast.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+<script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+
+<script type="text/javascript">
+
+
+// ================================ Variables
+
+var parsers                   =new Array();
+var selected_mount            = 1
+// once selected the parser it should go into a list and then request from the server side
+var Current_case_details      = ({{case_details|tojson|safe}})
+var Current_case              = Current_case_details['casename']
+var parsers_details           = ({{ parsers_details|tojson|safe }}); // list of parsers from mongoDB
+var all_machines              = ({{ all_machines|tojson|safe }});
+
+var parsers_selected_machines = '';
+var parsers_selected_case     = '';
+  
+var update_process_interval   = 5000; // microseconds wait before update progress status 
+
+
+var progress_result           = []    // store the progress for each machine
+
+// ================================ Functions 
+
+// this function convert bgrColor to hex
+function hexc(colorval) {
+    var parts = colorval.match(/^rgb\((\d+),\s*(\d+),\s*(\d+)\)$/);
+    delete(parts[0]);
+    for (var i = 1; i <= 3; ++i) {
+        parts[i] = parseInt(parts[i]).toString(16);
+        if (parts[i].length == 1) parts[i] = '0' + parts[i];
+    }
+    color = '#' + parts.join('');
+}
+
+
+
+
+// build the content of the processing window content 
+function build_start_process(caseid , machineids , machinenames){
+  parsers_selected_case       = caseid
+  parsers_selected_machines   = machineids
+  var machine_names           = machinenames
+  
+  var machines_name_title = ""
+  for(var n in machine_names){
+      machines_name_title += '<span class="label label-primary">' + machine_names[n] + '</span> '
+  }
+  
+  $('.processing_machine_name_title').html(machines_name_title)
+
+  $('#list_of_machines_box_container').hide()
+  $('#parsers_box_container').show()
+  $('#process_selected_parsers').html('')
+
+  // reformat the list of parsers
+  var general_parsers = {};
+  for(var p in parsers_details){
+    if( parsers_details[p]['parser_type_field'] in general_parsers )
+      general_parsers[ parsers_details[p]['parser_type_field'] ].push( parsers_details[p]['name'] )
+    else
+      general_parsers[ parsers_details[p]['parser_type_field'] ] = [ parsers_details[p]['name'] ]  
+  }
+
+  // build the table of parsers
+  var parsers_tables_ul = '<ul class="nav nav-tabs">';
+  var parsers_tables_tab = '<div class="tab-content">';
+  
+  var is_active = "active";
+  for(var p in general_parsers){
+    
+    parsers_tables_ul += '<li class="'+is_active+'"><a href="#select_parsers_'+p+'" data-toggle="tab">'+p+'</a></li>';
+    parsers_tables_tab += '<div class="tab-pane '+is_active+'" id="select_parsers_'+p+'"><table>';
+    is_active = "";
+    
+    for(var i in general_parsers[p]){
+        parsers_tables_tab += '<tr><td><div class="checkbox"><label><input type="checkbox" class="parsers_selection_checkbox" value="'+general_parsers[p][i]+'">'+general_parsers[p][i]+'</label></td></tr></div>'
+        //parsers_tables_tab += '<button type="button" class="btn btn-app btn-block" value="'+general_parsers[p][i]+'">'+general_parsers[p][i]+'</button>'
+    }
+    parsers_tables_tab += '</table></div>'
+  }
+  parsers_tables_ul += '</ul>'
+  parsers_tables_tab += '</div>'
+  // add the html of the table to the page
+  $('#parsers_selection_table').html('<div class="container">\
+      <div class="tabbable tabs-left">' + parsers_tables_ul + parsers_tables_tab + '</div>\
+    </div>')
+
+}
+
+
+
+
+
+
+
+
+// this function will update the progress for all machines
+function update_parsers_progress_all_machines(){
+    for(m in all_machines)
+        update_parsers_progress(Current_case , all_machines[m]['_id'])
+}
+
+
+
+
+
+
+// this function will update the progress bar for parser status
+function update_parsers_progress(case_id , machine_id){
+    $(".process_events").empty()       
+      var url_page = '/case/'+case_id + '/' + machine_id +'/progress'
+      $.getJSON(url_page, function(data) {
+
+            progress_result = data
+            
+            var parsers = {}
+            for(var p in progress_result){
+                parsers[p] = {}
+                parsers[p]['pending'] = 0;
+                parsers[p]['parsing'] = 0;
+                parsers[p]['done'] = 0;
+
+                for( var f in progress_result[p] )
+                    parsers[p][progress_result[p][f]['status']]++
+                
+            }
+            var is_parsing  = 0; // if there are some parsers still parsing
+            var total       = 0
+            var total_done  = 0
+
+            for(p in parsers){
+              is_parsing += parsers[p]['parsing']; 
+              total += (parsers[p]['pending'] + parsers[p]['parsing'] + parsers[p]['done'])
+              total_done += parsers[p]['done']
+            }
+            // if there is parsers still running, change the color of progress bar
+            var vfgColor = '#00c0ef'
+
+            if(is_parsing > 0)
+                vfgColor = '#f56954'
+            
+            if(is_parsing == 0 && total != total_done)
+                vfgColor = '#f39c12'
+                
+            if( hexc( $('#status_' + machine_id + " .progress-bar").css('backgroundColor') ) != vfgColor){
+                $('#status_' + machine_id + " .progress-bar").css('backgroundColor' , vfgColor);
+            }
+            $('#status_' + machine_id + " .progress-bar").css('width' , ( (total_done/total)*100 ) + "%")
+            $('#status_' + machine_id + " .progress_label").text( Math.ceil(total_done) + " / " + total + " ("+ Math.ceil( (total_done/total)*100 -0.99 ) + "%)" );
+            
+        });
+
+}
+
+
+
+// ================================ Listeners
+
+
+/* ==================== START Parsers ====================== */
+// check all machines to be parsed
+$('#process_check_all').click(function() {
+    if($(this).attr('data-checked') == 'false') {
+        $(this).attr('data-checked' , 'true')
+        $('.checkbox_process').prop("checked", true);
+        $(this).find('.fa').removeClass('fa-circle-o')
+        $(this).find('.fa').addClass('fa-circle')
+    } else {
+        $(this).attr('data-checked' , 'false')
+        $('.checkbox_process').prop("checked", false);
+        $(this).find('.fa').removeClass('fa-circle')
+        $(this).find('.fa').addClass('fa-circle-o')
+    }
+});
+
+
+
+
+
+// when user click next button from select parser window
+$('#parsers_box_container').on('click' , '.parsers_selection_next_btn' , function(){
+  var selected_parsers = []
+  // get checked parsers
+  $.each($('.parsers_selection_checkbox:checked') , function(){
+      selected_parsers.push( $(this).val() )
+  } )
+  // if no parsers selected stop
+  if(selected_parsers.length == 0){
+      toast_msg('One parser at least should be selected' , type = "error" , header = "Error")
+      return;
+  }
+  if(parsers_selected_machines.length == 0 ||  parsers_selected_case == ''){
+      toast_msg('Machine or Case not properly selected' , type = "error" , header = "Error")
+      return;
+  }
+  for(var m in parsers_selected_machines){
+      // send the list of parsers to controller via ajax
+      var url_page = '/case/'+parsers_selected_case+'/processartifacts/'+parsers_selected_machines[m]+'/'+selected_parsers
+          $.ajax({
+              type: 'GET',
+              url: url_page,
+              success: function(data, status, request) {
+                  // if success go back to machines list
+              },
+              error: function() {
+                  // if there was an error on the ajax
+                  toast_msg('Failed to start processing a machine'  , type='error' , header = 'Error')
+                  $('#parsers_box_container .parsers_selection_error_msg p').html('There was an error on the parsing, please check the logs')
+                  $('#parsers_box_container .parsers_selection_error_msg').show()
+              }
+          });
+  }
+
+  toast_msg('Started parsing artifacts'  , type='info' , header = 'Success')
+  // go to thet machines list page
+  $('.parsers_back_to_machines').click()
+})
+
+
+
+
+
+
+// when user click back button from select parser window
+$('#parsers_box_container').on('click' , '.parsers_back_to_machines' , function(){
+    $('#list_of_machines_box_container').show()
+    $('#parsers_box_container').hide()
+
+    parsers_selected_case = ''
+    parsers_selected_machines = []
+    $('.checkbox_process').attr('checked' , false)  // clear checkbox selected machines
+    $('#process_check_all').attr('data-checked' , 'false') // clear the select all checkbox
+})
+
+
+
+
+
+
+// when user click delete selected machines button
+$('#list_of_machines_box_container').on('click' , '.btn_delete_machine' , function(){
+    var selected_machineids = [];
+    var caseid = null;
+    $('.checkbox_process:checked').each(function(){
+        selected_machineids.push($(this).data('machineid'))
+        caseid = $(this).data('caseid')
+    })
+    
+    var url_page = '/case/'+Current_case+'/delete_machine/'+selected_machineids
+    $.ajax({
+            type: 'GET',
+            url: url_page,
+            success: function(data, status, request) {
+                status_url = request.getResponseHeader('Location');
+                location.reload(true);
+            },
+            error: function() {
+                toast_msg("Connection Failed" , type = "error" , header = "Error")
+            }
+            });
+})
+
+
+
+
+// when user click processing button for selected machines
+$('#list_of_machines_box_container').on('click' , '.start_processing_selected' , function(){
+    var selected_machineids = [];
+    var selected_machinenames = [];
+    var caseid = null;
+    $('.checkbox_process:checked').each(function(){
+        selected_machineids.push($(this).data('machineid'))
+        selected_machinenames.push($(this).data('machinename'))
+        caseid = $(this).data('caseid')
+    })
+
+    build_start_process(caseid , selected_machineids , selected_machinenames)
+
+})
+
+
+
+
+
+
+// when user click processing button
+$('#info_boxes_machine').on('click' , '.start_processing2' , function(){
+  var caseid = $(this).data('caseid')
+  var machineid = [$(this).data('machineid')]
+  var machinename = [$(this).data('machinename')]
+  build_start_process(caseid , machineid , machinename)
+
+})
+
+
+
+
+
+// if "Selecte All" button clicked, check all parsers
+$('#parsers_box_container').on('click' , '.parsers_select_all' , function(){
+  var is_select_all = $(this).data('action') == 'select_all'
+  $('.parsers_selection_checkbox').each(function( index ) {
+      if( ( !$(this).prop('checked') && is_select_all ) || ( $(this).prop('checked') && !is_select_all ) ) 
+          $(this).click()
+  });
+  if($(this).data('action') == 'select_all'){
+    $(this).text('Deselect All')
+    $(this).data('action' , 'deselect_all')
+  } else {
+    $(this).text('Select All')
+    $(this).data('action' , 'select_all')
+  }
+})
+
+
+
+
+
+
+
+// if parser selected, add it to the selected parsers list
+$('#parsers_selection_table').on('change' , '.parsers_selection_checkbox' , function(){
+    var selected_parser = $(this).val()
+    var is_check = $(this).prop('checked')
+    if(is_check){
+        $('#process_selected_parsers').append(' <span id="process_selected_parsers_' + selected_parser + '" class="badge bg-yellow">' + selected_parser + '</span> ')
+    } else {
+      $('#process_selected_parsers_' + selected_parser).remove()
+      
+    }
+})
+
+
+
+
+
+// on click upload artifacts button 
+$(document).on("click", ".open-caseid", function () {
+  $(".modal-body #main_case_id").val( $(this).data('id') );
+  $(".modal-body #machine_case_id").val( $(this).data('id2') );
+});
+
+
+
+
+
+
+// this function is for uplading the artifacts zip file
+$('#upload-file-btn').click(function(event) {
+  event.preventDefault();
+
+  var formData = new FormData($('#upload-file')[0]);
+  main_case_id =$("#main_case_id").val();
+  machine_case_id =$("#machine_case_id").val();
+
+  $.ajax({
+    xhr : function() {
+      var xhr = new window.XMLHttpRequest();
+
+      xhr.upload.addEventListener('progress', function(e) {
+
+        if (e.lengthComputable) {
+            var percent = Math.round((e.loaded / e.total) * 100);
+
+            $('#progressBar').attr('aria-valuenow', percent).css('width', percent + '%').text(percent + '%');
+            $('#file_upload_error').remove()
+            $('#filesit').prop('disabled', true)
+            if ( percent == 100){
+
+              $("#model_body_upload").append("<div id='files_uploaded'><i class='fa fa-check fa-2x fa-fw margin-bottom text-primary'></i>Files Upload</div>");
+              $("#model_body_upload").append("<div id='compress_files'><i class='fa fa-spinner fa-spin fa-3x fa-fw margin-bottom text-danger'></i>Processing files...</div>");
+
+            }
+
+
+        }
+
+      });
+
+      return xhr;
+    },
+    type : 'POST',
+    url : '/case/'+main_case_id+'/uploadartifacts/'+machine_case_id,
+    data : formData,
+    processData : false,
+    contentType : false,
+    async: true,
+    success : function(data) {
+      if(data['results'] == 'error'){
+          toast_msg(data['data'] , type = "error" , header = "Error")
+          $("#model_body_upload").append('<div id="file_upload_error" class="alert alert-danger alert-dismissible">\
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>\
+            <h4><i class="icon fa fa-ban"></i> Error!</h4>' + data['data'] + '\
+          </div>')
+
+          $('#compress_files').remove()
+          $('#files_uploaded').remove()
+          $('#filesit').prop('disabled', false)
+          return;
+      }
+
+      $("#model_body_upload").empty();
+      var data = data['data']
+      $("#model_body_upload").append("<div><i class='fa fa-check fa-2x fa-fw margin-bottom text-primary'></i>Files Upload</div>");
+      $("#model_body_upload").append("<div><i class='fa fa-check fa-2x fa-fw margin-bottom text-primary'></i>Files Processed: "+data.length+" files</div>");
+      
+
+    }
+  });
+});
+
+
+
+
+
+
+
+
+// when click add machine button
+$(document).on("click", ".add_machine_btn", function () {
+  $(".modal-body #main_case_id").val( $('#case_id').text() );
+});
+
+
+
+
+// ================================ Main code
+
+
+
+// this function will run every 5 seconds to update the parser status progress bar for all machines
+setInterval(function(){
+  update_parsers_progress_all_machines()
+}, update_process_interval);
+
+
+
+
+// call the update function progress bar the first time
+$(document).ready(function(){update_parsers_progress_all_machines()})
+
+
+    </script>
+{% endblock %}
+

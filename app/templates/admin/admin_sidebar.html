@@ -1,0 +1,54 @@
+<!--
+  This page contain the sidebar HTML code on administration page
+-->
+<html>
+  <head>
+  </head>
+  <body>
+    {% block leftsidebar %}
+    <aside class="main-sidebar">
+      <section class="sidebar">
+
+
+        <ul class="sidebar-menu">
+          <li class="header">
+            ADMINISTRATION
+          </li>
+
+
+          <!-- side bar elements -->
+          {% for title in SIDEBAR['sidebar'] %}
+          <li class="treeview">
+          
+            <a href="{{ title['Title'][1] }}">
+              <i class="{{title['Title'][2]}}"></i>
+              <span>{{title['Title'][0]}}</span>
+              {% if title['SubTitles'] is not none %}
+                <span class="pull-right-container">
+                    <i class="fa fa-angle-left pull-right"></i>
+                </span>
+              {% endif %}
+            </a>
+
+            <!-- side bar sub elements -->
+            {% if title['SubTitles'] is not none %}
+            <ul class="treeview-menu">
+              {% for subtitle in title['SubTitles'] %}
+                  <li><a href="{{subtitle[1]}}"><i class="fa fa-circle-o"></i>{{subtitle[0]}} </a></li>
+              {% endfor %}
+            </ul>
+            {% endif %}
+            <!-- end of side bar elements -->
+          </li>
+          {% endfor %}
+          <!-- end side bar elements -->
+
+        </ul>
+
+
+
+      </section>
+    </aside>
+    {% endblock %}
+  </body>
+</html>

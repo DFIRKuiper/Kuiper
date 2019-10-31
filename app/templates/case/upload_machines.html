@@ -1,0 +1,217 @@
+{% extends  "case/index.html" %}
+
+
+{% block content %}
+	<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload.css')}}" />
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload-ui.css')}}" />
+    <!-- CSS adjustments for browsers with JavaScript disabled -->
+    <noscript><link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload-noscript.css')}}"/></noscript>
+    <noscript><link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload-ui-noscript.css')}}"/></noscript>
+	
+
+
+      <div class="row">
+        <div class="col-xs-12">
+          <div class="box">
+            <div class="box-header">
+              <h3 class="box-title"><i class="fa fa-upload"></i> Upload Machines <a data-toggle="tooltip" data-placement="bottom" title="Only zip files accepted less than 5GB size, the file name will be the machine name, make sure it is not password protected"><i class="fa fa-info-circle"></i></a></h3>
+				
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+
+
+				<!-- The file upload form used as target for the file upload widget -->
+				<form id="fileupload" enctype="multipart/form-data">
+					
+					<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+					<div class="row fileupload-buttonbar">
+					<div class="col-lg-7">
+					
+						<!-- The fileinput-button span is used to style the file input field as button -->
+						<div class="btn-group">
+
+							<span class="btn btn-success fileinput-button">
+							
+							<i class="glyphicon glyphicon-plus"></i>
+							<span>Add files...</span>
+							<input type="file" name="files[]" multiple />
+							</span>
+							<button type="submit" class="btn btn-primary start">
+							<i class="glyphicon glyphicon-upload"></i>
+							<span>Start upload</span>
+							</button>
+							<button type="reset" class="btn btn-warning cancel">
+							<i class="glyphicon glyphicon-ban-circle"></i>
+							<span>Cancel upload</span>
+							</button>
+						</div>
+						<!-- The global file processing state -->
+						<span class="fileupload-process"></span>
+					</div>
+					<!-- The global progress state -->
+					<div class="col-lg-5 fileupload-progress fade">
+						<!-- The global progress bar -->
+						<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+							<div class="progress-bar progress-bar-prime" style="width:0%;"></div>
+						</div>
+						<!-- The extended global progress state -->
+						<div class="progress-extended">&nbsp;</div>
+					</div>
+					</div>
+					<div><ul id="files_list"></ul></div>
+					<!-- The table listing the files available for upload/download -->
+					<table role="presentation" class="table table-striped">
+					<tbody class="files"></tbody>
+					</table>
+				</form>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+
+
+{% raw %}
+    <!-- The template to display files available for upload -->
+    <script id="template-upload" type="text/x-tmpl">
+      {% for (var i=0, file; file=o.files[i]; i++) { %}
+          <tr class="template-upload fade">
+              <td>
+                  {% if (window.innerWidth > 480 || !o.options.loadImageFileTypes.test(file.type)) { %}
+                      <p class="name">{%=file.name%}</p>
+                  {% } %}
+                  <strong class="error text-danger"></strong>
+              </td>
+              <td width="10%">
+                  <span class="size">Processing...</span>
+			  </td>
+			  <td width="30%">
+                  <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-prime" style="width:0%;"></div></div>
+              </td>
+              <td width="30%">
+			  		<div class="buttons btn-group pull-right">
+                  {% if (!o.options.autoUpload && o.options.edit && o.options.loadImageFileTypes.test(file.type)) { %}
+                    <button class="btn btn-success edit" data-index="{%=i%}" disabled>
+                        <i class="glyphicon glyphicon-edit"></i>
+                        <span>Edit</span>
+                    </button>
+                  {% } %}
+                  {% if (!i && !o.options.autoUpload) { %}
+                      <button class="btn btn-primary start" disabled>
+                          <i class="glyphicon glyphicon-upload"></i>
+                          <span>Start</span>
+                      </button>
+                  {% } %}
+                  {% if (!i) { %}
+                      <button class="btn btn-warning cancel">
+                          <i class="glyphicon glyphicon-ban-circle"></i>
+                          <span>Cancel</span>
+                      </button>
+                  {% } %}
+				  </div>
+              </td>
+          </tr>
+      {% } %}
+    </script>
+{% endraw %}
+
+
+<!-- jQuery 3 -->
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+
+<script src="../../static/dist/jquery_file_upload/js/vendor/jquery.ui.widget.js"></script>
+
+<!-- Bootstrap 3.3.7 -->
+<script src="../../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="../../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="../../static/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="../../static/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="../../static/dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../static/dist/js/demo.js"></script>
+
+<script src="../../static/json_viewer/json-viewer.js"></script>
+
+<script src="../../static/dist/jquery_file_upload/js/vendor/tmpl.min.js"></script>
+
+<script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+    
+
+<!-- toast notifications --> 
+<script src="../../static/dist/jquery_toast/jquery.toast.min.js"></script>
+<link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+
+<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+<script src="{{url_for('static', filename='dist/js/load-image.all.min.js')}}"></script>
+
+
+<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+<script src="../../static/dist/jquery_file_upload/js/jquery.iframe-transport.js"></script>
+<!-- The basic File Upload plugin -->
+<script src="../../static/dist/jquery_file_upload/js/jquery.fileupload.js"></script>
+<!-- The File Upload processing plugin -->
+<script src="../../static/dist/jquery_file_upload/js/jquery.fileupload-process.js"></script>
+<!-- The File Upload image preview & resize plugin -->
+<script src="../../static/dist/jquery_file_upload/js/jquery.fileupload-image.js"></script>
+<!-- The File Upload audio preview plugin -->
+<script src="../../static/dist/jquery_file_upload/js/jquery.fileupload-audio.js"></script>
+<!-- The File Upload video preview plugin -->
+<script src="../../static/dist/jquery_file_upload/js/jquery.fileupload-video.js"></script>
+<!-- The File Upload validation plugin -->
+<script src="../../static/dist/jquery_file_upload/js/jquery.fileupload-validate.js"></script>
+<!-- The File Upload user interface plugin -->
+<script src="../../static/dist/jquery_file_upload/js/jquery.fileupload-ui.js"></script>
+
+
+<!-- page script -->
+<script>
+
+var toast = $.toast;
+
+jQuery(function($){
+
+	// Initialize the jQuery File Upload widget:
+	$('#fileupload').fileupload({
+			downloadTemplateId: null,	// disable downloadTemplateId 
+			disableImagePreview: true, 	// disable preview
+			dataType: 'json',
+			edit: false,
+			autoUpload: false,
+			acceptFileTypes: /(\.|\/)(zip)$/i,
+			maxFileSize: 5000000000, // 5 GB
+			maxNumberOfFiles: 100,
+			url: "{{url_for('case_upload_machine', case_id=case_details['casename'] )}}",
+			done: function (e, data) {
+				console.log(data)
+				if( data._response.result.result == false){
+					console.log(data._response.result.message)
+					data.context.find('.error').text(data._response.result.message)
+					data.context.find('.progress').html('<div class="progress-bar progress-bar-red" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>')
+				} else {
+					data.context.find('.buttons').html('<i class="fa fa-fw fa-check"></i>');
+					data.context.find('.progress').html('<div class="progress-bar progress-bar-green" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>')
+					
+					console.log(data)
+					var filename = data._response.result.data['name']
+					var zip_content = data._response.result.data['zip_content']
+				}
+				data.context.find('.progress').removeClass('active')
+				data.context.find('.progress').removeClass('progress-striped')
+			},
+	});
+})
+
+
+
+</script>
+
+
+
+{% endblock %}

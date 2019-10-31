@@ -1,0 +1,69 @@
+
+
+# ============ Kuiper Platform
+Kuiper:
+  IP            : 192.168.220.129 # flask web application ip
+  PORT          : 5000            # flask web application port 
+  Debug         : True            # enable debugging mode
+  RemoveRawFiles: True            # remove raw files uploaded to Kuiper, as consequences enable this will allow upload the file multiple times
+
+# ============ AdminLTE
+adminlte:
+  SIDEBAR_OPEN: false
+
+
+# ============ configuration of celery
+CELERY:
+  CELERY_BROKER_URL     : redis://localhost:6379
+  CELERY_RESULT_BACKEND : redis://localhost:6379
+  CELERY_TASK_ACKS_LATE : True
+
+# ============ Elasticsearch
+ElasticSearch:
+  IP    : 192.168.220.129
+  PORT  : 9200
+
+
+# ============ MongoDB
+MongoDB:
+  DB_NAME: 'Kuiper'   # MongoDB Database name
+
+
+
+
+
+# ============ configuration of directories on the platform
+# it is preferable to not change these settings (except platform_folder)  
+Directories:
+  platform_folder: &platform_folder   "./"                                 # main folder
+  app_folder: &app_folder             [*platform_folder, /app]          # application files folder
+  app_parsers:                        [*platform_folder, /app/parsers]  # parsers folder
+  artifacts_upload:                   [*platform_folder, /files]        # uploaded artifacts folders  
+  artifacts_upload_raw:               [*platform_folder, /raw]          # original uploaded compressed files
+
+
+# ============ case_sidebar
+# Title content: [<title on sidebar>,<url path>,<icon>]
+# SubTitles: [ [ <title on sidebar>,<url path>,<icon>] , etc. ]
+case_sidebar:
+  - Title: ["Dashboard","/case/<case_id>/dashboard","fa fa-pie-chart"]
+    SubTitles : Null
+  - Title: ["Machines","/case/<case_id>","fa fa-laptop"]
+    SubTitles : Null
+  - Title: ["Artifacts","/case/<case_id>/browse_artifacts","fa  fa-cubes"]
+    SubTitles : Null
+  - Title: ["Timeline","/case/<case_id>/timeline","fa fa-clock-o"]
+    SubTitles : Null
+  - Title: ["Alerts","/case/<case_id>/alerts","fa  fa-bell"]
+    SubTitles : Null
+
+# ============ admin_sidebar
+# Title content: [<title on sidebar>,<url path>,<icon>]
+# SubTitles: [ [ <title on sidebar>,<url path>,<icon>] , etc. ]
+admin_sidebar:
+  - Title:      ["Cases","/admin/","fa  fa-globe"]
+    SubTitles : Null
+  - Title:      ['Rules' , '/admin/rules' , 'fa fa-list-alt']
+    SubTitles : Null
+  - Title:      ['Configuration' , '/admin/config' , 'fa fa-gears' ]
+    SubTitles : Null

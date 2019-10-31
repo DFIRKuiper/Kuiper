@@ -1,0 +1,6 @@
+v0.5.5
+  - Split code up into reasonable modules:
+    - BinaryParser
+    - Structures
+    - Logic
+  - Fix bug reported by Phill Moore that truncated long path components.
