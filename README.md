@@ -15,7 +15,7 @@
     - [1.4. Use Cases](#Use-Cases)
 - [2. Examples](#Examples)
 - [3. Kuiper Components](#Kuiper-Components)
-    - [2.1. Overview Components](#Overview-Components)
+    - [2.1. Components Overview](#Components-Overview)
     - [2.2. Parsers](#Parsers)
 - [4. Getting Started](#getting-started)
     - [4.1. Requirements](#requirements)
@@ -83,7 +83,7 @@ With a large number of cases and a large number of team members, it becomes hard
 
 # Kuiper Components
 
-## Overview Components
+## Components Overview
 
 Kuiper use the following components:
 
