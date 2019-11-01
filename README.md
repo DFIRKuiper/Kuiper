@@ -192,6 +192,7 @@ Happy hunting :).
 # TODO List:
 
 - Add Wiki
+- Fix issues with parsers
 
 # Issues Tracking and Contribution
 
