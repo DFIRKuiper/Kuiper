@@ -121,26 +121,26 @@ Shimcache           | [MANDIANT](https://github.com/mandiant/ShimCacheParser)
 Shortcuts           | [HarmJ0y](https://github.com/HarmJ0y/pylnker)
 UsnJrnl             | [PoorBillionaire](https://github.com/PoorBillionaire/USN-Journal-Parser)
 WMI_Persistence     | [davidpany](https://github.com/davidpany/WMI_Forensics)
-ComputerName        |
-DHCP                |
-InstalledApp        |
-InstalledComponents |
-LastVisitedMRU      |
-LaunchTracing       |
-OpenSaveMRU         |
-ProfileList         |
-ShellExtensions     |
-TimeZoneInformation |
-TypedUrls           |
-Uninstall           |
-UserAssist          |
-WordWheelQuery      |
-Bam                 |
-AppCompatFlags      |
-MuiCache            |
-RunMRU              |
-Sysinternals        |
-TerminalServerClient|
+ComputerName        | Custom by Muteb Alqahtani
+DHCP                | Custom by Muteb Alqahtani
+InstalledApp        | Custom by Muteb Alqahtani
+InstalledComponents | Custom by Muteb Alqahtani
+LastVisitedMRU      | Custom by Muteb Alqahtani
+LaunchTracing       | Custom by Muteb Alqahtani
+OpenSaveMRU         | Custom by Muteb Alqahtani
+ProfileList         | Custom by Muteb Alqahtani
+ShellExtensions     | Custom by Muteb Alqahtani
+TimeZoneInformation | Custom by Muteb Alqahtani
+TypedUrls           | Custom by Muteb Alqahtani
+Uninstall           | Custom by Muteb Alqahtani
+UserAssist          | Custom by Muteb Alqahtani
+WordWheelQuery      | Custom by Muteb Alqahtani
+Bam                 | Custom by Muteb Alqahtani
+AppCompatFlags      | Custom by Muteb Alqahtani
+MuiCache            | Custom by Muteb Alqahtani
+RunMRU              | Custom by Muteb Alqahtani
+Sysinternals        | Custom by Muteb Alqahtani
+TerminalServerClient| Custom by Muteb Alqahtani
 
 
 
