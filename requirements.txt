@@ -24,7 +24,7 @@ winjob==0.0.12
 PyYAML==5.1.2
 pytest
 Flask-Celery-Helper
-urllib3==1.24.1
+urllib3==1.24.2
 python-registry==1.0.4
 python-evtx==0.6.1
 redis
