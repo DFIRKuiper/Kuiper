@@ -1,7 +1,7 @@
 
 
 ![logo.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/logo2.png?raw=true)
-
+https://github.com/Abdullah-Alrasheed
 
 ## Table of Contents
 
@@ -214,5 +214,4 @@ we appreciate sharing any parsers you develop, please send a pull request to be 
 
 [Muteb Alqahtani](https://github.com/muteb), Twitter([@muteb_alqahtani](https://twitter.com/muteb_alqahtani))
 
-
-Abdullah Alrasheed, Twitter([@abdullah_rush](https://twitter.com/abdullah_rush))
+[Abdullah Alrasheed](https://github.com/Abdullah-Alrasheed), Twitter([@abdullah_rush](https://twitter.com/abdullah_rush))
