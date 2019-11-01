@@ -103,24 +103,44 @@ Kuiper use the following components:
 The following are parsers used in Kuiper project, some are custom built, and others have been modified to output the results in a compliant format in order to integrate it with Kuiper and some have been heavily modified to make it compatible with Kuiper.
 
 Parser 		         | Author
------------------ | -------------
-BrowserHistory    | [Saleh Muhaysin](https://github.com/salehmuhaysin/BrowserHistory_ELK)
-Srum              | [Saleh Muhaysin](https://github.com/salehmuhaysin/SRUM_parser)
-CSV               | Custom by Saleh Muhaysin
-Recyclebin        | Custom by Muteb Alqahtani
-Scheduled Tasks   | Custom by Muteb Alqahtani
-Prefetch          | [MBromiley](https://github.com/bromiley/tools/tree/master/win10_prefetch)
-Windows Events    | [dgunter](https://github.com/dgunter/evtxtoelk)
-Amcache	          | [Willi Ballenthin](https://github.com/williballenthin/python-registry/blob/master/samples/amcache.py) 
-bits_admin        | [ANSSI](https://github.com/ANSSI-FR/bits_parser)
-Jumplist          | [Bhupendra Singh](https://github.com/Bhupipal/JumpListParser)
-MFT               | [dkovar](https://github.com/dkovar/analyzeMFT)
-RUA               | [davidpany](https://github.com/davidpany/WMI_Forensics)
-Shellbags         | [Willi Ballenthin](https://github.com/williballenthin/shellbags)
-Shimcache         | [MANDIANT](https://github.com/mandiant/ShimCacheParser)
-Shortcuts         | [HarmJ0y](https://github.com/HarmJ0y/pylnker)
-UsnJrnl           | [PoorBillionaire](https://github.com/PoorBillionaire/USN-Journal-Parser)
-WMI_Persistence   | [davidpany](https://github.com/davidpany/WMI_Forensics)
+-----------------   | -------------
+BrowserHistory      | [Saleh Muhaysin](https://github.com/salehmuhaysin/BrowserHistory_ELK)
+Srum                | [Saleh Muhaysin](https://github.com/salehmuhaysin/SRUM_parser)
+CSV                 | Custom by Saleh Muhaysin
+Recyclebin          | Custom by Muteb Alqahtani
+Scheduled Tasks     | Custom by Muteb Alqahtani
+Prefetch            | [MBromiley](https://github.com/bromiley/tools/tree/master/win10_prefetch)
+Windows Events      | [dgunter](https://github.com/dgunter/evtxtoelk)
+Amcache	            | [Willi Ballenthin](https://github.com/williballenthin/python-registry/blob/master/samples/amcache.py) 
+bits_admin          | [ANSSI](https://github.com/ANSSI-FR/bits_parser)
+Jumplist            | [Bhupendra Singh](https://github.com/Bhupipal/JumpListParser)
+MFT                 | [dkovar](https://github.com/dkovar/analyzeMFT)
+RUA                 | [davidpany](https://github.com/davidpany/WMI_Forensics)
+Shellbags           | [Willi Ballenthin](https://github.com/williballenthin/shellbags)
+Shimcache           | [MANDIANT](https://github.com/mandiant/ShimCacheParser)
+Shortcuts           | [HarmJ0y](https://github.com/HarmJ0y/pylnker)
+UsnJrnl             | [PoorBillionaire](https://github.com/PoorBillionaire/USN-Journal-Parser)
+WMI_Persistence     | [davidpany](https://github.com/davidpany/WMI_Forensics)
+ComputerName        |
+DHCP                |
+InstalledApp        |
+InstalledComponents |
+LastVisitedMRU      |
+LaunchTracing       |
+OpenSaveMRU         |
+ProfileList         |
+ShellExtensions     |
+TimeZoneInformation |
+TypedUrls           |
+Uninstall           |
+UserAssist          |
+WordWheelQuery      |
+Bam                 |
+AppCompatFlags      |
+MuiCache            |
+RunMRU              |
+Sysinternals        |
+TerminalServerClient|
 
 
 
