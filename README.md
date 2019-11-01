@@ -37,7 +37,7 @@ Digital Investigation Platform
 
 
 ## What is Kuiper?
-Kuiper is a digital investigation platform that provide a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast traige script like [Hoarder](https://github.com/muteb/Hoarder)). In additional, collaborate with other team members on the same platform by tagging artifacts and present it as a timeline, as well as setting rules for automating the detection. The main purpose of this project is to aid in streamlining digital investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
+Kuiper is a digital investigation platform that provides a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast traige script like [Hoarder](https://github.com/muteb/Hoarder)). In additional, collaborate with other team members on the same platform by tagging artifacts and present it as a timeline, as well as setting rules for automating the detection. The main purpose of this project is to aid in streamlining digital investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
 ![diagram.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/diagram.png?raw=true)
 
 
