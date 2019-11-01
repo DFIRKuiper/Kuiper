@@ -51,7 +51,7 @@ if [ "$1" == "-install" ]; then
             echoerror "Python dependencies failed (Error Code: $ERROR)."
         fi
 
-    yes|pip2 install -r "$DIR/requirements.txt"  >> $LOGFILE 2>&1
+    yes|pip2 install -r "$DIR/requirements_2.7.txt"  >> $LOGFILE 2>&1
     ERROR=$?
         if [ $ERROR -ne 0 ]; then
             echoerror "Requirements failed (Error Code: $ERROR)."
@@ -64,7 +64,7 @@ if [ "$1" == "-install" ]; then
             echoerror "Could not install pip (Error Code: $ERROR)."
         fi
     echo "Installing requirements"
-    yes|pip3 install -r "$DIR/requirements2.txt"  >> $LOGFILE 2>&1
+    yes|pip3 install -r "$DIR/requirements_3.txt"  >> $LOGFILE 2>&1
     ERROR=$?
         if [ $ERROR -ne 0 ]; then
             echoerror "Requirements failed (Error Code: $ERROR)."
