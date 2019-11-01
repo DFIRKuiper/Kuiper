@@ -1,7 +1,7 @@
 
 
 ![logo.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/logo2.png?raw=true)
-https://github.com/Abdullah-Alrasheed
+
 
 ## Table of Contents
 
