@@ -25,6 +25,8 @@ app.config['CELERY_TASK_ACKS_LATE']     = y['CELERY']['CELERY_TASK_ACKS_LATE']
 celery = Celery(app)
 
 app.config['DB_NAME']                   = y['MongoDB']['DB_NAME']
+app.config['DB_IP']                   	= y['MongoDB']['DB_IP']
+app.config['DB_PORT']                   = y['MongoDB']['DB_PORT']
 
 app.config['SIDEBAR_OPEN']              = y['adminlte']['SIDEBAR_OPEN']
 

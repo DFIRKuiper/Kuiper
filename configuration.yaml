@@ -2,7 +2,7 @@
 
 # ============ Kuiper Platform
 Kuiper:
-  IP            : 192.168.220.129 # flask web application ip
+  IP            : 0.0.0.0         # flask web application ip
   PORT          : 5000            # flask web application port 
   Debug         : True            # enable debugging mode
   RemoveRawFiles: True            # remove raw files uploaded to Kuiper, as consequences enable this will allow upload the file multiple times
@@ -20,14 +20,15 @@ CELERY:
 
 # ============ Elasticsearch
 ElasticSearch:
-  IP    : 192.168.220.129
+  IP    : 0.0.0.0
   PORT  : 9200
 
 
 # ============ MongoDB
 MongoDB:
-  DB_NAME: 'Kuiper'   # MongoDB Database name
-
+  DB_NAME: 'Kuiper'         # MongoDB Database name
+  DB_IP: '192.168.220.156'  # MongoDB Database IP address 
+  DB_PORT: 27017            # MongoDB Database Port number
 
 
 

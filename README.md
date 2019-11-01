@@ -1,6 +1,6 @@
 
 
-![logo.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/logo2.png?raw=true)
+![logo.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/logo2.png?raw=true)
 
 
 ## Table of Contents
@@ -38,7 +38,7 @@ Digital Investigation Platform
 
 ## What is Kuiper?
 Kuiper is a digital investigation platform that provide a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast traige script like [Hoarder](https://github.com/muteb/Hoarder)). In additional, collaborate with other team members on the same platform by tagging artifacts and present it as a timeline, as well as setting rules for automating the detection. The main purpose of this project is to aid in streamlining digital investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/diagram.png?raw=true)
+![diagram.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/diagram.png?raw=true)
 
 
 ## Why Kuiper?
@@ -66,31 +66,17 @@ With a large number of cases and a large number of team members, it becomes hard
  - **Holistic view of evidences**: Browse and search within the parsed artifacts for all machines on the opened case.
  - **Rules creation**: Save search query as rules, these rules could be used to trigger alerts for future cases.
  - **Tagging and timeline**: Tag suspicious/malicious records, and display the tagged records in a timeline. For records or information without records (information collected from other external sources such as FW, proxy, WAF, etc. logs) you can add a message on timeline with the specific time.
- - **Parsers management**: Collected files without predefined parser is not an issue anymore, you can write your own parser and add it to Kuiper and will parse these files. read more how to add parser from [Add Custom Parser](https://github.com/salehmuhaysin/Kuiper/wiki/Add-Custom-Parser)
+ - **Parsers management**: Collected files without predefined parser is not an issue anymore, you can write your own parser and add it to Kuiper and will parse these files. read more how to add parser from [Add Custom Parser](https://github.com/DFIRKuiper/Kuiper/wiki/Add-Custom-Parser)
 
 
 
 # Examples
 
-1. **Cases page**: from here you can manage cases
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/cases.png?raw=true)
-2. **Rules management**: edit and remove rule
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/rules.png?raw=true)
+**Create cases and upload artifacts**
+![create_cases](https://github.com/DFIRKuiper/Kuiper/blob/master/img/create_case.gif?raw=true)
 
-3. **Parsers Configuration**: manage the parsers (add, delete, and edit)
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/parsers.png?raw=true)
-
-4. **Case machines**: list all machines on the selected case, from here you can add machine and upload artifacts to it as zip file or raw files.
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/machines.png?raw=true)
-
-
-5. **Artifacts Browsing**: this is where the hunting begins ;), all records parsed from artifacts will be displayed here, you can search and save your search query as rule and tag records.
-
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/browse_artifacts.png?raw=true)
-
-6. **Timeline**: all tagged records and add messages are displayed in a chronological order as well as it could be exported as CSV.
-
-![diagram.png](https://github.com/salehmuhaysin/Kuiper/blob/master/img/timeline.png?raw=true)
+**Analysis example in Kuiper**
+![create_cases](https://github.com/DFIRKuiper/Kuiper/blob/master/img/analysis.gif?raw=true)
 
 
 
@@ -117,26 +103,50 @@ Kuiper use the following components:
 The following are parsers used in Kuiper project, some are custom built, and others have been modified to output the results in a compliant format in order to integrate it with Kuiper and some have been heavily modified to make it compatible with Kuiper.
 
 Parser 		         | Author
------------------ | -------------
-BrowserHistory    | [Saleh Muhaysin](https://github.com/salehmuhaysin/BrowserHistory_ELK)
-Srum              | [Saleh Muhaysin](https://github.com/salehmuhaysin/SRUM_parser)
-CSV               | Custom by Saleh Muhaysin
-Recyclebin        | Custom by Muteb Alqahtani
-Scheduled Tasks   | Custom by Muteb Alqahtani
-Prefetch          | [MBromiley](https://github.com/bromiley/tools/tree/master/win10_prefetch)
-Windows Events    | [dgunter](https://github.com/dgunter/evtxtoelk)
-Amcache	          | [Willi Ballenthin](https://github.com/williballenthin/python-registry/blob/master/samples/amcache.py) 
-bits_admin        | [ANSSI](https://github.com/ANSSI-FR/bits_parser)
-Jumplist          | [Bhupendra Singh](https://github.com/Bhupipal/JumpListParser)
-MFT               | [dkovar](https://github.com/dkovar/analyzeMFT)
-RUA               | [davidpany](https://github.com/davidpany/WMI_Forensics)
-Shellbags         | [Willi Ballenthin](https://github.com/williballenthin/shellbags)
-Shimcache         | [MANDIANT](https://github.com/mandiant/ShimCacheParser)
-Shortcuts         | [HarmJ0y](https://github.com/HarmJ0y/pylnker)
-UsnJrnl           | [PoorBillionaire](https://github.com/PoorBillionaire/USN-Journal-Parser)
-WMI_Persistence   | [davidpany](https://github.com/davidpany/WMI_Forensics)
+-----------------   | -------------
+BrowserHistory      | [Saleh Muhaysin](https://github.com/salehmuhaysin/BrowserHistory_ELK)
+Srum                | [Saleh Muhaysin](https://github.com/salehmuhaysin/SRUM_parser)
+CSV                 | Custom by Saleh Muhaysin
+Recyclebin          | Custom by Muteb Alqahtani
+Scheduled Tasks     | Custom by Muteb Alqahtani
+Prefetch            | [MBromiley](https://github.com/bromiley/tools/tree/master/win10_prefetch)
+Windows Events      | [dgunter](https://github.com/dgunter/evtxtoelk)
+Amcache	            | [Willi Ballenthin](https://github.com/williballenthin/python-registry/blob/master/samples/amcache.py) 
+bits_admin          | [ANSSI](https://github.com/ANSSI-FR/bits_parser)
+Jumplist            | [Bhupendra Singh](https://github.com/Bhupipal/JumpListParser)
+MFT                 | [dkovar](https://github.com/dkovar/analyzeMFT)
+RUA                 | [davidpany](https://github.com/davidpany/WMI_Forensics)
+Shellbags           | [Willi Ballenthin](https://github.com/williballenthin/shellbags)
+Shimcache           | [MANDIANT](https://github.com/mandiant/ShimCacheParser)
+Shortcuts           | [HarmJ0y](https://github.com/HarmJ0y/pylnker)
+UsnJrnl             | [PoorBillionaire](https://github.com/PoorBillionaire/USN-Journal-Parser)
+WMI_Persistence     | [davidpany](https://github.com/davidpany/WMI_Forensics)
+ComputerName        | Custom by Muteb Alqahtani
+DHCP                | Custom by Muteb Alqahtani
+InstalledApp        | Custom by Muteb Alqahtani
+InstalledComponents | Custom by Muteb Alqahtani
+LastVisitedMRU      | Custom by Muteb Alqahtani
+LaunchTracing       | Custom by Muteb Alqahtani
+OpenSaveMRU         | Custom by Muteb Alqahtani
+ProfileList         | Custom by Muteb Alqahtani
+ShellExtensions     | Custom by Muteb Alqahtani
+TimeZoneInformation | Custom by Muteb Alqahtani
+TypedUrls           | Custom by Muteb Alqahtani
+Uninstall           | Custom by Muteb Alqahtani
+UserAssist          | Custom by Muteb Alqahtani
+WordWheelQuery      | Custom by Muteb Alqahtani
+Bam                 | Custom by Muteb Alqahtani
+AppCompatFlags      | Custom by Muteb Alqahtani
+MuiCache            | Custom by Muteb Alqahtani
+RunMRU              | Custom by Muteb Alqahtani
+Sysinternals        | Custom by Muteb Alqahtani
+TerminalServerClient| Custom by Muteb Alqahtani
 
-To add your own parser on Kuiper, read documentation [Add Custom Parser](https://github.com/salehmuhaysin/Kuiper/wiki/Add-Custom-Parser)
+
+
+
+
+To add your own parser on Kuiper, read documentation [Add Custom Parser](https://github.com/DFIRKuiper/Kuiper/wiki/Add-Custom-Parser)
 
 
 # Getting Started
@@ -155,7 +165,7 @@ To add your own parser on Kuiper, read documentation [Add Custom Parser](https:/
 Run the following commands to clone the Kuiper repo via git.
 
 ```
-$ git clone https://github.com/salehmuhaysin/Kuiper.git
+$ git clone https://github.com/DFIRKuiper/Kuiper.git
 ```
 
 Change your current directory location to the new Kuiper directory, and run the **kuiper_install.sh** bash script as root.
@@ -167,7 +177,7 @@ $ sudo ./kuiper_install.sh -install
 
 The **kuiper_install.sh** bash script will install all Kuiper dependencies such as (python, pip, redis, elasticsearch, mongodb and many others used by Kuiper default parsers).
 
-If you want to change the default configuration of Kuiper, please visit the page [Configuration](https://github.com/salehmuhaysin/Kuiper/wiki/Configuration)
+If you want to change the default configuration of Kuiper, please visit the page [Configuration](https://github.com/DFIRKuiper/Kuiper/wiki/Configuration)
 
 Use the following bash file to launch Kuiper.
 
@@ -201,6 +211,7 @@ we appreciate sharing any parsers you develop, please send a pull request to be 
 
 [Saleh Muhaysin](https://github.com/salehmuhaysin), Twitter ([@saleh_muhaysin](https://twitter.com/saleh_muhaysin)),
 
-[Muteb](https://github.com/muteb), Twitter([@muteb_alqahtani](https://twitter.com/muteb_alqahtani))
+[Muteb Alqahtani](https://github.com/muteb), Twitter([@muteb_alqahtani](https://twitter.com/muteb_alqahtani))
 
-Abdullah Alrasheed
+Abdullah Alrasheed, Twitter([@abdullah_rush](https://twitter.com/abdullah_rush))
+

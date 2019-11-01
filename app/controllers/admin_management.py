@@ -131,73 +131,6 @@ def admin_create_case():
 
 
 
-# =================== Config =======================
-
-# show the main config page
-@app.route('/admin/config')
-def config_page():
-    # get all cases 
-    all_caces = db_cases.get_cases()
-    if all_caces[0] == False:
-        print all_caces[1]
-
-    return render_template('admin/configuration.html',SIDEBAR=SIDEBAR,all_caces=all_caces , page_header="Configuration")
-
-# delete important fields and labels
-@app.route('/admin/config/del_impt_field', methods=["POST"])
-def del_impt_field():
-    if request.method == "POST":
-        values = request.json
-        print values['values']
-        print "*"*100
-        del_important_fields(values['values'])
-        return json.dumps({"result" : 'done'})
-
-# delete folders names and labels
-@app.route('/admin/config/delete_folder_values', methods=["POST"])
-def delete_folder_values():
-    if request.method == "POST":
-        values = request.json
-        print values['values']
-        print "*"*100
-        del_important_folders_names(values['values'])
-        return json.dumps({"result" : 'done'})
-
-@app.route('/admin/config/delete_parser_values', methods=["POST"])
-def delete_parser_values():
-    if request.method == "POST":
-        values = request.json
-        print values['values']
-        print "*"*100
-        del_important_parsers_names(values['values'])
-        return json.dumps({"result" : 'done'})
-
-# add important fields and labels
-@app.route('/admin/config/imp_fields', methods=["POST"])
-def add_impt_fields():
-    if request.method == "POST":
-        values = request.json
-        print json.loads(json.dumps(values))
-        insert_imp_fields(json.loads(json.dumps(values)))
-        return json.dumps({"result" : 'done'})
-
-# add path fields and labels
-@app.route('/admin/config/folder_name_fields', methods=["POST"])
-def add_folder_name_fields():
-    if request.method == "POST":
-        values = request.json
-        print json.loads(json.dumps(values))
-        insert_folder_name_fields(json.loads(json.dumps(values)))
-        return json.dumps({"result" : 'done'})
-
-# add path parsers names and labels
-@app.route('/admin/config/add_parsers_names', methods=["POST"])
-def add_parsers_names():
-    if request.method == "POST":
-        values = request.json
-        print json.loads(json.dumps(values))
-        insert_parsers_names(json.loads(json.dumps(values)))
-        return json.dumps({"result" : 'done'})
 
 
 #create users called from dbstuff
@@ -218,9 +151,29 @@ def admin_delete_case(casename):
 
 
 
+# =================== Config =======================
+
+
+
+
 
 
 # =================== Parsers =======================
+
+
+# show the main config page
+@app.route('/admin/config')
+def config_page():
+    # get all cases 
+    all_caces = db_cases.get_cases()
+    if all_caces[0] == False:
+        print all_caces[1]
+
+    return render_template('admin/configuration.html',SIDEBAR=SIDEBAR,all_caces=all_caces , page_header="Configuration")
+
+
+
+
 
 # add parser information
 @app.route('/admin/config/add_parser', methods=["POST"])
@@ -301,7 +254,6 @@ def get_parsers_ajax():
     if request.method == "POST":
         
         parsers = db_parsers.get_parser()
-        print parsers
         ajax_res = {'result' : parsers}
         return json.dumps(ajax_res)
 

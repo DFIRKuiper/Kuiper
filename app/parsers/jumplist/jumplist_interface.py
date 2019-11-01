@@ -19,15 +19,10 @@ def auto_jumplist(file , parser):
                         return []
                 else:
                         decoded_data = ast.literal_eval(decoded_data)
-                        print decoded_data
-                        #ff = json.dumps(ast.literal_eval(json.dumps(decoded_data)))
-                        #print list(json.loads(ff))
-
                         return [decoded_data]
                 
         except Exception as e:
                 exc_type, exc_obj, exc_tb = sys.exc_info()
-                
 		msg = "[-] [Error] " + parser + " Parser: " + str(exc_obj) + " - Line No. " + str(exc_tb.tb_lineno)
                 print msg
                 return (None , msg)

@@ -16,11 +16,15 @@ from app import *
 
 
 DB_NAME = app.config['DB_NAME']
+DB_IP   = app.config['DB_IP']
+DB_PORT = app.config['DB_PORT']
+
 
 
 # =================================================
 #               Database Cases
 # =================================================
+MClient = MongoClient(DB_IP + ":" + str(DB_PORT) )
 
 class DB_Cases:
 
@@ -28,11 +32,11 @@ class DB_Cases:
     def __init__(self):
 
         # if cases collection not exists, add it to mongoDB
-        db_m = MongoClient()[DB_NAME]
+        db_m = MClient[DB_NAME]
         if 'cases' not in db_m.collection_names():
             db_m.create_collection('cases')
 
-        self.mongo_db = MongoClient()[DB_NAME]["cases"]
+        self.mongo_db = MClient[DB_NAME]["cases"]
 
     # ======================= Machines ==========================
 
@@ -76,7 +80,7 @@ class DB_Cases:
         collection = self.mongo_db['machines']
         data = collection.remove({"_id":machine_id})
 
-        collection = MongoClient()[DB_NAME]['files']
+        collection = MClient[DB_NAME]['files']
         data = collection.remove({"_id":machine_id})
 
         return data
@@ -176,12 +180,12 @@ class DB_Rules():
     def __init__(self):
 
         # if rules collection not exists, add it to mongoDB
-        db_m = MongoClient()[DB_NAME]
+        db_m = MClient[DB_NAME]
         
         if 'rules' not in db_m.collection_names():
             db_m.create_collection('rules')
 
-        self.MongoClient = MongoClient()[DB_NAME]["rules"]
+        self.MongoClient = MClient[DB_NAME]["rules"]
 
 
     # ===================================== Get rules
@@ -270,12 +274,12 @@ class DB_Parsers:
     collection = None
     def __init__(self):
         # if parsers collection not exists, add it to mongoDB
-        db_m = MongoClient()[DB_NAME]
+        db_m = MClient[DB_NAME]
         
         if 'parsers' not in db_m.collection_names():
             db_m.create_collection('parsers')
 
-        self.collection = MongoClient()[DB_NAME]["parsers"]
+        self.collection = MClient[DB_NAME]["parsers"]
 
 
         # == check the parsers on parsers folder and if parser not on the DB
@@ -387,11 +391,11 @@ class DB_Files:
     def __init__(self):
 
         # if files collection not exists, add it to mongoDB
-        db_m = MongoClient()[DB_NAME]
+        db_m = MClient[DB_NAME]
         if 'files' not in db_m.collection_names():
             db_m.create_collection('files')
 
-        self.collection = MongoClient()[DB_NAME]["files"]
+        self.collection = MClient[DB_NAME]["files"]
 
     # ===================================== Get machine files
     # get all files for specified machine
