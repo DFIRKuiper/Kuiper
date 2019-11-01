@@ -121,26 +121,26 @@ Shimcache           | [MANDIANT](https://github.com/mandiant/ShimCacheParser)
 Shortcuts           | [HarmJ0y](https://github.com/HarmJ0y/pylnker)
 UsnJrnl             | [PoorBillionaire](https://github.com/PoorBillionaire/USN-Journal-Parser)
 WMI_Persistence     | [davidpany](https://github.com/davidpany/WMI_Forensics)
-ComputerName        | Custom by Muteb Alqahtani
-DHCP                | Custom by Muteb Alqahtani
-InstalledApp        | Custom by Muteb Alqahtani
-InstalledComponents | Custom by Muteb Alqahtani
-LastVisitedMRU      | Custom by Muteb Alqahtani
-LaunchTracing       | Custom by Muteb Alqahtani
-OpenSaveMRU         | Custom by Muteb Alqahtani
-ProfileList         | Custom by Muteb Alqahtani
-ShellExtensions     | Custom by Muteb Alqahtani
-TimeZoneInformation | Custom by Muteb Alqahtani
-TypedUrls           | Custom by Muteb Alqahtani
-Uninstall           | Custom by Muteb Alqahtani
-UserAssist          | Custom by Muteb Alqahtani
-WordWheelQuery      | Custom by Muteb Alqahtani
-Bam                 | Custom by Muteb Alqahtani
-AppCompatFlags      | Custom by Muteb Alqahtani
-MuiCache            | Custom by Muteb Alqahtani
-RunMRU              | Custom by Muteb Alqahtani
-Sysinternals        | Custom by Muteb Alqahtani
-TerminalServerClient| Custom by Muteb Alqahtani
+ComputerName        | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+DHCP                | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+InstalledApp        | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+InstalledComponents | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+LastVisitedMRU      | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+LaunchTracing       | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+OpenSaveMRU         | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+ProfileList         | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+ShellExtensions     | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+TimeZoneInformation | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+TypedUrls           | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+Uninstall           | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+UserAssist          | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+WordWheelQuery      | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+Bam                 | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+AppCompatFlags      | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+MuiCache            | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+RunMRU              | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+Sysinternals        | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+TerminalServerClient| [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
 
 
 
