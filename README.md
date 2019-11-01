@@ -122,6 +122,10 @@ Shortcuts         | [HarmJ0y](https://github.com/HarmJ0y/pylnker)
 UsnJrnl           | [PoorBillionaire](https://github.com/PoorBillionaire/USN-Journal-Parser)
 WMI_Persistence   | [davidpany](https://github.com/davidpany/WMI_Forensics)
 
+
+
+
+
 To add your own parser on Kuiper, read documentation [Add Custom Parser](https://github.com/DFIRKuiper/Kuiper/wiki/Add-Custom-Parser)
 
 
