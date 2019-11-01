@@ -212,6 +212,11 @@ we appreciate sharing any parsers you develop, please send a pull request to be 
 [Saleh Muhaysin](https://github.com/salehmuhaysin), Twitter ([@saleh_muhaysin](https://twitter.com/saleh_muhaysin)),
 
 [Muteb Alqahtani](https://github.com/muteb), Twitter([@muteb_alqahtani](https://twitter.com/muteb_alqahtani))
+<<<<<<< HEAD
 
 Abdullah Alrasheed, Twitter([@abdullah_rush](https://twitter.com/abdullah_rush))
 
+=======
+
+Abdullah Alrasheed, Twitter([@abdullah_rush](https://twitter.com/abdullah_rush))
+>>>>>>> c6d5819cf364f9caadacfebfb194d08d2cc06d6c
