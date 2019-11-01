@@ -175,7 +175,7 @@ $ cd Kuiper/
 $ sudo ./kuiper_install.sh -install 
 ```
 
-The **kuiper_install.sh** bash script will install all Kuiper dependencies such as (python, pip, redis, elasticsearch, mongodb and many others used by Kuiper default parsers).
+The **kuiper_install.sh** bash script will install all Kuiper dependencies such as (python, pip, redis, elasticsearch, mongodb and many others used by Kuiper default parsers), after installation done **reboot** the system.
 
 If you want to change the default configuration of Kuiper, please visit the page [Configuration](https://github.com/DFIRKuiper/Kuiper/wiki/Configuration)
 
