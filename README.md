@@ -19,7 +19,8 @@
     - [3.2. Parsers](#Parsers)
 - [4. Getting Started](#getting-started)
     - [4.1. Requirements](#requirements)
-    - [4.1. Installation](#Installation)
+    - [4.2. Download](#Download) 
+    - [4.3. Installation](#Installation)
 - [5. TODO List](#TODO-List)
 - [6. Issues Tracking and Contribution](#Issues-Tracking-and-Contribution)
 - [7. Licenses](#Licenses)
@@ -159,6 +160,10 @@ To add your own parser on Kuiper, read documentation [Add Custom Parser](https:/
 - **Disk:** 25GB for testing purposes and more disk space depends on the amount of data collected.
 
   
+## Download
+
+To download a prebuilt Kuiper on virtual machine, please visit the following page
+[Download Kuiper VM](https://github.com/DFIRKuiper/Kuiper/tree/master/VirualMachine)
 
 ## Installation 
 
