@@ -112,7 +112,7 @@ Recyclebin          | Custom by Muteb Alqahtani
 Scheduled Tasks     | Custom by Muteb Alqahtani
 Prefetch            | [MBromiley](https://github.com/bromiley/tools/tree/master/win10_prefetch)
 Windows Events      | [dgunter](https://github.com/dgunter/evtxtoelk)
-Amcache	            | [Willi Ballenthin](https://github.com/williballenthin/python-registry/blob/master/samples/amcache.py) 
+Amcache	            | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
 bits_admin          | [ANSSI](https://github.com/ANSSI-FR/bits_parser)
 Jumplist            | [Bhupendra Singh](https://github.com/Bhupipal/JumpListParser)
 MFT                 | [dkovar](https://github.com/dkovar/analyzeMFT)
