@@ -1,4 +1,10 @@
 
+- [Contribution](#Contribution)
+  - [Parsers List](#Parsers-List)
+  - [Parsers Requests](#Parsers-Requests)
+  - [Add Your Parser to the List](#Add-Your-Parser-to-the-List)
+
+
 # Contribution
 
 Dears, the core engine of **Kuiper** is the parsers, without parsers **Kuiper** cannot display any results and it is useless, the predefined parsers are few compared to the number of artifacts could be parsed and help the investigator on his/her analysis.
