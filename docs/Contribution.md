@@ -35,7 +35,7 @@ TerminalServerClient| [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
 
 # Parsers Requests
 
-Do you have good development skills and want to contribute and help analysts on developing new parser, this is your place, analysts requested the following parsers to help their investigation, pick what is interesting start developing and [Add Your Parser to the List](#Add-Your-Parser-to-the-List)
+Do you have good development skills and want to contribute and help analysts on developing new parser, this is your place, analysts requested the following parsers to help their investigation, pick what is interesting, start developing, and [Add Your Parser to the List](#Add-Your-Parser-to-the-List)
 
 Parser  | Request Link
 ------- | ------
