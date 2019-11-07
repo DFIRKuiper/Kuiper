@@ -1,25 +1,13 @@
 
 # Contribution
 
-Dears, as you notice the core engine of **Kuiper** is the parsers, without parsers **Kuiper** cannot display any results and it is useless, the predefined parsers are few compared to the number of artifacts could be parsed and help the investigator on his/her analysis.
+Dears, the core engine of **Kuiper** is the parsers, without parsers **Kuiper** cannot display any results and it is useless, the predefined parsers are few compared to the number of artifacts could be parsed and help the investigator on his/her analysis.
 
-Add your parser to the list and help other analysts. It is simple, to add parser to **Kuiper** go to [Add Custom Parser](https://github.com/DFIRKuiper/Kuiper/wiki/Add-Custom-Parser).
+Add your parser to the list and help other analysts.
 
-##Add Your Parser to the List
-To your custom parser to the parser's contribution list, please do the following:
-
-1- [Add Custom Parser](https://github.com/DFIRKuiper/Kuiper/wiki/Add-Custom-Parser)
-2- Test the parser on **Kuiper** over a sample and make sure it parse the sample correctly.
-3- Send a "pull request" for only the parser folder and its files, make sure do not commit other files changed on **Kuiper** folders, only the parser folder.
-4- Please send the sample of file artifacts and a screenshot of the parser configuration as follows
-![create_cases](https://github.com/DFIRKuiper/Kuiper/blob/master/img/parser_details.png?raw=true)
-
-If you want a specific parser to be added to the list, please send an issues -> Parser request template, and it will be added here
 
 
 ## Parsers List
-
-
 
 Parser 		         | Author																	| Parser		| Author
 -----------------   | ------------------------------------------------------------------------- | ------------ | ---
@@ -44,10 +32,31 @@ RunMRU              | [Muteb Alqahtani](https://github.com/muteb/RegSkewer) | Sy
 TerminalServerClient| [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
 
 
-#Parsers Requests
+
+# Parsers Requests
 
 Do you have good development skills and want to contribute and help analysts on developing new parser, this is your place, analysts requested the following parsers to help their investigation, pick what is interesting start developing and [Add Your Parser to the List](#Add-Your-Parser-to-the-List)
 
 Parser  | Request Link
 ------- | ------
 XML		| None
+
+
+If you want a specific parser to be added to the list, please send an issues -> Parser request template, and it will be added here
+
+
+
+## Add Your Parser to the List
+
+To add your custom parser to the parser's contribution list, please do the following:
+
+1- Go to [Add Custom Parser](https://github.com/DFIRKuiper/Kuiper/wiki/Add-Custom-Parser)
+
+2- Test the parser on **Kuiper** over a sample and make sure it parsed the sample correctly.
+
+3- Send a "pull request" for only the parser folder and its files, make sure do not commit other files changed on **Kuiper** folders, only the parser folder.
+
+4- Please send the sample of file artifacts and a screenshot of the parser configuration as follows
+![create_cases](https://github.com/DFIRKuiper/Kuiper/blob/master/img/parser_details.png?raw=true)
+
+5- If the parser need any dependencies to be installed, list the commands to install these dependencies, and we will add it to the installer
