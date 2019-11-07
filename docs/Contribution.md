@@ -1,8 +1,8 @@
 
-- [Contribution](#Contribution)
-  - [Parsers List](#Parsers-List)
-  - [Parsers Requests](#Parsers-Requests)
-  - [Add Your Parser to the List](#Add-Your-Parser-to-the-List)
+- [1. Contribution](#Contribution)
+  - [1.1. Parsers List](#Parsers-List)
+  - [1.2. Parsers Requests](#Parsers-Requests)
+  - [1.3. Add Your Parser to the List](#Add-Your-Parser-to-the-List)
 
 
 # Contribution
