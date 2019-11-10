@@ -86,23 +86,17 @@ def md5(fname):
 def unzip_file(zip_path,dst_path):
     try:
         create_folders(dst_path)
-        with zipfile.ZipFile(zip_path , 'r') as zfile:
-            for name in zfile.namelist():
-                p_encoded = (dst_path + name).encode('utf-8')
-                if name.endswith('/'):
-                    create_folders(p_encoded)
-                    continue
-                with zfile.open(name) as file:
-                    f = open((dst_path + name).encode('utf-8'), 'w')
-                    f.write(file.read())
-                    f.close()
-            return [True , "All files of ["+zip_path+"] extracted to ["+dst_path+"]"]
-        
-        
+        with zipfile.ZipFile(zip_path , mode='r') as zfile:
+            zfile.extractall(path=dst_path )
+        return [True , "All files of ["+zip_path+"] extracted to ["+dst_path+"]"]
+
+    except UnicodeDecodeError as e:
+        #handle unicode errors, like utf-8 codec issues
+        return [True , "All files of ["+zip_path+"] partialy extracted to ["+dst_path+"]"]
     except Exception as e:
         return [False, "Error extract the zip content: " + str(e)]
 
-
+    
 # ================================ list zip file content
 # list zip file content
 def list_zip_file(zip_path):
@@ -344,7 +338,6 @@ def case_upload_machine(case_id):
             # save the file to the raw data
             file.save(raw_folder + file_name)   
 
-            zip_file_list = []  # contain the zip file list content
             
             # unzip the file to machine files
             try:
@@ -352,7 +345,6 @@ def case_upload_machine(case_id):
                 
                 if unzip_fun[0] == True:
                     
-                    zip_file_list = list_zip_file(raw_folder + file_name)
                     
                     if RemoveRawFiles:
                         remove_file(raw_folder + file_name) # remove the raw file
@@ -370,8 +362,7 @@ def case_upload_machine(case_id):
                     return jsonify({'result' : False , 'filename' : filename , 'message' : 'Failed to unzip the file'})
 
             f = {
-                'name': filename,
-                'zip_content' : zip_file_list
+                'name': filename
             }
             machine_details = {
                 'main_case' : case_id,
