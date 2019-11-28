@@ -48,6 +48,7 @@ Do you have good development skills and want to contribute and help analysts on 
 Parser  | Request Link
 ------- | ------
 XML		| None
+USB Devices | the following line has lot of registry keys related to USB devices, [here](http://erikmusick.com/removable-media-in-the-registry/)
 
 
 If you want a specific parser to be added to the list, please send an issues -> Parser request template, and it will be added here
