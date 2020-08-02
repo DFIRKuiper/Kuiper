@@ -1,7 +1,7 @@
 libscca_python==20181227
 Flask==0.10.1
 unicodecsv==0.14.1
-elasticsearch==6.3.1
+elasticsearch==7.6.0
 xmltodict==0.12.0
 six==1.10.0
 requests==2.21.0
@@ -22,9 +22,13 @@ sphinx_rtd_theme==0.4.3
 webapp2==2.5.2
 winjob==0.0.12
 PyYAML==5.1.2
-pytest
+pytest==4.6.6
 Flask-Celery-Helper
 urllib3==1.24.1
 python-registry==1.0.4
 python-evtx==0.6.1
-redis
+redis==3.3.11
+gunicorn==19.4.5
+gevent==1.4.0
+psutil==5.7.0
+libesedb-python==20200418

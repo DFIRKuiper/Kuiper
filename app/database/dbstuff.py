@@ -10,7 +10,7 @@ from bson import ObjectId
 import sys
 import json
 import ast
-
+import shutil
 
 from app import *
 
@@ -21,10 +21,120 @@ DB_PORT = app.config['DB_PORT']
 
 
 
+
+
+
+# =================================================
+#               Database System Health
+# =================================================
+class DB_Health:
+    mongo_db = None
+
+    def __init__(self):
+        self.health = {}
+        if MClient is None:
+            self.health['connected'] = False
+        else:
+            self.health['connected'] = True
+            self.health['alive'] = MClient.alive()
+            self.health['databases_exists'] = True if DB_NAME in MClient.database_names() else False
+            
+    
+
+def get_db_health():
+    return DB_Health()
+
+
+
+
+# =================================================
+#               Database Groups
+# =================================================
+
+# ===================================== DB groups
+# this class contain the groups
+class DB_Groups():
+    MongoClient = None
+    def __init__(self):
+
+        # if rules collection not exists, add it to mongoDB
+        db_m = MClient[DB_NAME]
+        
+        if 'groups' not in db_m.collection_names():
+            db_m.create_collection('groups')
+
+        self.MongoClient = MClient[DB_NAME]["groups"]
+
+
+    
+    # ===================================== Get group
+    # get a list of all groups
+    def get_groups(self , case_id = None):
+        try:
+            query = {}
+            if case_id is not None:
+                query['case_name'] = case_id 
+
+            data = self.MongoClient.find(query)
+            datax = []
+            for x in data:
+                datax.append(x)
+            return [True, datax]
+        except Exception as e:
+            return [False, str(e)]
+
+
+    # ===================================== Add Group
+    # add group to data base
+    def add_group(self, case_name , group_name):
+        try:
+            
+            self.MongoClient.insert({
+                '_id'       : case_name + "_" + group_name,
+                "case_name" : case_name,
+                'group_name': group_name
+                })
+            return [True , "Group ["+group_name+"] on case ["+case_name+"] added to mongoDB"]
+
+        except DuplicateKeyError:
+            return [False , "Group ["+group_name+"] on case ["+case_name+"] already exists"]
+
+        except Exception as e:
+            return [False , str(e)]
+
+    # =================================== Delete group 
+    # deassien all machines from the group before deleting it
+    def delete_group(self, case_id, group_name):
+        try:
+            res = db_cases.deassign_all_from_group(case_id , group_name )
+            if res[0] == False:
+                return res 
+
+            data = self.MongoClient.remove({"_id":case_id + "_" + group_name})
+            return [True, "Group ["+group_name+"] deleted"]
+
+        except Exception as e:
+            return [False, str(e)]
+# generate the db rule object
+def get_db_groups():
+    return DB_Groups()
+
+
+
+# =================================================
+#               End Database Groups
+# =================================================
+
+
+
+
+
+
+
 # =================================================
 #               Database Cases
 # =================================================
-MClient = MongoClient(DB_IP + ":" + str(DB_PORT) )
+
 
 class DB_Cases:
 
@@ -42,18 +152,29 @@ class DB_Cases:
 
     # ================================ get all machines for case
     # take case id and return all machines for this case
-    def get_machines(self, case_id):
+    def get_machines(self, case_id , group=None):
         machines = []
-        for d in self.mongo_db["machines"].find({'main_case': case_id}).sort([['creation_time', -1]]):
-            machines.append(d)
+        try:
+            query = {'main_case': case_id}
+            if group is not None:
+                query['groups'] = group
+            for d in self.mongo_db["machines"].find(query).sort([['creation_time', -1]]):
+                machines.append(d)
 
-        return machines
+            return [True, machines]
+        except Exception as e:
+            return [False, None]
+
+
 
     # ================================ get specific machines by id
     def get_machine_by_id(self , machine_id):
-        for i in self.mongo_db["machines"].find({"_id" : machine_id}):
-            return i
-        return None
+        try:
+            for i in self.mongo_db["machines"].find({"_id" : machine_id}):
+                return [True, i]
+            return [True, None]
+        except Exception as e:
+            return [False, str(e)]
 
 
     
@@ -72,18 +193,88 @@ class DB_Cases:
         except DuplicateKeyError:
             return [False , "Machine already exists"] 
         except Exception as e:
-            return [False, "Error: " + str(e)]
+            return [False, str(e)]
     
     
     # ================================ delete machine
     def delete_machine(self, machine_id):
-        collection = self.mongo_db['machines']
-        data = collection.remove({"_id":machine_id})
+        try:
+            collection = self.mongo_db['machines']
+            data = collection.remove({"_id":machine_id})
 
-        collection = MClient[DB_NAME]['files']
-        data = collection.remove({"_id":machine_id})
+            collection = MClient[DB_NAME]['files']
+            data = collection.remove({"_id":machine_id})
 
-        return data
+            return [True, data]
+        except Exception as e:
+            return [False , str(e)]
+
+
+    # ================================ Update machine
+    # update case details information
+    def update_machine(self , machine_id , machine_details):
+        try:
+            collection = self.mongo_db["machines"]
+            up = collection.update({'_id':machine_id}, {'$set': machine_details },upsert=False)
+            return [True, up]
+        except Exception as e:
+            return [False, "Error: " + str(e)]
+
+
+
+    # ================================ Assign machines to group
+    # assign machines to specified group
+    def assign_to_group(self , machines_list , group_name):
+        if len(machines_list) == 0:
+            return [True, 'no machines has been specified']
+        try:
+            up = None 
+            collection  = self.mongo_db["machines"]
+            for m in machines_list:
+                # check if the machine already assigned to this group 
+                machine = self.get_machine_by_id(m)
+                if machine[0] == False:
+                    continue 
+                if 'groups' in machine[1] and group_name in machine[1]['groups']:
+                    continue
+
+                up = collection.update({ "_id" : m }, {'$push': {'groups' : group_name} },upsert=False)
+            return [True, up]
+        except Exception as e:
+            return [False, "Error: " + str(e)]
+
+
+
+    # ================================ Deassign machines to group
+    # deassign machines from specified group
+    def deassign_from_group(self , machines_list , group_name):
+        if len(machines_list) == 0:
+            return [True, 'no machines has been specified']
+        try:
+            collection  = self.mongo_db["machines"]
+            for m in machines_list:
+                up = collection.update({ "_id" : m }, {'$pull': {'groups' : group_name} },upsert=False)
+            return [True, up]
+        except Exception as e:
+            return [False, "Error: " + str(e)]
+
+
+    
+
+    # ================================ Deassign machines from group
+    # deassign all machines from group
+    def deassign_all_from_group(self , case_id , group_name):
+        try:
+            up = None
+            collection  = self.mongo_db["machines"]
+            machines = collection.find({ "main_case" : case_id })
+            for m in machines:
+                up = collection.update({ "_id" : m['_id'] }, {'$pull': {'groups' : group_name} },upsert=False)
+            return [True, up]
+        except Exception as e:
+            return [False, "Error: " + str(e)]
+
+
 
 
 
@@ -91,9 +282,12 @@ class DB_Cases:
 
     # ================================ get specific case by id
     def get_case_by_id(self, case_id):
-        for d in self.mongo_db.find({'casename' : case_id}):
-            return d
-
+        try:
+            for d in self.mongo_db.find({'casename' : case_id}):
+                return [True, d]
+            return [True , None]
+        except Exception as e:
+            return [False , str(e)]
     
     # ================================ get all cases
     def get_cases(self):
@@ -221,8 +415,7 @@ class DB_Rules():
                 return [False , "Rule ["+rule_id+"] failed updated from mongoDB"]
 
         except Exception as e:
-            print(e)
-            return [False , "Error: " + str(e)]
+            return [False , str(e)]
 
     # ===================================== Add rule
     # add rule to data base
@@ -244,7 +437,7 @@ class DB_Rules():
             return [False , "Rule ["+rule_name+"] already exists"]
 
         except Exception as e:
-            return [False , "Error: " + str(e)]
+            return [False , str(e)]
 
 
 # generate the db rule object
@@ -294,21 +487,30 @@ class DB_Parsers:
 
         # check if the parser on the DB, if not add it
         for p in parsers:
-            # get the configuration file from the parser folder
-            conf_path = p[1] + "/configuration.json" 
-            if os.path.exists( conf_path ):
-                
-                with open( conf_path ) as conf_json_file:
-                    conf_json = ast.literal_eval(conf_json_file.read())
-                    for conf in conf_json:
-                        if self.get_parser_by_name( conf['name'] )[0] == False: # if parser not found
-                            print "====================="
-                            # push the parser information to the DB
-                            if self.add_parser( conf ):
-                                print "[+] Parser ["+conf['name']+"] added to DB"
+            try:
+                # get the configuration file from the parser folder
+                conf_path = p[1] + "/configuration.json" 
+                if os.path.exists( conf_path ):
+                    
+                    with open( conf_path ) as conf_json_file:
+                        conf_json = ast.literal_eval(conf_json_file.read())
+                        for conf in conf_json:
+                            parser = self.get_parser_by_name( conf['name'] )
+                            if parser[0] == True and parser[1] is None: # if parser not found
+                                # push the parser information to the DB
+                                add_parser = self.add_parser( conf )
+                                if add_parser[0]:
+                                    logger.logger(level=logger.INFO , type="mongo_parsers", message="Parser ["+conf['name']+"] added to DB")
+                                else:
+                                    logger.logger(level=logger.ERROR , type="mongo_parsers", message="Failed to add parser ["+conf['name']+"]" , reason=add_parser[1])
+                            elif parser[0] == False:
+                                # if failed to get the parser information
+                                logger.logger(level=logger.ERROR , type="mongo_parsers", message="Failed checking if parser ["+conf['name']+"] exists", reason=parser[1])
                             else:
-                                print "[-] Error: dailed to add parser ["+conf['name']+"] - "
-
+                                # if the parser exists
+                                logger.logger(level=logger.DEBUG , type="mongo_parsers", message="Parser ["+conf['name']+"] exists")
+            except Exception as e:
+                logger.logger(level=logger.ERROR , type="mongo_parsers", message="Failed loading parsers configurations", reason=str(e))
 
 
     # ===================================== add parser
@@ -318,49 +520,124 @@ class DB_Parsers:
             parser_details['creation_time']= str( datetime.now() ).replace(' ' , 'T')
             # insert into collection
             self.collection.insert(parser_details)
+
+            
+                    
+            # write the parser configuration to file
+            config = self.collection.find({'parser_folder' : parser_details['parser_folder']})
+            parsers_configuration = []
+            for c in config:
+                parsers_configuration.append(c)
+            
+            
+            configuration_file = open(app.config['PARSER_PATH'] + "/" + parser_details['parser_folder'] + "/configuration.json" , 'w')
+            configuration_file.write(json.dumps(parsers_configuration))
+            configuration_file.close()
+
+
             return [True, parser_details['_id'] ]
 
         except DuplicateKeyError:
-            return [False, "Parser ["+parser_details['name']+"] already present in DB."]
+            return [False, "Parser ["+parser_details['name']+"] already in DB."]
     
     # ===================================== edit parser
     def edit_parser(self, parser_name ,  parser_details):
         try:
             # update into collection
             up = self.collection.update({'_id':parser_name}, {'$set': parser_details},upsert=False)
+
+            
             if up['updatedExisting']:
+
+                    
+                # write the parser configuration to file
+                config = self.collection.find({'parser_folder' : parser_details['parser_folder']})
+                parsers_configuration = []
+                for c in config:
+                    parsers_configuration.append(c)
+                
+                
+                configuration_file = open(app.config['PARSER_PATH'] + "/" + parser_details['parser_folder'] + "/configuration.json" , 'w')
+                configuration_file.write(json.dumps(parsers_configuration))
+                configuration_file.close()
+
+                logger.logger(level=logger.INFO , type="mongo_parsers", message="Parser configuration file ["+parser_details['parser_folder']+"/configuration.json] written")
+
                 return [True , "Parser ["+parser_details['name']+"] updated from mongoDB"]
             else:
                 return [False , "Parser ["+parser_details['name']+"] failed updated from mongoDB"]
 
         except Exception as e:
-            return [False, "Error: " + str(e) ]
+            return [False, str(e) ]
 
 
     # ===================================== get parsers details
     def get_parser(self):
-        parsers = []
-        for p in self.collection.find({}).sort([['creation_time', -1]]):
-            parsers.append(p)
-        
-        return parsers
+        try:
+            parsers = []
+            for p in self.collection.find({}).sort([['creation_time', -1]]):
+                parsers.append(p)
+            
+            return [True, parsers]
+        except Exception as e:
+            return [False , str(e)]
+
     
     # ===================================== get parser by name
     # get parser details by its name
     def get_parser_by_name(self, parser_name):
-        for p in self.collection.find({}):
-            if p['name'] == parser_name:
-                return [True, p]
-        return [False, "Parser ["+parser_name+"] not found"]
+        try:
+            for p in self.collection.find({}):
+                if p['name'] == parser_name:
+                    return [True, p]
+
+            return [True , None]
+        except Exception as e:
+            return [False, str(e)]
     
     # ===================================== Delete parser
     # delete parser by name
     def delete_parser_by_name(self, parser_name):
         try:
+            parser = self.collection.find({'_id' : parser_name})
+            parser_details = None
+            for c in parser:
+                parser_details = c
+            if parser_details is None:
+                return [False , "Parser not found in database"]
+
             data = self.collection.remove({"_id": parser_name})
+
+            logger.logger(level=logger.INFO , type="mongo_parsers", message="Parser ["+parser_name+"] removed from database")
+            
+
+            
+
+            
+                    
+            # write the parser configuration to file
+            config = self.collection.find({'parser_folder' : parser_details['parser_folder']})
+            parsers_configuration = []
+            for c in config:
+                parsers_configuration.append(c)
+            
+            
+            configuration_file = open(app.config['PARSER_PATH'] + "/" + parser_details['parser_folder'] + "/configuration.json" , 'w')
+            configuration_file.write(json.dumps(parsers_configuration))
+            configuration_file.close()
+            logger.logger(level=logger.INFO , type="mongo_parsers", message="Parser ["+parser_name+"] configuration file updated")
+
+
+            # if there is no other parser uses the same folder, then move it to temp folder
+            if len(parsers_configuration) == 0:
+                parser_folder = os.path.join(app.config['PARSER_PATH'],  parser_details['parser_folder'])
+                shutil.move(parser_folder , app.config['PARSER_PATH'] + "/temp/" + parser_details['parser_folder'] )
+                logger.logger(level=logger.INFO , type="mongo_parsers", message="Parser ["+parser_name+"] folder moved to temp folder")
+
             return [True , "Parser ["+parser_name+"] deleted"]
         except Exception as e:
             return [False , "Error: " + str(e)]
+
 
 
 
@@ -400,27 +677,31 @@ class DB_Files:
     # ===================================== Get machine files
     # get all files for specified machine
     def get_by_machine(self, machine_id):
-        machine_files = self.add_machine_in_files(machine_id) # if machine not in DB add it
-        for p in self.collection.find({'_id' : machine_id}):
-            return [True, p]
-        return [False, "Machine ["+machine_id+"] not found"]
-
+        try:
+            machine_files = self.add_machine_in_files(machine_id) # if machine not in DB add it
+            for p in self.collection.find({'_id' : machine_id}):
+                return [True, p]
+            return [True, None ]
+        except Exception as e:
+            return [False, str(e)]
 
     # ===================================== add machine in files
     # inside the files collection, if the machine not defined add it
     def add_machine_in_files(self, machine_id):
-        # === check if the machine exists in files DB, if not exists create it
-        machine_files = None # store the files for specifc machine in DB
-        for m in self.collection.find({'_id': machine_id}):
-            machine_files = m 
-        # if machine not exists, add it
-        if machine_files is None:
-            self.collection.insert({"_id" : machine_id , "files" : []})
+        try:
+            # === check if the machine exists in files DB, if not exists create it
+            machine_files = None # store the files for specifc machine in DB
             for m in self.collection.find({'_id': machine_id}):
-                machine_files = m
-            
-        return machine_files 
-
+                machine_files = m 
+            # if machine not exists, add it
+            if machine_files is None:
+                self.collection.insert({"_id" : machine_id , "files" : []})
+                for m in self.collection.find({'_id': machine_id}):
+                    machine_files = m
+                
+            return [True, machine_files]
+        except Exception as e:
+            return [False, str(e)]
 
     # ===================================== Disable/Enable file processing
     # this function will disable a file from being parsed by specific parser
@@ -455,11 +736,17 @@ class DB_Files:
     def add_file(self, machine_id , file_details):
         try:
             machine_files = self.add_machine_in_files(machine_id)
+            if machine_files[0] == False:
+                return machine_files
+
+            machine_files = machine_files[1]
 
             # === merge the file_details with the files from the database
             # check if the file in DB, if yes get its information
             file_in_db = False
+
             for i in range(0 , len(machine_files['files']) ):
+                
                 if machine_files['files'][i]['file_path'] == file_details['file_path']:
                     file_in_db = True # if file in database
                     parser_in_file = False
@@ -472,7 +759,6 @@ class DB_Files:
 
                     # if parser not exists for the file, add the parser
                     if parser_in_file == False:
-                        print file_details['parsers']
                         machine_files['files'][i]['parsers'].append( file_details['parsers'] )
                     
                     break
@@ -500,29 +786,88 @@ class DB_Files:
     # ===================================== Get file details
     # get parsers details for all parsers by the file path
     def get_by_file_path(self, machine_id , file_path):
-        
-        machine_files = self.add_machine_in_files(machine_id) # if machine not in DB add it
+        try:
+            machine_files = self.add_machine_in_files(machine_id) # if machine not in DB add it
+            if machine_files[0] == False:
+                return machine_files
 
-        for p in self.collection.find({'_id' : machine_id}):
-            for f in p['files']:
-                if f['file_path'] == file_path:
-                    return [True , f]
 
-        return [False , "Error: File ["+file_path+"] not in DB"]
-    
+            for p in self.collection.find({'_id' : machine_id}):
+                for f in p['files']:
+                    if f['file_path'] == file_path:
+                        return [True , f]
+
+            return [True , None]
+        except Exception as e:
+            return [False, str(e)]
     # ===================================== Get parsing progress
     # get the status of parsers for specific machine
     def get_parsing_progress(self, machine_id):
-        machine_files = self.add_machine_in_files(machine_id) # if machine not in DB add it
-        parsers_progress = {}
-        for db_f in self.collection.find({'_id' : machine_id}):
-            for f in db_f['files']:
-                for p in f['parsers']:
-                    if p['parser_name'] not in parsers_progress.keys():
-                        parsers_progress[ p['parser_name'] ] = []
-                    parsers_progress[ p['parser_name'] ].append( {'file' : f['file_path'] , 'status' : p['status']} )
+        try:
+            machine_files = self.add_machine_in_files(machine_id) # if machine not in DB add it
+            if machine_files[0] == False:
+                return machine_files
+
+            parsers_progress = {}
+            for db_f in self.collection.find({'_id' : machine_id}):
+                for f in db_f['files']:
+                    for p in f['parsers']:
+                        if p['parser_name'] not in parsers_progress.keys():
+                            parsers_progress[ p['parser_name'] ] = []
+                        parsers_progress[ p['parser_name'] ].append( {'file' : f['file_path'] , 'status' : p['status']} )
+                        
+            return [True, parsers_progress]
+        except Exception as e:
+            return [False,  str(e)]
+
+    # ==================================== Get files based on status
+    # get the files based on thier status 
+    def get_by_status(self, status):
+        try:
+            files = []
+            for machine in self.collection.find({}):
+                for f in machine['files']:
+                    for p in f['parsers']:
+                        if p['status'] == status:
+                            files.append({
+                                'machine'   : machine,
+                                'file_path' : f['file_path'],
+                                'file_size' : f['file_size'],
+                                'parser'    : p
+                                })
+                        
+            return [True, files]
+        except Exception as e:
+            return [False,  str(e)]
+
+    # ==================================== update file based on task id
+    # update files content based on the provided task id 
+    def update_files_by_task_id(self , machine_id , task_id , status , message):
+        try:
+            machine_files = self.add_machine_in_files(machine_id) # if machine not in DB add it
+            if machine_files[0] == False:
+                return machine_files
+
+            files = {}
+            for machine in self.collection.find({'_id' : machine_id}):
+                changed = False
+                for f in machine['files']:
+                    for p in f['parsers']:
                     
-        return [True, parsers_progress]
+                        if 'task_id' in p.keys() and p['task_id'] == task_id and p['status'] in ['queued' , 'parsing']:
+                            p['status']  = status
+                            p['message'] = message
+                            changed      = True
+                if changed:
+                    up = self.collection.update({'_id':machine_id}, {'$set': machine},upsert=False)
+                    if up:
+                        return [True , "Updated"]
+                    else:
+                        return [False , "Failed to update"]
+
+            return [True, 'Updated']
+        except Exception as e:
+            return [False,  str(e)]
 
 
 # this class contain the files
@@ -534,10 +879,16 @@ def get_db_files():
 # =================================================
 
 
-
-
+try:
+    MClient = MongoClient(DB_IP + ":" + str(DB_PORT) )
+except Exception as e:
+    MClient = None
+    logger.logger(level=logger.ERROR , type="database", message="Failed to access to MongoDB " + str(DB_IP) + ":" + str(DB_PORT) , reason=str(e))
+    
 
 db_cases    = get_db_cases()    # get case database
 db_rules    = get_db_rules()    # get rule database
 db_files    = get_db_files()    # get files databse
 db_parsers  = get_db_parsers()  # get parser database
+db_health   = get_db_health()
+db_groups   = get_db_groups()

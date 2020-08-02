@@ -27,10 +27,10 @@
     <link rel="stylesheet" href="{{url_for('static', filename='botsptree/dist/css/bootstrap-treenav.min.css')}}">
       <link rel="stylesheet" href="{{url_for('static', filename='bootstrap/css/ionicons.min.css')}}">
     <!-- Theme style -->
-    <link rel="stylesheet" href="{{url_for('static', filename='dist/css/AdminLTE.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/css/AdminLTE.css')}}">
     <!-- AdminLTE Skins. Choose a skin from the css/skins
          folder instead of downloading all of them to reduce the load. -->
-    <link rel="stylesheet" href="{{url_for('static', filename='dist/css/skins/_all-skins.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/css/skins/_all-skins.css')}}">
     <link rel="stylesheet" href="{{url_for('static', filename='dist/css/loader.css')}}">
     <!-- iCheck -->
     <link rel="stylesheet" href="{{url_for('static', filename='plugins/iCheck/flat/blue.css')}}">
@@ -47,6 +47,7 @@
     <link rel="stylesheet" href="{{url_for('static', filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css')}}">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <link rel="stylesheet" href="{{url_for('static' , filename='Kuiper.css')}}">
 
   </head>
 
@@ -87,31 +88,32 @@ if(sessionStorage.getItem("sidebar-toggle-collapsed") == null){
 
       <header class="main-header">
         <!-- Logo -->
-        <a href="{{url_for('home_page')}}" class="logo" style="background: lightgray">
+        <a href="{{url_for('home_page')}}" class="logo">
           <!-- mini logo for sidebar mini 50x50 pixels -->
-          <span class="logo-mini"><img src="{{url_for('static', filename='dist/img/logo_k.png')}}" width="42" height="42"></span>
+          <span class="logo-mini"><img src="{{url_for('static', filename='dist/img/logo_k_dark.png')}}" width="42" height="37"></span>
           <!-- logo for regular state and mobile devices -->
-          <span class="logo-lg"><img src="{{url_for('static', filename='dist/img/logo2.png')}}" width="110" height="42"></span>
+          <span class="logo-lg"><img src="{{url_for('static', filename='dist/img/logo_dark.png')}}" width="82" height="42"></span>
         </a>
-        <!-- Header Navbar: style can be found in header.less -->
-        <nav class="navbar navbar-static-top ">
-          <!-- Sidebar toggle button-->
-          <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-            <span class="sr-only">Toggle navigation</span>
-          </a>
-        </nav>
+        
       </header>
       {% include 'admin/admin_sidebar.html' %}
+      
+
+      
+
       <!-- Content Wrapper. Contains page content -->
       <div class="content-wrapper">
         <!-- Content Header (Page header) -->
         <section class="content-header">
           <h1>
-            Administrator Panel
+            <b>Administrator Panel</b>
             <small>{{page_header}}</small>
           </h1>
+
+            
         </section>
-	
+
+
 	
 	<section class="content">
 
@@ -180,20 +182,6 @@ body { padding-right: 0 !important }
 </style>
 
 
-
-<script>
-  
-  // whne click sidebar open/close button, store the information on session storage
-  $('.sidebar-toggle').click(function() {
-    event.preventDefault();
-    if (Boolean(sessionStorage.getItem("sidebar-toggle-collapsed"))) {
-      sessionStorage.setItem("sidebar-toggle-collapsed", "");
-    } else {
-      sessionStorage.setItem("sidebar-toggle-collapsed", "1");
-    }
-  });
-
-</script>
 
 
 

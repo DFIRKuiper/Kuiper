@@ -1497,8 +1497,13 @@
  * Skin: Purple
  * ------------
  */
+
+ body {
+     color: #a7a7ba;
+ }
 .skin-purple .main-header .navbar {
-  background-color: #605ca8;
+  background-color: #26283c;
+  border-bottom: 1px solid #353a53;
 }
 .skin-purple .main-header .navbar .nav > li > a {
   color: #ffffff;
@@ -1538,12 +1543,11 @@
   }
 }
 .skin-purple .main-header .logo {
-  background-color: #555299;
+  background-color: #26283c;
   color: #ffffff;
-  border-bottom: 0 solid transparent;
+  border-right: 1px solid #393e5a;
 }
 .skin-purple .main-header .logo:hover {
-  background-color: #545096;
 }
 .skin-purple .main-header li.user-header {
   background-color: #605ca8;
@@ -1554,7 +1558,8 @@
 .skin-purple .wrapper,
 .skin-purple .main-sidebar,
 .skin-purple .left-side {
-  background-color: #222d32;
+  background-color: #26283c;
+  border-right: 1px solid #353a53;
 }
 .skin-purple .user-panel > .info,
 .skin-purple .user-panel > .info > a {
@@ -1562,36 +1567,39 @@
 }
 .skin-purple .sidebar-menu > li.header {
   color: #4b646f;
-  background: #1a2226;
+  background: #26283c;
 }
 .skin-purple .sidebar-menu > li > a {
   border-left: 3px solid transparent;
+  border-top: 1px dashed #393e5a;
 }
 .skin-purple .sidebar-menu > li:hover > a,
 .skin-purple .sidebar-menu > li.active > a,
 .skin-purple .sidebar-menu > li.menu-open > a {
-  color: #ffffff;
-  background: #1e282c;
+  color: #7571f9;
+  background: #26283c;
 }
 .skin-purple .sidebar-menu > li.active > a {
   border-left-color: #605ca8;
 }
 .skin-purple .sidebar-menu > li > .treeview-menu {
   margin: 0 1px;
-  background: #2c3b41;
+  background: #26283c;
 }
 .skin-purple .sidebar a {
-  color: #b8c7ce;
+    font-weight: bold;
+  color: #8d919b;
 }
 .skin-purple .sidebar a:hover {
   text-decoration: none;
 }
 .skin-purple .sidebar-menu .treeview-menu > li > a {
-  color: #8aa4af;
+  font-weight: normal;
+  color: #898d99;
 }
 .skin-purple .sidebar-menu .treeview-menu > li.active > a,
 .skin-purple .sidebar-menu .treeview-menu > li > a:hover {
-  color: #ffffff;
+  color: #9ba0ad;
 }
 .skin-purple .sidebar-form {
   border-radius: 3px;

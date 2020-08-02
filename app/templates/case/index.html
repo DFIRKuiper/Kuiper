@@ -10,7 +10,6 @@
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
 
-    <link rel="stylesheet" href="{{url_for('static', filename='json_viewer/json-viewer.css')}}">
 
     <!-- Bootstrap 3.3.5 -->
       <link rel="stylesheet" href="{{url_for('static', filename='plugins/select2/select2.min.css')}}">
@@ -32,7 +31,7 @@
     <link rel="stylesheet" href="{{url_for('static', filename='dist/css/AdminLTE.css')}}">
     <!-- AdminLTE Skins. Choose a skin from the css/skins
          folder instead of downloading all of them to reduce the load. -->
-    <link rel="stylesheet" href="{{url_for('static', filename='dist/css/skins/_all-skins.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/css/skins/_all-skins.css')}}">
     <link rel="stylesheet" href="{{url_for('static', filename='dist/css/loader.css')}}">
     <!-- iCheck -->
     <link rel="stylesheet" href="{{url_for('static', filename='plugins/iCheck/flat/blue.css')}}">
@@ -49,8 +48,8 @@
     <link rel="stylesheet" href="{{url_for('static', filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css')}}">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-
-
+    
+    <link rel="stylesheet" href="{{url_for('static' , filename='Kuiper.css')}}">
 
   <script>
 // the purpose of this script is to store the configuration of sidebar, whether it is opened or closed when moving between pages
@@ -88,23 +87,15 @@ if(sessionStorage.getItem("sidebar-toggle-collapsed") == null){
 
       <header class="main-header">
         <!-- Logo -->
-        <a href="{{url_for('home_page')}}" class="logo" style="background: lightgray">
+        <a href="{{url_for('home_page')}}" class="logo">
           <!-- mini logo for sidebar mini 50x50 pixels -->
-          <span class="logo-mini"><img src="{{url_for('static', filename='dist/img/logo_k.png')}}" width="42" height="42"></span>
+          <span class="logo-mini"><img src="{{url_for('static', filename='dist/img/logo_k_dark.png')}}" width="42" height="37"></span>
           <!-- logo for regular state and mobile devices -->
-          <span class="logo-lg"><img src="{{url_for('static', filename='dist/img/logo2.png')}}" width="110" height="42"></span>
+          <span class="logo-lg"><img src="{{url_for('static', filename='dist/img/logo_dark.png')}}" width="82" height="42"></span>
         </a>
-        <!-- Header Navbar: style can be found in header.less -->
-        <nav class="navbar navbar-static-top" role="navigation">
-          <!-- Sidebar toggle button-->
-          <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-            <span class="sr-only">Toggle navigation</span>
-          </a>
-          <div class="navbar-custom-menu">
-		  
-		 </div>
-        </nav>
+        
       </header>
+
       <!-- Left side column. contains the logo and sidebar -->
       {% include 'case/case_sidebar.html' %}
       <!-- Content Wrapper. Contains page content -->
@@ -113,9 +104,15 @@ if(sessionStorage.getItem("sidebar-toggle-collapsed") == null){
         <section class="content-header">
           <h1>
             Case Panel
-            {% if 'casename' in case_details %}
-            <small>{{case_details['casename']}}</small>
+            {% if case_details is mapping %}
+                {% set case_id = case_details['casename'] %}
+            {% else %}
+                {% set case_id = case_details %}
             {% endif %}
+
+            
+            <small>{{case_id}}</small>
+            
           </h1>
         </section>
 	
@@ -178,26 +175,13 @@ if(sessionStorage.getItem("sidebar-toggle-collapsed") == null){
     <!-- AdminLTE for demo purposes -->
     <script src="{{url_for('static', filename='dist/js/demo.js')}}"></script>
     
+    <link rel="stylesheet" href="{{url_for('static' , filename='Kuiper.css')}}">
 
 <style>
 /* fix the issue of padding 15px on body when closing dialogs */
 body { padding-right: 0 !important }
 
 </style>
-
-<script>
-  
-  // whne click sidebar open/close button, store the information on session storage
-  $('.sidebar-toggle').click(function() {
-    event.preventDefault();
-    if (Boolean(sessionStorage.getItem("sidebar-toggle-collapsed"))) {
-      sessionStorage.setItem("sidebar-toggle-collapsed", "");
-    } else {
-      sessionStorage.setItem("sidebar-toggle-collapsed", "1");
-    }
-  });
-
-</script>
 
 
 

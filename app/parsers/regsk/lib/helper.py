@@ -45,10 +45,10 @@ def from_fat(fat):
         stamp[0] = stamp[0] + 1980
         stamp[5] = stamp[5] * 2
         dt_obj = datetime.datetime(stamp[0], stamp[1], stamp[2], stamp[3], stamp[4], stamp[5])
-        in_fat = dt_obj.strftime('%Y-%m-%dT%H:%M:%S.%f')
+        return dt_obj.strftime('%Y-%m-%dT%H:%M:%S.%f')
     except Exception as e:
-        pass
-    return in_fat
+        return None
+    
 
 def strip_control_characters(input):
     if input:

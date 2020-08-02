@@ -22,9 +22,8 @@
   <!-- ================ Starts Parsers tab ===============-->
   <div class="tab-pane show active" id="parsers_tab" role="tabpanel" aria-labelledby="contact-tab">
 
-          <div class="box box-primary">
+          <div class="box">
             <div class="box-header">
-              <h3 class="box-title">Parsers</h3>
               <div class="btn-group  pull-right">
                   <button type="button" class="change_parser_view btn btn-default btn-sm" data-content="parsers_list" title="List parser"><i class="fa fa-list"></i></button>
                   <button type="button" class="change_parser_view btn btn-default btn-sm" data-content="parsers_add" title="Add parser"><i class="fa fa-plus"></i></button>
@@ -32,8 +31,8 @@
               
             </div>
             <!-- parsers list -->
-            <div class="box-body no-padding parsers_content table-responsive" id="parsers_list" style="display:None">
-                <div class=" table-responsive">
+            <div class="box-body no-padding parsers_content" id="parsers_list" style="display:None">
+                <div class="">
                   <table class="table table-striped ">
                     <thead>
                       <tr>
@@ -54,9 +53,11 @@
             <form id="upload-file" method="post" enctype="multipart/form-data">
             <div class="box-body parsers_content" id="parsers_add" style="display:None">
               <div class="row">
+                    <input id="parser_folder_name" class="form-control" type="hidden" />
                   <div class="col-md-6">
                       <!-- parser name -->
-                      <div class="form-group"><label>Parser Name</label>
+                      <div class="form-group"><label>Parser Name</label> <a target="_blank" href="https://github.com/DFIRKuiper/Kuiper/wiki/Add-Custom-Parser" data-toggle="tooltip" data-placement="bottom" title="" data-original-title="Help to add custom parser" style="color:#00c0ef"><i class="fa fa-info-circle"></i></a>
+
                       <input type="text" id="parser_name_field" class="form-control" placeholder="Parser name ...">
                       </div>
                       
@@ -184,7 +185,6 @@
 <!-- AdminLTE for demo purposes -->
 <script src="../../static/dist/js/demo.js"></script>
 
-<script src="../../static/json_viewer/json-viewer.js"></script>
 
 
 <!-- toast notifications -->
@@ -218,7 +218,12 @@ function update_parsers_table(){
     
     success: function(result) {
 
-        var r = JSON.parse(result)['result'];
+        var result_ajax = JSON.parse(result);
+        if(result_ajax['result'] == 'failed'){
+            toast_msg('Failed to get parsers details' , type='error' , header = "Error")
+            return;
+        }
+        var r = result_ajax['data']
         parsers_details = r
         var parsers_list_table = $('#parsers_list_table')
         parsers_list_table.html('')
@@ -231,10 +236,10 @@ function update_parsers_table(){
             imp_fields_html += '<span class="badge">Name</span> ' + r[i]['important_field'][imp]['name'] + ' <span class="badge">Path</span> ' + r[i]['important_field'][imp]['path'] + "<br />"
           }
 
-          var cat_files_html = '<b>'+r[i]['parser_files_categorization_type']+'</b><br />'
+          var cat_files_html = '<b>'+r[i]['parser_files_categorization_type']+'</b> '
           cat_files_vals = (r[i]['parser_files_categorization_values'] != null) ? r[i]['parser_files_categorization_values'].split(",") : []
           for(var v in cat_files_vals){
-            cat_files_html += '<span class="badge bg-light-blue">'+cat_files_vals[v]+'</span> '
+            cat_files_html += '<span class="badge bg-blue">'+cat_files_vals[v]+'</span> '
           }
 
           // add the html to parsers table
@@ -246,18 +251,19 @@ function update_parsers_table(){
               <td>'+r[i]['description']+'</td>\
               <td>\
                   <div class="btn-group">\
+                  <button type="button" class="parsers_edit_parser btn btn-warning btn-xs" data-parsername="'+r[i]['name']+'" title="Edit Parser"><i class="fa fa-fw fa-edit"></i></button>\
                     <button type="button" class="parsers_delete_parser btn btn-danger btn-xs" data-parsername="'+r[i]['name']+'" title="Remove Parser"><i class="fa fa-fw fa-remove "></i></button>\
-                    <button type="button" class="parsers_edit_parser btn btn-warning btn-xs" data-parsername="'+r[i]['name']+'" title="Edit Parser"><i class="fa fa-fw fa-edit"></i></button>\
                   </div>\
               </td>\
           </tr><tr id="parser_details_'+i+'" style="display:none">\
-            <td colspan="6">\
-              <table class="table table-bordered">\
+            <td colspan="6" style="padding: 0;">\
+              <table class="table table_left_header">\
               <tr><td width="200"><b>Name</b></td><td> '+r[i]['_id']+'</td></tr>\
               <tr><td width="200"><b>Interface Function</b></td><td> '+r[i]['interface_function']+'</td></tr>\
               <tr><td width="200"><b>Description</b></td><td> '+r[i]['description']+'</td></tr>\
               <tr><td width="200"><b>Creation Time</b></td><td> '+r[i]['creation_time'].split('T').join(' ').split('.')[0]+'</td></tr>\
               <tr><td width="200"><b>Parser Type</b></td><td> '+r[i]['parser_type_field']+'</td></tr>\
+              <tr><td width="200"><b>Parser Folder</b></td><td> '+r[i]['parser_folder']+'</td></tr>\
               <tr><td width="200"><b>Important Fields</b></td><td> '+imp_fields_html+'</td></tr>\
               <tr><td width="200"><b>Files Categorization</b></td><td> '+cat_files_html+'</td></tr>\
               </table>\
@@ -297,7 +303,9 @@ $('#parsers_list_table').on('click' , '.parsers_edit_parser' , function(){
     $('#parser_type_field').val(parser_detail['parser_type_field'])
     $('#parser_files_categorization_type').val(parser_detail['parser_files_categorization_type'])
     $('#parser_files_categorization_values').val(parser_detail['parser_files_categorization_values'])
+    $("#parser_folder_name").val(parser_detail['parser_folder'])
 
+    
     for(var v in parser_detail['important_field']){
         $(".parser_selection_important_field_name[data-num='"+v+"']").val(parser_detail['important_field'][v]['name'])
         $(".parser_selection_important_field_path[data-num='"+v+"']").val(parser_detail['important_field'][v]['path'])
@@ -328,7 +336,7 @@ $('#parsers_list_table').on( 'click',  '.parsers_delete_parser' , function(){
             toast_msg('Parser ['+parser+'] Removed Successfully')
             update_parsers_table()
           } else {
-            toast_msg('Parser ['+parser+'] Could not be Removed' , type='error' , header = "Error")
+            toast_msg('Parser ['+parser+'] Could not be Removed: ' + r['msg'] , type='error' , header = "Error")
           }
 
   
@@ -378,7 +386,8 @@ $('.change_parser_view').on( 'click' , function(){
       $('#parser_type_field').val('logging_information')
       $('#parser_files_categorization_type').val('extension')
       $('#parser_files_categorization_values').val('')
-      
+      $("#parser_folder_name").val('')
+
       $('.parser_selection_important_field_path').parent().parent().remove()
       $('.parser_selection_add_important_field').click()
 
@@ -422,7 +431,8 @@ $('#add_parser_button_submit').click( function(event){
     formData.append('parser_files_categorization_type' , $('#parser_files_categorization_type').val() )
     formData.append('parser_files_categorization_values' , $('#parser_files_categorization_values').val() )
     formData.append('action' , action ) // add or edit 
-
+    formData.append('parser_folder' , $("#parser_folder_name").val())
+    
     // get all the important fields from the table
     var parser_selection_important_field_name = []
     var parser_selection_important_field_path = []
@@ -466,7 +476,7 @@ $('#add_parser_button_submit').click( function(event){
             async: true,
             dataType: 'json',
             success: function(data, status, request) {
-                if(data['result'] == "error")
+                if(data['result'] == "failed")
                   toast_msg(data['msg'], type = "error" , header = "Error")
                 else
                   toast_msg( (action == 'add') ? 'Parser added' : 'Parser Updated' , type = "info" , header = "Done")

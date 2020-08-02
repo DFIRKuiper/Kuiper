@@ -23,9 +23,9 @@ class TerminalServerClient():
             TerminalServerClient_user_settings_key = hive.find_key(TerminalServerClient_user_settings_path)
             # print('Found a key: {}'.format(TerminalServerClient_user_settings_key.path()))
             if TerminalServerClient_user_settings_key:
+                timestamp = TerminalServerClient_user_settings_key.last_written_timestamp().isoformat()
                 if "Servers" in TerminalServerClient_user_settings_path:
                     for sid_key in TerminalServerClient_user_settings_key.subkeys():
-                        timestamp = TerminalServerClient_user_settings_key.last_written_timestamp().isoformat()
                         key_name = sid_key.name()
                         sid_key_values = iter(sid_key.values())
 
@@ -39,16 +39,16 @@ class TerminalServerClient():
                                 continue
 
                             value_name = value.name()
-                            if "UsernameHint" == value_name:
-                                value_data = value.data()
+                            UsernameHint = "" if "UsernameHint" != value_name else strip_control_characters(value.data())
+                            
+                                
 
                             record = OrderedDict([
                                 ("key_timestamp", timestamp),
                                 ("IP_Address", key_name),
-                                ("User_Name", strip_control_characters(value_data)),
+                                ("User_Name", UsernameHint),
                                 ("@timestamp", timestamp)
                             ])
-            #
                             lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
                 else :
                     sid_key_values = iter(TerminalServerClient_user_settings_key.values())

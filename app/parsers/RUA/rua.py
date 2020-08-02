@@ -456,9 +456,9 @@ def parse_null_delimited_record(ccm_nulldel_match, full_tf):
     return json.loads(json.dumps(app))
 
 
-def parse_xml_record(ccm_xml_match, output_file):
+def parse_xml_record(ccm_xml_match):
     """Parse XML formatted records"""
-
+    dic = {}
     # Find each field of the data format as defined in script header
     dic['AdditionalProductCodes'] = ccm_xml_match.group("additional_product_codes")
     dic['CompanyName'] = ccm_xml_match.group("company_name")

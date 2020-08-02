@@ -15,8 +15,16 @@ class PortForwading():
         self.log_files = log_files
 
     def run(self):
+        hive = get_hive(self.prim_hive,self.log_files)
+        select_key = hive.find_key(u'Select')
+        current_path=''
+        if select_key:
+            current_value = select_key.value(name=u"Current")
+            current_path = u"ControlSet{:03d}".format(current_value.data())
+        else:
+            current_path ='ControlSet001'
         lst =[]
-        PortForwading_user_settings_path = u"CurrentControlSet\\Services\\PortProxy\\v4tov4"
+        PortForwading_user_settings_path = u"\\".join([current_path,u"Services\\PortProxy\\v4tov4"])
         hive = get_hive(self.prim_hive,self.log_files)
         PortForwading_user_settings_key = hive.find_key(PortForwading_user_settings_path)
         for sk in PortForwading_user_settings_key.subkeys():

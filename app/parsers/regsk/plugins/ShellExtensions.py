@@ -20,12 +20,15 @@ class ShellExtensions():
         lst =[]
         "use the SOFTWARE hive to get the result"
         ShellExtensions_user_settings_path = u'Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved'
+        
         hive = get_hive(self.prim_hive,self.log_files)
         ShellExtensions_user_settings_key = hive.find_key(ShellExtensions_user_settings_path)
         if ShellExtensions_user_settings_key:
             sid_key_values = iter(ShellExtensions_user_settings_key.values())
             timestamp = ShellExtensions_user_settings_key.last_written_timestamp().isoformat()
             while True:
+                
+
                 try:
                     value = next(sid_key_values)
                 except StopIteration:
@@ -33,9 +36,14 @@ class ShellExtensions():
                 except Exception as error:
                     logging.error(u"Error getting next value: {}".format(error))
                     continue
-
-                sid_name = value.name()
-                file_name = strip_control_characters(value.data())
+                
+                sid_name= value.name()
+                data    = value.data()
+                if isinstance(data, bytes):
+                    pos = data.find(b'\x00\x00') +1
+                    file_name = strip_control_characters(data[:pos].decode('utf-16'))
+                else:
+                    file_name = strip_control_characters(data)
 
                 record = OrderedDict([
                         ("sid", sid_name),

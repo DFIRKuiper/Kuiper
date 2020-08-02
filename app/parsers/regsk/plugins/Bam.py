@@ -15,9 +15,16 @@ class Bam():
         self.log_files = log_files
 
     def run(self):
-        lst =[]
-        bam_user_settings_path = u"ControlSet001\\Services\\bam\\UserSettings"
         hive = get_hive(self.prim_hive,self.log_files)
+        select_key = hive.find_key(u'Select')
+        current_path=''
+        if select_key:
+            current_value = select_key.value(name=u"Current")
+            current_path = u"ControlSet{:03d}".format(current_value.data())
+        else:
+            current_path ='ControlSet001'
+        lst =[]
+        bam_user_settings_path = u"\\".join([current_path,u"Services\\bam\\UserSettings"])
         bam_user_settings_key = hive.find_key(bam_user_settings_path)
         if bam_user_settings_key:
             for sid_key in bam_user_settings_key.subkeys():

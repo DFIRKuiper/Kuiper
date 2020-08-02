@@ -58,8 +58,10 @@
 
 
       <div class="modal-footer">
-        <button type="button" class="btn btn-default pull-left" data-dismiss="modal">Close</button>
-        <button type="submit" class="btn btn-primary">Save changes</button>
+        <div class="btn-group">
+            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><i class="fa  fa-close"></i> Close</button>
+            <button type="submit" class="btn btn-success"><i class="fa fa-edit"></i> Submit</button>
+        </div>
       </div>
 
 
@@ -85,14 +87,16 @@
 
     <!-- ================== Info/Error Messages =================== -->
     {% if message is not none %}
-            <div class="callout callout-success">
+            <div class="alert alert-dismissible alert-success">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
               <h4>Message</h4>
               <p>{{message}}</p>
             </div>
           {% endif %}
 
           {% if err_msg is not none %}
-            <div class="callout callout-danger">
+            <div class="alert alert-dismissible alert-danger">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
               <h4>Alert</h4>
               <p>{{err_msg}}</p>
             </div>
@@ -101,25 +105,30 @@
 
     <!-- ================== Case cards =================== -->
 
-    {% for c in all_caces%}
+    {% for c in all_cases%}
 
-      <a class=" col-md-3 col-sm-6 col-xs-12">
+      <a class=" col-md-3 col-sm-6 col-xs-12"  style="min-width: max-content;">
         <div class="info-box case_card clickable" data="{{c['casename']}}">
-        {% if c['status'] == "active" %}
-          <span class="info-box-icon bg-aqua"><i class="fa fa-star-o"></i></span>
-        {% elif c['status'] == "not_active" %}
-          <span class="info-box-icon bg-yellow"><i class="fa fa-flag-o"></i></span>
-        {% endif %}
+        
+        
 
           <div class="info-box-content">
 
 
             <span class="info-box-number">{{c['casename']}}</span>
-            <span class="info-box-text">{{c['date']}}</span>
+
+            {% if c['status'] == "active" %}
+                <span class="label pull-right bg-green">Active</i></span>
+            {% elif c['status'] == "not_active" %}
+                <span class="label pull-right bg-yellow">Not Active</i></span>
+                
+            {% endif %}
+            
+            <span class="info-box-text" title="Case creation time"><i class="fa fa-clock-o"></i> {{c['date']}}</span>
             <br />
             <div class="buttons btn-group pull-right">
-              <button type="button" data="{{c['casename']}}" class="edit_case_info float_right btn btn-default btn-sm" data-toggle="modal" data-target="#edit_case_info_modal"><i class="fa fa-gear"></i></button>
-              <button type="button" data="{{c['casename']}}" class="remove_case_info float_right btn btn-default btn-sm" ><i class="fa fa-remove"></i></button>
+              <button type="button" data="{{c['casename']}}" class="edit_case_info float_right btn btn-default btn-xs" data-toggle="modal" data-target="#edit_case_info_modal"><i class="fa  fa-edit"></i> Edit</button>
+              <button type="button" data="{{c['casename']}}" class="remove_case_info float_right btn btn-danger btn-xs" ><i class="fa fa-remove"></i> Remove</button>
             </div>
 
           </div>
@@ -163,7 +172,6 @@
 <!-- AdminLTE for demo purposes -->
 <script src="../../static/dist/js/demo.js"></script>
 
-<script src="../../static/json_viewer/json-viewer.js"></script>
 
 
 
@@ -213,10 +221,19 @@
 .clickable {
   cursor: pointer;
 }
+.clickable:hover, #add_case_info:hover {
+    background: #33354e;
+  cursor: pointer;
+}
+
 .edit_case_info, .remove_case_info{
   position: relative;
   bottom: 15px;
 }
+
+
+
+
 </style>
 
 
@@ -225,20 +242,21 @@
 <script type="text/javascript">
 
 // ======================= Variables
-var all_caces = ({{ all_caces|tojson|safe }}); // cases details 
+var all_cases = ({{ all_cases|tojson|safe }}); // cases details 
 var stop_moving_to_case_page = false; // this used to stop moving to case page when click on the buttons (edit, delete) on case card 
 
 
 // ======================= Listeners
 
 
-
+/*
 // change background color of case cards on hover
 $('.case_card').hover(function(){
-  $(this).addClass('bg-gray')
+  //$(this).css("background-color", "gray");
 }, function(){
-  $(this).removeClass('bg-gray')
+  //$(this).removeStyle("background-color");
 })
+*/
 
 // when click on add case, reset the data on inputs for case dialog
 $('#cases_cards').on('click' , '#add_case_info' , function(){
@@ -253,11 +271,11 @@ $('#cases_cards').on('click' , '#add_case_info' , function(){
 $('#cases_cards').on('click' , '.edit_case_info' , function(){ 
     stop_moving_to_case_page = true;
     var casename = $(this).attr('data')
-    for(var i =0; i< all_caces.length;i++){
-      if(all_caces[i]['casename'] == casename){
-        $('#edit_case_casename').val( all_caces[i]['casename'] );
+    for(var i =0; i< all_cases.length;i++){
+      if(all_cases[i]['casename'] == casename){
+        $('#edit_case_casename').val( all_cases[i]['casename'] );
         $('#edit_case_casename').attr( 'readonly' , true );
-        $('#status_' + all_caces[i]['status'] ).prop('checked' , true)
+        $('#status_' + all_cases[i]['status'] ).prop('checked' , true)
         $('#update_or_create_case').val('update')
       }
     }

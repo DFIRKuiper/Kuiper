@@ -44,33 +44,62 @@ function get_field_from_json_path(json, path) {
 }
 
 
+if (!library)
+   var library = {};
 
+library.json = {
+   replacer: function(match, pIndent, pKey, pVal, pEnd) {
+      var key = '<span class=json-key>';
+      var val = '<span class=json-value>';
+      var str = '<span class=json-string>';
+      var r = pIndent || '';
+      if (pKey)
+         r = r + key + pKey.replace(/[": ]/g, '') + '</span>: ';
+      if (pVal)
+         r = r + (pVal[0] == '"' ? str : val) + pVal + '</span>';
+      return r + (pEnd || '');
+      },
+   prettyPrint: function(obj) {
+      var jsonLine = /^( *)("[\w]+": )?("[^"]*"|[\w.+-]*)?([,[{])?$/mg;
+      return JSON.stringify(obj, null, 3)
+         .replace(/&/g, '&amp;').replace(/\\"/g, '&quot;')
+         .replace(/</g, '&lt;').replace(/>/g, '&gt;')
+         .replace(jsonLine, library.json.replacer);
+      }
+   };
+
+
+   
 // built the details window for windows event information
-function build_windows_event_table(record) {
-    var event_id_link = "http://www.eventid.net/display.asp?eventid=" + record['_source']['Data']["Event"]["System"]["EventID"]["#text"];
-    var open_badge = '<span class="badge bg-light-blue">'
+function build_windows_event_table(record , container) {
+    
+    var open_badge = '<span class="badge bg-blue">'
+
     var system = record['_source']['Data']["Event"]["System"]
+    var event_id_link = "http://www.eventid.net/display.asp?eventid=" + system["EventID"]["#text"];
     var fields = {
-        "EventID": "<a href=\"" + event_id_link + "\">" + system["EventID"]["#text"] + "</a> <a  target=\"_blank\" href=\"" + event_id_link + "\"><i class=\"fa fa-fw fa-external-link\"></i></a>",
-        "Task": ("Task" in system) ? system["Task"] : "",
-        "TimeCreated": ("TimeCreated" in system) ? system["TimeCreated"]["@SystemTime"] : "",
-        "Level": ("Level" in system) ? system["Level"] : "",
-        "ActivityID": ("Correlation" in system) ? system["Correlation"]['@ActivityID'] : "",
-        "RelatedActivityID": ("Correlation" in system) ? system["Correlation"]["@RelatedActivityID"] : "",
-        "Version": ("Version" in system) ? system["Version"] : "",
-        "Opcode": ("Opcode" in system) ? system["Opcode"] : "",
-        "EventRecordID": ("EventRecordID" in system) ? system["EventRecordID"] : "",
-        "Provider_GUID": ("Provider" in system) ? system["Provider"]["@Guid"] : "",
-        "Provider_Name": ("Provider" in system) ? system["Provider"]["@Name"] : "",
-        "Keywords": ("Keywords" in system) ? system["Keywords"] : "",
-        "ProcessID": ("Execution" in system) ? system["Execution"]["@ProcessID"] : "",
-        "ThreadID": ("Execution" in system) ? system["Execution"]["@ThreadID"] : "",
-        "Security_UserID": ("Security" in system) ? system["Security"]["@UserID"] : "",
-        "Computer": ("Computer" in system) ? system["Computer"] : "",
-        "Channel": ("Channel" in system) ? system["Channel"] : ""
+        "EventID"           : "<a href=\"" + event_id_link + "\">" + system["EventID"]["#text"] + "</a> <a  target=\"_blank\" href=\"" + event_id_link + "\"><i class=\"fa fa-fw fa-external-link\"></i></a>",
+        "Task"              : ("Task" in system) ? system["Task"] : "",
+        "TimeCreated"       : ("TimeCreated" in system) ? system["TimeCreated"]["@SystemTime"] : "",
+        "Level"             : ("Level" in system) ? system["Level"] : "",
+        "ActivityID"        : ("Correlation" in system) ? system["Correlation"]['@ActivityID'] : "",
+        "RelatedActivityID" : ("Correlation" in system) ? system["Correlation"]["@RelatedActivityID"] : "",
+        "Version"           : ("Version" in system) ? system["Version"] : "",
+        "Opcode"            : ("Opcode" in system) ? system["Opcode"] : "",
+        "EventRecordID"     : ("EventRecordID" in system) ? system["EventRecordID"] : "",
+        "Provider_GUID"     : ("Provider" in system) ? system["Provider"]["@Guid"] : "",
+        "Provider_Name"     : ("Provider" in system) ? system["Provider"]["@Name"] : "",
+        "Keywords"          : ("Keywords" in system) ? system["Keywords"] : "",
+        "ProcessID"         : ("Execution" in system) ? system["Execution"]["@ProcessID"] : "",
+        "ThreadID"          : ("Execution" in system) ? system["Execution"]["@ThreadID"] : "",
+        "Security_UserID"   : ("Security" in system) ? system["Security"]["@UserID"] : "",
+        "Computer"          : ("Computer" in system) ? system["Computer"] : "",
+        "Channel"           : ("Channel" in system) ? system["Channel"] : ""
     }
-    var html = '<div class="box-header bg-gray disabled color-palette">System</div>';
-    html = html + "<table class=\"table table-condensed\"><tbody>";
+
+    
+    var html = '<div class="box-header disabled color-palette">System</div>';
+    html = html + "<table class=\"table table-condensed table_left_header\"><tbody>";
     for (k in fields) {
 
         if (typeof fields[k] == "undefined")
@@ -84,57 +113,55 @@ function build_windows_event_table(record) {
 
 
 
-    html = html + '<div class="box-header bg-gray disabled color-palette">Data</div>';
-    console.log(JSON.stringify(record['_source']['Data']["Event"]))
+    html = html + '<div class="box-header disabled color-palette">Data</div>';
+
+    html = html + '<pre><code id="event_json_viewer"></code></pre>';
+    
+
+    /*
     for (var key in record['_source']['Data']["Event"]) {
         if (key == "System" || key == "@xmlns")
             continue;
+        var content = JSON.stringify(record['_source']['Data']["Event"][key], null, 4).split('\\n').join('<br />').split("\\t").join("&nbsp;&nbsp;&nbsp;&nbsp;")
+        html = html + "<pre>" + content + "</pre>";
+    }*/
+    container.html(html);
 
-        html = html + "<pre class=\"box-body\">" + JSON.stringify(record['_source']['Data']["Event"][key], null, 4).split('\\n').join('<br />') + "</pre>";
-    }
+    $('#event_json_viewer').html(library.json.prettyPrint(record['_source']['Data']["Event"]));
 
-    return html;
 }
 
 
 // build simple table (record contains key and values)
-function build_simple_artifacts_table(records, searchable = true) {
+function build_simple_artifacts_table(records , container, searchable = true) {
 
-    var open_badge = '<span class="badge bg-light-blue"> '
+    var open_badge = '<span class="badge bg-blue"> '
     results = convert_json_to_list(records['_source'])
-    console.log(results)
 
     var html = '';
-    html = html + "<table class=\"table table-condensed\"><tbody>";
+    html = html + "<table class=\"table table-condensed table_left_header\"><tbody>";
     // var hashes = []
     for (var i = 0; i < results.length; i++) {
-        var failed = results[i][0].split('|').join('.');
+        var field = results[i][0].split('|').join('.');
         var value = results[i][1];
 
         if (searchable)
-            var search_plus = '<a id="' + failed + ':' + value + '" class="clickable add_to_search_query float_right"><i class="fa fa-search-plus"></i></a>'
+            var search_plus = '<a id="' + field + ':' + value + '" class="clickable add_to_search_query float_right"><i class="fa fa-search-plus"></i></a>'
         else
-        // if(failed.contains("Hash"))
-        //   alert('hash found');
             var search_plus = ''
 
-        if (failed.indexOf("Data.Hash") >= 0) {
-            // hashes.push(value);
-            //
-            var positives = '<span class="pull-right-container" > <small data="' + value + '" class="hash_data label bg-red"> waiting... </small> </span>'
-            html += '<tr><td> ' + open_badge + " " + failed + ' </span> ' + search_plus + '</td><td>' + value + positives + '</td></tr>';
-        } else {
-            html += '<tr><td> ' + open_badge + " " + failed + ' </span> ' + search_plus + '</td><td>' + value + '</td></tr>';
-        }
+        
+        html += '<tr><td> ' + open_badge + " " + field + ' </span> ' + search_plus + '</td><td>' + value + '</td></tr>';
+        
 
-        // check_hash(hashes);
+        
     }
 
 
 
     html = html + "</tbody></table>";
 
-    return html;
+    container.html(html);
 
 
 }

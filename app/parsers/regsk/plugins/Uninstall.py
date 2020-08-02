@@ -68,10 +68,9 @@ class Uninstall():
                     Publisher_data = strip_control_characters(Publisher.data())
                 else:
                     Publisher_data=""
-
                 Size = sid_key.value(name=u"Size")
                 if Size:
-                    Size_data = strip_control_characters(Size.data())
+                    Size_data = str(Size.data())
                 else:
                     Size_data =""
 

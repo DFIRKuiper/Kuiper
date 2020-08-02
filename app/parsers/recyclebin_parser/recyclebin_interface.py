@@ -13,7 +13,6 @@ def recyclebin_interface(file, parser):
     except Exception as e:
     	exc_type, exc_obj, exc_tb = sys.exc_info()
     	msg = "[-] [Error] " + parser + " Parser: " + str(exc_obj) + " - Line No. " + str(exc_tb.tb_lineno)
-    	print msg
     	return (None , msg)
 
 

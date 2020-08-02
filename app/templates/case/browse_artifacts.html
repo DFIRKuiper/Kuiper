@@ -12,7 +12,7 @@
         <button type="button" class="close" data-dismiss="modal">&times;</button>
         <h4 class="modal-title"><i class="fa fa-cubes"></i> Artifacts Details</h4>
       </div>
-      <div class="modal-body box-body"><table class="table table-condensed" id="dialog_content"></table></div>
+      <div class="modal-body box-body"><table class="table table-condensed table_left_header" id="dialog_content"></table></div>
     </div>
   </div>
 </div>
@@ -30,64 +30,50 @@
 <div id="content_table" class="col-xs-12" style="overflow-y: scroll;"><!--col-xs-12-->
 
 <div class="box">
+
+
+
 <div class="box-header no-padding">
+<!-- ===================== Title ===================== -->
 
-
+    <h3 class="box-title"> <i class="fa fa-cubes"></i> Artifacts </h3>
 <!-- ===================== Search ===================== -->
 
-    <div class="input-group margin">
+    <div class="input-group">
 
+            
+
+        
         <select id="search_query" multiple data-role="tagsinput" class="form-control"></select>
+        <input id="search_query_simple" />
+
 
         <!-- search buttons -->
         <div class="input-group-btn">
 
+            
             <!-- reset button -->
-            <button type="button" class="btn btn-info btn-flat btn-lg" id="reset_search_terms" title="reset search terms" >
+            <button type="button" class="btn btn-primary btn-flat btn-sm" id="reset_search_terms" title="reset search terms" >
                 <span class="fa fa-undo"></span>
             </button>
 
+            <!-- simple search  -->
+            <button type="button" class="btn btn-primary btn-flat btn-sm" id="simple_search_btn" title="enable/disable simple search" >
+                <span class="fa fa-pencil"></span>
+            </button>
+
+
             <!-- advanced search button -->
-            <button type="button" class="btn btn-info btn-flat btn-lg" id="advance_search_dialog_opener_btn" title="open advanced search">
+            <button type="button" class="btn btn-primary btn-flat btn-sm" id="advance_search_dialog_opener_btn" title="open advanced search">
                 <span class="fa fa-gears"></span>
             </button>
 
-            <button type="button" class="btn btn-info btn-lg" id="search_button">Search <i class="fa fa-search"></i></button>
-        </div>
+            <button type="button" class="btn btn-primary btn-flat btn-sm" id="search_button"><i class="fa fa-search"></i></button>
 
-    </div>
-
-</div>
-<!-- =============================== -->
-
-
-
-<!-- ===================== Advanced search ===================== -->
-<div id="advance_search_dialog" style="display: none">
-    <div class="box-body" style="padding-top: 0; padding-bottom: 0;">
-        <div id="builder"></div>
-        <div class="btn-group">
-            <button type="button" class="btn btn-primary advanced_search_dialog_apply">Apply</button>
-            <button type="button" class="btn btn-default advanced_search_dialog_close">Close</button>
-        </div>
-    </div>
-</div>
-<!-- =============================== -->
-
-
-<!-- ===================== Sample Query Box ===================== -->
-
-    <div class="box-body">
-          <table id="sample_query">
-            <tr>
-              <td width="100%"><div class="text-muted well well-sm no-shadow" id="sample_query_search" style="padding: 0 9px;margin-bottom: 0px;"></div></td>
-              <td>
-
-
-                <button type="button" id="sample_search_confirm_rule" class="btn btn-success pull-right" data-toggle="popover" data-placement="left"data-original-title="">
-                  Save As Rule
-                </button>
-              <div id="sample_search_confirm_popover" class="hide"   data-trigger="focus">
+            <!-- Save search as rule -->
+            <button type="button" class="btn btn-primary btn-flat btn-sm" id="sample_search_confirm_rule" data-toggle="popover" data-original-title="Save search as rule"><i class="fa fa-save"></i></button>
+            
+                <div id="sample_search_confirm_popover" class="hide"   data-trigger="focus">
 
 
 
@@ -109,36 +95,60 @@
                   </div>
                   <br />
                   <div>
-                      <textarea class="form-control" id="sample_search_confirm_popover_rule_description" rows="3" placeholder="description ..."></textarea>
+                      <textarea class="form-control" id="sample_search_confirm_popover_rule_description" rows="3" placeholder="description ..." style="margin-bottom:10px;"></textarea>
                   </div>
+                  
+                </div>
 
-              </div>
 
-              </td>
-            </tr>
-          </table>
+
+        </div>
+
     </div>
 
-</div>
-
+</div>Raw Query: <a type="button" class="btn btn-transparent btn-xs details-arrow-toggle" data-target="sample_query_search"><i class="fa  fa-caret-down"></i></a>
 <!-- =============================== -->
 
+
+
+<!-- ===================== Advanced search ===================== -->
+<div id="advance_search_dialog" style="display: none">
+    <div class="box-body" style="padding-top: 0; padding-bottom: 0;">
+        <div id="builder"></div>
+        <div class="btn-group">
+            <button type="button" class="btn btn-success btn-sm advanced_search_dialog_apply">Apply</button>
+            <button type="button" class="btn btn-default btn-sm advanced_search_dialog_close">Close</button>
+        </div>
+    </div>
+</div>
+<!-- =============================== -->
+
+
+<!-- ===================== Sample Query Box ===================== -->
+    <div id="sample_query_search" style="display:none"></div>
+
+
+
+<!-- =============================== -->
+</div>
 
 <!-- ===================== Artifacts table ===================== -->
         <div class="box">
 
         	<!-- START box Header -->
+            
         	<div class="box-header">
-            <span id="artifacts_list_container">
-                <a data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" class="artifacts_list_button btn btn-default btn-sm dropdown-toggle" > <i class="fa caret"></i></a>
-                <ul id="artifacts_list" class="dropdown-menu artifacts-list-dropdown-toggle" role="menu"></ul>
-            </span>
 
+            <div class="btn-group pull-left" id="artifacts_list_container">
+                <a type="button" class="artifacts_list_button btn bg-blue btn-xs btn-flat dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="List artifacts types" > <i class="fa caret"></i></a>
+                <a type="button" class="btn btn-default btn-xs" id="disable_enable_details_table" title="disable/enable record details"><i class="clickable fa fa-clone"></i></a>
+                <ul id="artifacts_list" class="dropdown-menu artifacts-list-dropdown-toggle" role="menu"></ul>        
+            </div>
+            
 
-
-
-            <h3 class="box-title"> <i class="fa fa-cubes"></i> Artifacts: </h3> total <span id="total_records" class="text-light-blue"> </span>
-            <a id="disable_enable_details_table" title="disable/enable record details"><i class="clickable fa fa-clone pull-right"></i></a>
+            <span style="margin-left: 5px;">Total </span><span id="total_records" class="text-red"> </span>
+             
+            
 
 
                 <div class="input-group float_right" style="width: 400px">
@@ -153,24 +163,22 @@
 
             <!-- table content  -->
             <div class="box-body no-padding" id="table_events_container" style="padding:10px">
-              <table class="table table-bordered table-striped" id="table_events"><tbody ></tbody></table>
+              <table class="table table-bordered" id="table_events"><tbody ></tbody></table>
             </div>
         </div>
 
-
+        <!-- ===================== paging box ===================== -->
+        <div>
+                    
+            <div class="dataTables_info vertical-center pull-left"  >Number of pages <span class="label bg-yellow add_artifacts_machine_name_title"><span id="number_of_pages"></span></span></div>
+            <div class="dataTables_paginate paging_simple_numbers pull-right"><ul class="pagination" id='paging'></ul></div>
+        </div>
+        <!-- =============================== -->
 <!-- =============================== -->
 
 
-        <!-- ===================== paging box ===================== -->
-        <div class="box">
-            <div class="box-footer clearfix">
-                <div>
-                  <span class="dataTables_info"  role="status" aria-live="polite">Number of pages <span id="number_of_pages" class="text-light-blue"></span></span>
-                  <div class="dataTables_paginate paging_simple_numbers pull-right"><ul class="pagination" id='paging'></ul></div>
-                </div>
-            </div>
-          </div>
-        <!-- =============================== -->
+        
+        
 
 
   </div>
@@ -186,9 +194,13 @@
     <div class="box">
         <div class="box-header">
           <h3 class="box-title"><i class="fa fa-cubes"></i> Record Details</h3>
-          <button type="button" class="btn btn-box-tool float_right" id="remove_record_details_block"><i class="fa fa-times"></i></button>
+          <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" id="remove_record_details_block"><i class="fa fa-times"></i></button>
+          </div>
+
+          
         </div>
-        <div class="box-body no-padding">
+        <div class="box-body">
           <div id="record_details">  </div>
         </div>
     </div>
@@ -219,7 +231,7 @@
 <!-- AdminLTE for demo purposes -->
 <script src="../../static/dist/js/demo.js"></script>
 
-<script src="../../static/json_viewer/json-viewer.js"></script>
+
 
 
 <!-- Select2 -->
@@ -259,18 +271,34 @@
 <!-- This will take the AdminLTE input style and use it with the tags input style -->
 <style type="text/css">
 /* START ====== tagsinput */
+.tag a {
+    color: #fff;
+}
 .bootstrap-tagsinput {
-    display: table-cell;
+    display:table-cell;
     z-index: 2;
     width: 100%;
 
-    height: 44px;
+    height: 32px;
     padding: 4px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: 1px solid #393e5a;
+    border-radius: 0px;
+    background-color: #2a2d4b;
+    
 }
+
+.div_focus{
+    border: 1px solid #3c8dbc;
+}
+
+.bootstrap-tagsinput input{ 
+    color: #e9e9e9;
+}
+
+
 .bootstrap-tagsinput[disabled] {
-  background: #eee
+  background: #1e1d2f;
+  cursor:default;
 }
 .bootstrap-tagsinput[disabled] input{
   visibility:hidden !important;
@@ -278,8 +306,25 @@
 .bootstrap-tagsinput[disabled] > span > span{
   display:none !important;
 }
+
+
 /* END ====== tagsinput */
 
+#search_query_simple{
+    display:none;
+    z-index: 2;
+    width: 100%;
+
+    height: 32px;
+    padding: 4px;
+    border: 1px solid #393e5a;
+    border-radius: 0;
+    color: #e9e9e9;
+}
+#search_query_simple:focus,
+#search_query_simple:active{
+    border: 1px solid #3c8dbc;
+}
 
 .float_right {
   float: right;
@@ -384,19 +429,29 @@
     border: none;
   }
 
-  .modal-header {
-    border-bottom-color: #EEEEEE;
-    background-color: #FAFAFA;
-  }
 
   /* -------- Date picker ----------- */
 
 /* ---------- Popover -----------*/
 .popover {
   max-width: 400px;
+  width:400px;
+  right: 100px;
+  left:0;
 }
 .popover-content {
   margin-right: 30px;
+}
+/* ---------------- search sample ---------------- */
+
+#sample_search_confirm_rule{
+}
+
+#sample_query_search{
+    /*height: 34px*/
+    background-color: #292f42;
+    border: 1px solid #393e5a;
+    padding: 0 5px ;
 }
 
 </style>
@@ -417,6 +472,7 @@ var record_important_fields = ({{ CASE_FIELDS|tojson|safe }});  // this will use
 
 
 var enable_record_table     = true;                 // if true then the right side artifact record will not be opened on click the tr record
+var is_record_tr_clicked    = false                 // store wheither there are a raw in event_table clicked or not
 sort_asc_icon_class         = "fa-sort-amount-asc"  // icon of sort asc
 sort_desc_icon_class        = "fa-sort-amount-desc" // icon of sort desc
 sort_disabled_icon_class    = "fa-unsorted"         // icon of data unsorted
@@ -426,7 +482,9 @@ var current_clicked_sort_by = "";                   // field that is being used 
 // search query
 var finished_init_tags        = false; // true if all search query tags input initialization done (used when adding rule tag and machine name, etc.)
 var lock_adding_tag           = false; // locker for adding input tags (used to stop adding tag untill previous tag added)
-var search_adv_search_enabled = false; // if true, ignore simple search and use advanced search only
+var search_type               = 'tagsinput' // type of search (tagsinput|simple|advance)
+
+
 
 
 // store the current sort by values
@@ -444,10 +502,8 @@ var fields_mapping  = ({{ fields_mapping|tojson|safe }}); // this will contain a
 var query_builder_v = $('#builder') // contain the query builder html (place to select query terms on advanced search)
 
 
-
 // datetime picker
 var datetime_range_search   = null; // contain the selected value from date range
-var timestamp_range_search  = null; // store the tag id from search bar that contain the date range
 
 
 var search_query            = JSON.parse( decodeHtml('{{search_query}}').split('\\"').join('"') );  // get predefined search query from the request
@@ -466,7 +522,7 @@ var search_query_tagsinput  = $('#search_query');                               
 function resizeDiv(){
 	var hight = ($(window).height() / 100 ); // 70% of the window size
 	$('#record_details').css('height', (hight*74) + 'px');
-	$('#content_table').css('height' , (hight*81) + 'px')
+	$('#content_table').css('height' , (hight*87) + 'px')
 }
 
 
@@ -527,7 +583,7 @@ function query_builder_fun() {
                     label: fields_mapping[i]['field_path'],
                     type: 'datetime',
                     size: 40,
-                    operators: ['equal', 'not_equal', 'contains', 'not_contains']
+                    operators: ['equal', 'not_equal']
                 })
                 break;
             case "select":
@@ -557,7 +613,6 @@ function query_builder_fun() {
         plugins: ['bt-tooltip-errors'],
         filters: filters_list
     }
-
 
     query_builder_v.queryBuilder(options)
     $('.query-builder .rule-filter-container .form-control').select2()
@@ -692,15 +747,24 @@ function get_sort_icon(field){
 
 // this used to update the search records and information
 function search_button_click(){
-	  search_json     = build_elasticsearch_query_json();
+	
 
-    // get the elasticsearch query string
-    var search_es   = build_search_query(search_json);
+    // if the search type not simple, then build the elasticsearch query 
+    if(search_type != 'simple'){
+        search_json     = build_elasticsearch_query_json();
 
+        // get the elasticsearch query string
+        var search_es   = build_search_query(search_json);
+    }
+    else {
+        // if the search type is simple, then take it as is
+        var search_es = $("#search_query_simple").val()
+    }
+    
 
     change_sample_query_search(search_es);          // change the sample query text
     reload_records(search_es , 0 , query_sort_by ); // request the new results
-    reload_artifacts_list(search_es);
+    //reload_artifacts_list(search_es);
 }
 
 
@@ -713,7 +777,7 @@ function search_button_click(){
 
 // used to update a tag to the search query tags
 function update_search_query_input_tag(tag , id, option="contains"){
-  if(tag.split('|').length == 1 && lock_adding_tag == false && search_adv_search_enabled == false){
+  if(tag.split('|').length == 1 && lock_adding_tag == false && search_type == 'tagsinput'){
       lock_adding_tag = true; // lock adding new item tags input
 
       // search for the tag label
@@ -751,7 +815,7 @@ function update_search_query_input_tag(tag , id, option="contains"){
 
 // used to add a tag to the search query tags
 function add_search_query_input_tag(tag , option="contains"){
-    if(tag.split('|').length == 1 && lock_adding_tag == false && search_adv_search_enabled == false){
+    if(tag.split('|').length == 1 && lock_adding_tag == false && search_type == 'tagsinput'){
         lock_adding_tag = true; // lock adding new item tags input
 
         search_query_tagsinput.tagsinput('add' , search_query_tagsinput.val().length + "|" + tag + "|" + option ); // trigger change to search query tag input
@@ -795,13 +859,14 @@ function change_sample_query_search(search_es){
 
 // this will rebuild the paging numbers and total results in the page
 function rebuild_paging(wanted_page , total_records){
+    
+    
       // edit the paging
       $('#total_records').text( total_records );
       var total_pages = Math.floor( total_records / 30 ) + 1;
       $('#number_of_pages').text(total_pages);
-
       var paging_html = "";
-
+      
       if(wanted_page > 0)
         paging_html = paging_html + '<li class="paginate_button"><a id="'+0+'">« First</a></li>';
       
@@ -809,7 +874,7 @@ function rebuild_paging(wanted_page , total_records){
           if(p < 0)
             continue;
           if( p == wanted_page)
-              paging_html = paging_html + '<li class="paginate_button disabled"><a  id="'+p+'" class="bg-aqua color-palette">'+(p+1)+'</a></li>';
+              paging_html = paging_html + '<li id="current_page" class="paginate_button disabled"><a  id="'+p+'" class="color-palette">'+(p+1)+'</a></li>';
           else 
               paging_html = paging_html + '<li class="paginate_button" ><a  id="'+p+'">'+(p+1)+'</a></li>';
       }
@@ -842,20 +907,21 @@ function rebuild_records(records){
     new_tr +=  '<th style="width: 150px">Time Stamp \
       <a data="Data.@timestamp" class="clickable float_right fa ' + get_sort_icon("Data.@timestamp") + ' clicked_sort" style="margin: 3px;"></a></th>';
 
-    new_tr +=  '<th style="width: 120px">Data Type <a data="data_type" class="clickable float_right fa ' + get_sort_icon("data_type") + ' clicked_sort"></a></th>';
+    new_tr +=  '<th style="width: 150px">Data Type <a data="data_type" class="clickable float_right fa ' + get_sort_icon("data_type") + ' clicked_sort"></a></th>';
     new_tr +=  '<th style="width: 150px">Machine <a data="machine" class="clickable float_right fa ' + get_sort_icon("machine") + ' clicked_sort"></a></th>';
     new_tr +=  "<th>Details</th>";
     new_tr +=  "</tr>";
     //record_important_fields
     for(var i = 0 ; i < records.length ; i++){
-        var timestamp = records[i]['_source']['Data']['@timestamp']
-        var hasTag = ("tag_id" in records[i]['_source']) ? true : false ;
-
+        var timestamp   = records[i]['_source']['Data']['@timestamp']
+        var hasTag      = ("tag_id" in records[i]['_source'])
+        var tag_id_attr = hasTag ? 'tag_id="'+records[i]['_source']['tag_id']+'"' : "" ;
+        
         new_tr += '<tr class="event_record_click" id="'+i+'" data-type="'+records[i]['_source']['data_type']+'">';
         new_tr +='<td>\
             <a><li data-id="'+records[i]['_id']+'" class="go_graph fa fa-code-fork clickable"></li></a>\
             <a data-toggle="modal" data-target="#record_details_dialog" class="record_details_dialog_click" style="cursor: pointer" id="'+i+'"><li class="fa  fa-caret-square-o-right" ></li></a>\
-            <a><li data="just_tag" data-time="'+timestamp+'" id="'+records[i]['_id']+'" class="'+((hasTag) ? 'text-red' : '' )+' add_tag fa fa-tag clickable"></li></a>\
+            <a><li '+tag_id_attr+' data="just_tag" data-time="'+timestamp+'" id="'+records[i]['_id']+'" class="'+((hasTag) ? 'text-red' : '' )+' record_tag fa fa-tag clickable"></li></a>\
             </td>';
 
 
@@ -896,12 +962,14 @@ function rebuild_records(records){
             var html_field_options = '<span class="dropdown">\
                 <a class="fields-dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="clickable bg-light-blue fa fa-filter"></span></a>\
                 <ul class="dropdown-menu">\
-                <li class="clickable" data="item" id><a id="'+search_field_path+':'+escapeHtml(field_value)+'" class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
-                <li class="clickable" data="item" id><a id="'+search_field_path+':'+escapeHtml(field_value)+'|excludes" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Excludes</a></li>\
+                <li class="clickable" data="item" id><a id="'+search_field_path+':'+escapeHtml(field_value)+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
+                <li class="clickable" data="item" id><a id="'+search_field_path+':'+escapeHtml(field_value)+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
+                <li class="clickable" data="item" id><a id="'+search_field_path+':'+escapeHtml(field_value)+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
+                <li class="clickable" data="item" id><a id="'+search_field_path+':'+escapeHtml(field_value)+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
                 <li class="clickable" data="item" id><a data="'+search_field_path+'" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
                 </ul>\
               </span>';
-            td_details += ' <span class="badge bg-light-blue"> ' + html_field_options + imp_rec[j][0]+'</span> ' + field_value;
+            td_details += ' <span class="badge bg-blue"> ' + html_field_options + imp_rec[j][0]+'</span> ' + field_value;
         }
 
         new_tr +='<td>'+ td_details + '</td>';
@@ -912,12 +980,19 @@ function rebuild_records(records){
 
 
     // on click add tag button
-    $('a').on( 'click' , 'li.add_tag' , function(){
-        var id = $(this).attr('id');
-        var tag = $(this).attr('data');
-        var time = $(this).attr('data-time');
-
-        add_doc_tag(id , tag , time , $(this))
+    $('a').on( 'click' , 'li.record_tag' , function(){
+        var id          = $(this).attr('id');
+        var tag_content = $(this).attr('data');
+        var time        = $(this).attr('data-time');
+        var tag_id      = $(this).attr('tag_id')
+        if(tag_id != undefined){
+            // if it has tag, then remove it
+            del_tag(id , tag_id , $(this))
+        } else {
+            // if it does not has tag, then add tag
+            add_doc_tag(id , tag_content , time , $(this))
+        }
+        
 
     })
 
@@ -937,6 +1012,34 @@ function rebuild_records(records){
 
 
 
+// function used to delete tag from record through ajax
+function del_tag(record_id , tag_id , element){
+
+    $.ajax({
+        type : 'POST',
+        url : "/case/{{case_details['casename']}}/timeline_delete_tag_ajax",
+        contentType: 'application/json;charset=UTF-8',
+        data : JSON.stringify({'data': {"tag_id":tag_id , 'record_id' : record_id } }),
+        success: function(result) {
+          var result = JSON.parse(result);
+          if(result['result'] == "successful"){
+              
+              element.removeClass('text-red');
+              element.removeAttr('tag_id');
+
+              toast_msg("Deleted tag: ["+tag_id+"]");
+          } else{
+              toast_msg(result['data']  , type = 'error' , header = 'Error')
+          }
+            
+              
+        },  
+        error: function(error){
+          toast_msg("Connection Failed" , icon = 'error' , heading = 'Error')
+        }
+    });
+}
+
 
 
 
@@ -950,11 +1053,14 @@ function add_doc_tag(doc_id , tag_content , timestamp , element){
     data : JSON.stringify({'data': {"tag":tag_content , 'doc_id' : doc_id , 'time': timestamp } }),
     success: function(result) {
       var result = JSON.parse(result);
-      if(result['result'] == "failed")
-          toast_msg('Failed to add tag' , type='error' , header='Error')
-      else{
+      if(result['result'] == "successful"){
+
           toast_msg("Added tag: ["+tag_content+"] to " + doc_id)
           element.addClass('text-red');
+          element.attr('tag_id' , result['tag_id'])
+      
+      } else{
+          toast_msg(result['data'] , type='error' , header='Error')
       }
     },
     error: function(error){
@@ -999,48 +1105,14 @@ function escapeHtml(unsafe) {
 
 
 
-// reload the artifacts list statistics (data_type and its counts list)
-function reload_artifacts_list(search){
-  var search  = (search == "") ? "" : 'AND (' + search+ ')'
-  search      = '!(data_type:"tag") ' + search; // exclude tags search
-
-  $.ajax({
-    type : 'POST',
-    url : "/case/{{case_details['casename']}}/browse_artifacts_list_ajax",
-    contentType: 'application/json;charset=UTF-8',
-    data : JSON.stringify({'data': {'query' : search } }),
-
-    success: function(result) {
-        var r = JSON.parse(result)['res'];
-        if( r == "no such index"){
-            toast_msg("Index not found" , type='error' , header="Error")
-        } else {
-
-            var list = ""
-            for(var i = 0 ; i <r.length ; i++)
-              list += '<li class="clickable"><a id="data_type:'+r[i]['key']+'" class="clickable add_to_search_query">'+r[i]['key']+' <span class="badge bg-red">'+r[i]['doc_count']+'</span></a></li>'
-            
-            $('#artifacts_list').html(list);
-            $('.artifacts_list_button').dropdown()
-        }
-    },
-    error: function(error){
-      toast_msg("Connection Failed" , type='error' , header="Error")
-    }
-  });
-}
-
-
-
-
-
-
 
 
 // request records data through ajax
 function reload_records(search , wanted_page , sort_by = query_sort_by ){
+    
   var search  = (search == "") ? "" : 'AND (' + search+ ')'
   search      = '!(data_type:"tag") ' + search;
+
   $.ajax({
     type : 'POST',
     url : "/case/{{case_details['casename']}}/browse_artifacts_ajax",
@@ -1050,18 +1122,38 @@ function reload_records(search , wanted_page , sort_by = query_sort_by ){
 
 
       var r = JSON.parse(result);
-
       var total_records = parseInt(r['res_total']);
           
       // if there is no index print error message
       if( "res_records" in r && r["res_records"] == "no such index")
           toast_msg("No such index, try process the artifacts" , type='error' , header="Warning")
       else {
+          // build paging table
           rebuild_paging(wanted_page , total_records);
           ajax_records = r['res_records']
+
+          // build records table
           rebuild_records(ajax_records);
+          
+          // build data type drop-down list 
+          console.log(r)
+          
+          var list = ""
+          if(r['res_total'] != 0){
+            var aggs = r['aggs']
+            for(var i = 0 ; i <aggs.length ; i++)
+                list += '<li class="clickable"><a id="data_type:'+aggs[i]['key']+'" class="clickable add_to_search_query">'+aggs[i]['key']+' <span class="badge bg-red">'+aggs[i]['doc_count']+'</span></a></li>'
+          }
+          $('#artifacts_list').html(list);
+          $('.artifacts_list_button').dropdown()
+        
+          if (is_record_tr_clicked){
+                // click the first raw in the table
+                $("#table_events tr#0").click()
 
-
+                //$("html, body").animate({ scrollTop: 0 }, "slow");
+                $("#content_table").animate({ scrollTop: 0 }, "slow");
+          }
           // if there is no record, print warning message
           if(total_records == 0)
               toast_msg("Empty results" , type='error' , header="Warning")
@@ -1200,21 +1292,24 @@ function build_search_query(json_query){
                     val = "(" + get_rule_by_name(val)['rule'] + ")"
             }
 
+
+            
             if(val == 'null')
                 val = "*"
             
-            // check if the search for a range []
-            else if( (operator == "==" || operator == "!=" ) && !(val.startsWith("[") && val.endsWith("]") ) && key != 'rule' )
-              val = '"'+val+'"'
-              
 
+            // check if the search for a range [], then dont not add the value inside ""
+            if ( (operator == "==" || operator == "!=") && !(val.startsWith("[") && val.endsWith("]")) && key != 'rule')
+                val = '"' + val + '"'
+              
+              
             // check if the search for general terms such as string or rule
             if( key == "string" || key == 'rule')
                 key = "";
             else
-                key = key + ( (is_val_has_spec_chars) ? ".keyword" : "" ) + ":"
+                key = key + ":"
 
-              
+
             // build the query string based on the operator
             switch(operator){
                 case "==":
@@ -1253,7 +1348,9 @@ function build_search_query(json_query){
 
 // this function will return the query json format, to be used later to build the elasticsearch query string
 function build_elasticsearch_query_json(){
-    if(search_adv_search_enabled == true){
+
+    // if the search type is advance convert it to elasticsearch query
+    if(search_type == 'advance'){
 
         // convert the advanced query builder into the elasticsearch custom json query
         es_j = get_es_json_query( get_advanced_search_query() )
@@ -1272,12 +1369,16 @@ function build_elasticsearch_query_json(){
         var val                   = item[1].substring( index_of_first_colon +1 );
         var v                     = {};
         var colmn_name            = (col == "") ? "string" : col;   // if column field not specified
-        var column_value          = val;                            // if column field not speci
+        var column_value          = val;                           
 
-        if(item[2] == "excludes")
-            colmn_name = '!=' + colmn_name;
+        if(item[2] == "not_contains")
+            colmn_name = '!~' + colmn_name;
         else if(item[2] == 'contains')
+            colmn_name = '=~' + colmn_name;
+        else if(item[2] == 'equal')
             colmn_name = '==' + colmn_name;
+        else if(item[2] == 'not_equal')
+            colmn_name = '!=' + colmn_name;
 
         v[colmn_name]   = column_value;
 
@@ -1301,36 +1402,75 @@ function build_elasticsearch_query_json(){
 
 
 // when click the up/down key on keyboard move clicked record up/down
-function keydown_record_up_down(event){
-    var trs = $('#table_events').find('tr.disabled');
-    if(typeof trs.attr('id') == 'undefined')
-      return;
-
-    var tr_id = trs.attr('id')
+function keydown_record_navegation(event){
+    
+    
     switch(event.which) {
 
+        case 37: //left
+        case 39: // right
+
+            // if the focused element not the body, dont navigate in records
+            if(document.activeElement.tagName != "BODY")
+                return;
+            
+            //event.preventDefault();
+            if(event.which == 37)
+                var wanted_page_a     = parseInt( $("#current_page").prev().find('a').attr('id') )
+            else
+                var wanted_page_a     = parseInt( $("#current_page").next().find('a').attr('id') )
+
+            if (isNaN( wanted_page_a ))
+                return;
+            navegate_to_page(wanted_page_a)
+
+            break;
+
+
+
         case 38: // up
-            tr_id--;
-            var prev = $('#table_events').find('tr#'+tr_id);
-            if( typeof prev == 'undefined')
-              return;
-
-            prev.click()
-
-            break;
-
-
         case 40: // down
-            tr_id++;
+
+            // if the focused element not the body, dont navigate in records
+            if(document.activeElement.tagName != "BODY")
+                return;
+
+
+            var trs = $('#table_events').find('tr.disabled');
+            if(typeof trs.attr('id') == 'undefined')
+                return;
+            var container = document.getElementById('content_table');
+            
+            event.preventDefault();
+
+            var tr_id = trs.attr('id')
+
+            
+            if(event.which == 38){
+                // if up key 
+                tr_id--;
+                container.scrollBy({top: -25,left: 0,behavior: 'smooth'});
+            } else {
+                // if down key
+                tr_id++;
+                container.scrollBy({top: 25,left: 0,behavior: 'smooth'});
+            }
+            
+            
             var next = $('#table_events').find('tr#'+tr_id);
-            if( typeof next == 'undefined')
+            if(next.length == 0){
+                var key = (event.which == 38) ? 37 : 39;
+                document.dispatchEvent(new KeyboardEvent('keydown',{'keyCode':key}));
               return;
-
+            }
+            
             next.click()
-
             break;
 
-        default: return; // exit this handler for other keys
+
+
+        default: 
+            return; // exit this handler for other keys
     }
 }
 
@@ -1340,14 +1480,60 @@ function keydown_record_up_down(event){
 
 
 
+// function that wil reset the search terms
+function reset_search_terms_func(){
+	search_query_tagsinput.tagsinput('removeAll');
+	query_builder_v.queryBuilder('reset')
+    search_type = 'tagsinput';
 
+    if($('#advance_search_dialog_opener_btn').hasClass('btn-success')){
+        $('#advance_search_dialog_opener_btn').addClass('btn-primary')
+        $('#advance_search_dialog_opener_btn').removeClass('btn-success')
+        $('#advance_search_dialog .advanced_search_dialog_close').click() // fadeout the advanced search box
+    }
+    
 
+    if($('#simple_search_btn').hasClass('btn-success')){
+        $('#simple_search_btn').addClass('btn-primary')
+        $('#simple_search_btn').removeClass('btn-success')
+        $('.bootstrap-tagsinput').show()
+        $("#search_query_simple").hide()
+    }
+    
+    search_button_click()
 
+    // enable the simple search tags
+    $('.bootstrap-tagsinput').removeAttr('disabled')
+}
 
 
 
 
 // ====================================== Listeners
+
+// this handle the arrow button to display/hide details 
+$(document).on('click' , '.details-arrow-toggle' , function(e){
+    var arrow = $(this)
+    var target = $("#" + arrow.data('target'))
+    var is_active = arrow.hasClass('is-active')
+
+    target.slideToggle({
+        duration: 200,
+        start: function(){
+            if(is_active){
+                arrow.removeClass("is-active")
+                arrow.html('<i class="fa  fa-caret-down"></i>')
+            } else {
+                arrow.addClass("is-active")
+                arrow.html('<i class="fa  fa-caret-up"></i>')
+            }
+        }
+    })
+})
+
+
+
+
 
 $(document).ready(function(){
 	resizeDiv(); // resize the record_details and content_table
@@ -1367,12 +1553,20 @@ window.onresize = function(event) {
 
 // this function will handle the popover dialog when user click save as rule button
 $(function () {
+
   $('#sample_search_confirm_rule').popover({
-        placement: 'left',
-        title: 'Save search as rule',
-        html:true,
-        content:  $('#sample_search_confirm_popover').html(),
-  })
+                 placement   : 'bottom',
+                 title       : 'Save search as rule',
+                 html        : true,
+                 content     : $('#sample_search_confirm_popover').html(),
+              })
+    
+    // set the position of the popover
+  $(document).on('click' , '#sample_search_confirm_rule' , function(e){
+                  $('.popover').css("left" , "-230px");
+                  $('.popover.bottom>.arrow').css('left' , "94%")
+              })
+
 })
 
 
@@ -1413,7 +1607,7 @@ $(document).on('click', function (e) {
 
 
 // if save as rule button clicked, add the rule to dmango
-$('#sample_query').on('click' , '.sample_search_save_as_rule' , function(){
+$(document).on('click' , '.sample_search_save_as_rule' , function(){
     var query_search_content = $('#sample_query_search h5 #sample_query_search_content').text().trim()
 
     // check if the rule query is empty
@@ -1486,28 +1680,50 @@ $('#search_button').click(function(){
 
 // on click open advanced search button
 $('#advance_search_dialog_opener_btn').click(function(){
+    reset_search_terms_func()
+    $('.bootstrap-tagsinput').attr('disabled' , 'disabled')
     $('#advance_search_dialog').fadeIn()
+    if($('#advance_search_dialog').is(":visible")){
+        $(this).removeClass('btn-info')
+        $(this).addClass('btn-success')
+    } else {
+        $(this).removeClass('btn-success')
+        $(this).addClass('btn-info')
+    }
 })
 
 
+// on click the simple search query button 
+$('#simple_search_btn').click(function(){
+    reset_search_terms_func()
+    
+    if($(this).hasClass('btn-primary')){
+        // enable simple search
+        
+        $(this).removeClass('btn-primary')
+        $(this).addClass('btn-success')
+        $("#search_query_simple").show()
+        $("#search_query_simple").val("")
+        $('.bootstrap-tagsinput').hide()
+        search_type = 'simple'
+        $('.bootstrap-tagsinput').attr('disabled' , 'disabled')
+        
+    }
+})
 
 
-
+// if the key Enter pressed, then trigger search button
+$("#search_query_simple").keypress(function(event){
+    // when entering the Enter key then trigger the search
+    if(event.which == 13 ){
+        search_button_click()                               // update the search 
+    }
+})
 
 
 // if reset search terms clicked, remove all searches from advanced search and simple search (input tags)
-$('#reset_search_terms').click(function(){
-	search_query_tagsinput.tagsinput('removeAll');
-	query_builder_v.queryBuilder('reset')
-	search_button_click()
-  search_adv_search_enabled = false;
-
-  $('#advance_search_dialog_opener_btn').addClass('btn-info')
-  $('#advance_search_dialog_opener_btn').removeClass('btn-success')
-  // enable the simple search tags
-  $('.bootstrap-tagsinput').removeAttr('disabled')
-  $('#advance_search_dialog .advanced_search_dialog_close').click() // fadeout the advanced search box
-
+$("#reset_search_terms").on('click' , function(){
+    reset_search_terms_func()
 })
 
 
@@ -1538,7 +1754,7 @@ $('#advance_search_dialog').on( 'click' , '.advanced_search_dialog_apply' , func
   		return;
   	}
 
-  	search_adv_search_enabled = true; // enable adv search
+  	search_type = 'advance'; // enable adv search
 
 
     // change the color of advance_search_dialog_opener_btn button
@@ -1594,23 +1810,47 @@ $('#search_query').on('tagOptions' , function( event ){
 
 
     var menu_actions = '\
+            <li class="tagOptions_action_equal_clicked" data="item"><a><span class="fa fa-search-plus" href="#"></span> Equals</a></li>\
     		<li class="tagOptions_action_contains_clicked" data="item"><a><span class="fa fa-search-plus" href="#"></span> Contains</a></li>\
-            <li class="tagOptions_action_excludes_clicked" data="item"><a><span class="fa fa-search-minus" href="#"></span> Excludes</a></li>';
+            <li class="tagOptions_action_not_contains_clicked" data="item"><a><span class="fa fa-search-minus" href="#"></span> Not Contains</a></li>\
+            <li class="tagOptions_action_not_equal_clicked" data="item"><a><span class="fa fa-search-minus" href="#"></span> Not Equal</a></li>';
     dropdown_menu.html(menu_actions);
     dropdown_menu.dropdown('toggle');
 
     if(typeof dropdown_menu.attr('data') === 'undefined'){ // this check to avoid define the clicking functions multiple times
+        
 
-        // action "excludes"
-        dropdown_menu.on('click' , 'li.tagOptions_action_excludes_clicked' , function(){
+        // action "equals"
+        dropdown_menu.on('click' , 'li.tagOptions_action_equal_clicked' , function(){
+
+            // change the item content to <item_id>|<item_content>|exceludes
+            var item          = html_item.data('item')
+            var item_parts    = item.split('|');
+            var new_item      = item_parts[0] + "|" + item_parts[1] + "|equal";
+            search_query_tagsinput.tagsinput('change_tag' , [ item ,new_item ]);  // change the value of the tag
+            search_button_click();
+        });
+
+
+        // action "not_equals"
+        dropdown_menu.on('click' , 'li.tagOptions_action_not_equal_clicked' , function(){
+
+            // change the item content to <item_id>|<item_content>|exceludes
+            var item          = html_item.data('item')
+            var item_parts    = item.split('|');
+            var new_item      = item_parts[0] + "|" + item_parts[1] + "|not_equal";
+            search_query_tagsinput.tagsinput('change_tag' , [ item ,new_item ]);  // change the value of the tag
+            search_button_click();
+        });
+
+        // action "not_contains"
+        dropdown_menu.on('click' , 'li.tagOptions_action_not_contains_clicked' , function(){
             // change the item content to <item_id>|<item_content>|exceludes
 
             var item        = html_item.data('item')
             var item_parts  = item.split('|');
-            var new_item    = item_parts[0] + "|" + item_parts[1] + "|excludes";
-
+            var new_item    = item_parts[0] + "|" + item_parts[1] + "|not_contains";
             search_query_tagsinput.tagsinput('change_tag' , [ item ,new_item ]);  // change the value of the tag
-
             search_button_click();
         });
 
@@ -1685,16 +1925,22 @@ $("#table_events,#dialog_content,#artifacts_list_container,#record_details_block
 
     var item = $(this).attr('id');
     // if action is exceludes
-    if(item.endsWith('|excludes'))
-      var re = add_search_query_input_tag(item.split('|')[0] , 'excludes');
+    if(item.endsWith('|not_contains'))
+      var re = add_search_query_input_tag(item.split('|')[0] , 'not_contains');
+    
+    // if specified action is not equals
+    else if(item.endsWith('|not_equal'))
+        var re = add_search_query_input_tag(item.split('|')[0] , 'not_equal');  
+    
+    // if specified action is contains
+    else if(item.endsWith('|contains'))
+        var re = add_search_query_input_tag(item.split('|')[0] , 'contains');   
 
-    // if action not exceludes then add as contain 
+    // default action is equal
     else
-      var re = add_search_query_input_tag(item);
+      var re = add_search_query_input_tag(item.split('|')[0] , 'equal');
 
-    if(re){
-      toast_msg("Search Updated: " + item , type='info' , header='Information')
-    }
+    
 
 });
 
@@ -1750,19 +1996,31 @@ $('#table_events').on('click' , '.clicked_sort' , function(){
 
 
 
+function navegate_to_page(page){
+    // if the search type not simple, then build the elasticsearch query 
+    if(search_type != 'simple'){
+        var search_json = build_elasticsearch_query_json();
+        // get the elasticsearch query string
+        var search_es   = build_search_query(search_json);
+    }
+    else {
+        // if the search type is simple, then take it as is
+        var search_es = $("#search_query_simple").val()
+    }
+    
+    
+    reload_records(search_es , page , query_sort_by); // request the new page
 
+}
 
 
 
 
 // when user click a page number, it will send ajax request and reloads the new records for that page
 $("#paging").on('click' , "li a" , function(){
-
-    var search_json = build_elasticsearch_query_json();
-    // get the elasticsearch query string
-    var search_es   = build_search_query(search_json);
     wanted_page     = parseInt($(this).attr('id'));
-    reload_records(search_es , wanted_page , query_sort_by); // request the new page
+    
+    navegate_to_page(wanted_page)
 });
 
 
@@ -1777,11 +2035,15 @@ $("#paging").on('click' , "li a" , function(){
 // on the record clicked, open the right side bar with its information
 $("#table_events").on('click' , 'tr.event_record_click' , function(){
 
-      $('#' + clicked_id_record).removeClass('bg-gray disabled');
-
+      $('#' + clicked_id_record).removeClass('table_events_clicked_tr disabled');
+      $('#' + clicked_id_record).css('background-color' ,  '');
       var clicked_id    = $(this).attr('id');
       clicked_id_record = clicked_id;
-      $(this).addClass('bg-gray disabled');
+      $(this).addClass('table_events_clicked_tr disabled');
+      $(this).css('background-color' ,  '#636777');
+
+      // change records cliced status to clicked
+      is_record_tr_clicked = true
 
 
       // if opening the details record disabled dont show it
@@ -1791,13 +2053,13 @@ $("#table_events").on('click' , 'tr.event_record_click' , function(){
 
       // build the right side window depends on the data type
       var data_type = $(this).attr('data-type')
-      if( data_type == "windows_events" )
-        var html = build_windows_event_table(ajax_records[clicked_id]);     
+      if( data_type == "windows_events" || data_type == "Events" )
+        var html = build_windows_event_table(ajax_records[clicked_id] , $('#record_details'));     
       else
-        var html = build_simple_artifacts_table(ajax_records[clicked_id]);  
+        var html = build_simple_artifacts_table(ajax_records[clicked_id] , $('#record_details'));  
       
 
-      $('#record_details').html(html);
+      //$('#record_details').html(html);
       $('#record_details_block').slideDown();
       $('#content_table').addClass('col-md-8');
 });
@@ -1854,11 +2116,14 @@ $("#table_events").on('click' , 'tr td a.record_details_dialog_click' , function
 search_query_obj.tagsinput({
     tagClass: function(item){
         var type = item.split('|')[2];
-        if(type == "contains"){
-          return "btn label label-info";
-        } else if(type == "excludes"){
-          return "btn label label-warning";
-        }
+        if(type == "contains")
+            return "btn label label-primary";
+        else if(type == "not_contains")
+            return "btn label label-warning";
+        else if(type == "equal")
+            return "btn label label-success";
+        else if(type == "not_equal")
+            return "btn label label-danger";
     },
     allowDuplicates: true,
     confirmKeys: [13, 44],
@@ -1889,9 +2154,11 @@ fields_mapping.push({
 })
 
 
+$(document).ready(function(){
+    // call the advanced search query builder function
+    query_builder_fun()
+})
 
-// call the advanced search query builder function
-query_builder_fun()
 
 
 
@@ -1941,18 +2208,9 @@ $('#query_pick_date_range').datepicker({
               	var t = "Data.@timestamp:[" + fd + "]"
               else
               	var t = "Data.@timestamp:" + fd
-
-              if(timestamp_range_search == null){
-                    add_search_query_input_tag(t);
-                    timestamp_range_search = search_query_tagsinput.val().length - 1;
-              }
-              else {
-
-                    var updated = update_search_query_input_tag(t , timestamp_range_search);
-                    if(updated) {
-                        search_button_click();
-                    }
-              }
+              
+              add_search_query_input_tag(t , 'equal');
+              timestamp_range_search = search_query_tagsinput.val().length - 1;
 
               $('#query_pick_date_range').val('')
            }
@@ -1975,21 +2233,23 @@ $('.datepicker--time').show();
 
 
 
+$(document).ready(function(){
 
+    // from the predefined search query add the terms to search query controller
+    for(var i = 0 ; i < search.length ; i++){
+        var c = search[i][0].split('|');
+        var item = c.slice( 1, c.length).join('.') + ":" + search[i][1];
+        add_search_query_input_tag(item , "equal");
+    }
+    finished_init_tags = true;      // set the inii tags as done
+    $('#search_button').click();    // apply the predefined search query
 
-// from the predefined search query add the terms to search query controller
-for(var i = 0 ; i < search.length ; i++){
-    var c = search[i][0].split('|');
-    var item = c.slice( 1, c.length).join('.') + ":" + search[i][1];
-    add_search_query_input_tag(item);
-}
-finished_init_tags = true;      // set the inii tags as done
-$('#search_button').click();    // apply the predefined search query
+})
 
 
 // enable the top-down press button
-$(document).keydown(function(e) {
-    keydown_record_up_down(e)
+$(document).on('keydown' , function(e) {
+    keydown_record_navegation(e)
 });
 
 

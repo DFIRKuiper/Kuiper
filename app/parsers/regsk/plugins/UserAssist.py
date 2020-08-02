@@ -24,6 +24,7 @@ class UserAssist:
             for guid_key in user_assist_key.subkeys():
                 guid_key_name = guid_key.name()
                 count_key = guid_key.subkey(u"Count")
+                dat_key =guid_key.last_written_timestamp().isoformat()
                 if count_key is not None:
                     for value in count_key.values():
                         value_name = value.name()
@@ -38,17 +39,21 @@ class UserAssist:
                                 ("_plugin", u"UserAssist"),
                                 ("guid", guid_key_name),
                                 ("name", value_name_decoded),
-                                ("count", count)
+                                ("count", count),
+                                ("@timestamp",dat_key)
                             ])
                             lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
                         elif len(value_data) == 72:
                             count = struct.unpack("<I", value_data[4:8])[0]
                             date_time = struct.unpack("<q", value_data[60:68])[0]
                             new_datetime =convert_datetime(date_time)
+                            if new_datetime == "1601-01-01T00:00:00":
+                                new_datetime = dat_key
                             record = OrderedDict([
                                 ("guid", guid_key_name),
                                 ("name", value_name_decoded),
                                 ("count", count),
+                                ("key_creation_time",dat_key),
                                 ("@timestamp",new_datetime)
                             ])
                             lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
@@ -56,4 +61,4 @@ class UserAssist:
                             pass
             return lst
         else:
-            return "[{}]"
+            return None

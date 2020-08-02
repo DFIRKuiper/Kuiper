@@ -19,4 +19,3 @@ def auto_csv_parser(file , parser):
         print msg
         return (None , msg)
 
-#print interface('./All_Endpoints_06_09.csv')

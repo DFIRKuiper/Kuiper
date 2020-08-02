@@ -39,7 +39,7 @@ def push_to_elk(url , index , data):
 	   		"_index": index,
 			"_type": 'None',
 			"_source": { "Data" : d }
-    	}
+		}
 		bulk_queue.append(di)	
 
 	print 'Bulkingrecords to ES: ' + str(len(bulk_queue))
@@ -85,6 +85,10 @@ def extract_webcachev01_dat(file_path):
 	with open(file_path, "rb") as f:
 		esedb_file.open_file_object(f) # read the file 
 		containers_table = esedb_file.get_table_by_name("Containers") # look for tables "Containers"
+		if containers_table is None:
+			esedb_file.close()
+			return visits
+			
 		for i in range(0, containers_table.get_number_of_records()):
 			if containers_table.get_record(i).get_value_data_as_string(8) == 'History': # only look for History containers
 				container_id = containers_table.get_record(i).get_value_data_as_integer(0)
@@ -159,14 +163,15 @@ def extract_firefox_history(file_path):
 
 	# get the origins
 	origins = []
-	for org in c.execute('SELECT * FROM moz_origins'):
-		origin = {}
-		for o in range(0 , len(org)):
-			origin[ columns["origins"][o] ] = org[o]
+	if 'moz_origins' in columns.keys():
+		for org in c.execute('SELECT * FROM moz_origins'):
+			origin = {}
+			for o in range(0 , len(org)):
+				origin[ columns["origins"][o] ] = org[o]
 
-		origins.append(origin)
+			origins.append(origin)
 
-
+	
 	# get all places
 	places = []
 	for place in c.execute('SELECT * FROM moz_places'):
@@ -175,7 +180,6 @@ def extract_firefox_history(file_path):
 			plc[ columns["places"][p] ] = place[p]
 
 		places.append(plc)
-
 
 	# get all annos
 	annos = []
@@ -195,7 +199,6 @@ def extract_firefox_history(file_path):
 
 		annos_attr.append(an)
 
-
 	# get all visits
 	visits = []
 	for visit in c.execute('SELECT * FROM moz_historyvisits'):
@@ -206,7 +209,6 @@ def extract_firefox_history(file_path):
 		visits.append(v)
 
 
-	#print json_beautifier(visits)
 	visit_type = [
 		"TRANSITION_LINK" , 
 		"TRANSITION_TYPED" ,
@@ -214,10 +216,10 @@ def extract_firefox_history(file_path):
 		'TRANSITION_EMBED' ,
 		'TRANSITION_REDIRECT_PERMANENT' ,
 		'TRANSITION_REDIRECT_TEMPORARY' ,
-		'TRANSITION_DOWNLOAD'
+		'TRANSITION_DOWNLOAD',
+		'TRANSITION_FRAMED_LINK'
 	]
 	for visit in visits:
-
 		# add the record type 
 		visit["visit_type"] = visit_type[ visit["visit_type"]-1 ]
 		if visit["visit_type"] == 'TRANSITION_DOWNLOAD':
@@ -255,13 +257,14 @@ def extract_firefox_history(file_path):
 
 				visit['annos'][ len(visit['annos']) ] = visit_anno
 
-
 		# fix the records fields 
 		for k in visit.keys():
 			if k in ["p_last_visit_date" , "visit_date"]:
 				visit[k] = convert_timestamp(visit[k] , browser_name='Firefox', tz='utc') # convert the times 
 			if k in ["p_url_hash"]:
 				visit[k] = str(visit[k])
+		
+
 		if 'annos' in visit.keys():
 			for anno in range( 0 , len( visit['annos'] )):
 				for k in visit['annos'][anno].keys():
@@ -313,10 +316,10 @@ def extract_chrome_history(file_path):
 		for i in range( 0 , len(download)):
 			if columns[i][0] in ["start_time" , "end_time" , "last_access_time"]:
 				downloads[columns[i][0]] = convert_timestamp(download[i] , browser_name='Chrome', tz='utc')
-			elif type(download[i]) is int or type(download[i]) is None:
+			elif type(download[i]) is int or download[i] is None:
 				downloads[columns[i][0]] = download[i]
 			else:
-				downloads[columns[i][0]] = str(download[i])
+				downloads[columns[i][0]] = download[i]
 
 		for i in url_chain:
 			if i[0] == downloads['id']:

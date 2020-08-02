@@ -4,6 +4,7 @@ import traceback
 from collections import OrderedDict
 from lib.helper import convert_datetime,from_fat
 from lib.helper import ComplexEncoder
+from lib.helper import strip_control_characters
 from lib.hive_yarp import get_hive
 import datetime
 from yarp import *
@@ -28,25 +29,24 @@ class Amcache():
                 sid_key_values = iter(sid_key.values())
                 key_time = sid_key.last_written_timestamp().isoformat()
                 win10_amache_mapping={
-                "ProgramId":"ProgramId",
-                "LongPathHash":"LongPathHash",
-                "IsOsComponent":"IsOsComponent",
-                "Usn":"Usn",
-                "LowerCaseLongPath":"path",
-                "FileId":"hash",
-                "Name":"Name",
-                "Publisher":" Publisher",
-                "Version":" Version",
-                "BinFileVersion":" BinFileVersion",
-                "BinaryType":" BinaryType",
-                "ProductName":" ProductName",
-                "ProductVersion":" ProductVersion",
-                "LinkDate":" LinkDate",
-                "BinProductVersion":" BinProductVersion",
-                "ProductName":" ProductName",
-                "Size":" Size",
-                "Language":" Language",
-                "IsPeFile":" IsPeFile"
+                "ProgramId"         :"ProgramId",
+                "LongPathHash"      :"LongPathHash",
+                "IsOsComponent"     :"IsOsComponent",
+                "Usn"               :"Usn",
+                "LowerCaseLongPath" :"Path",
+                "FileId"            :"Sha1",
+                "Name"              :"Name",
+                "Publisher"         :"CompanyName",
+                "Version"           :"Version",
+                "BinFileVersion"    :"BinFileVersion",
+                "BinaryType"        :"BinaryType",
+                "ProductName"       :"ProductName",
+                "ProductVersion"    :"ProductVersion",
+                "LinkDate"          :"LinkDate",
+                "BinProductVersion" :"BinProductVersion",
+                "Size"              :"FileSize",
+                "Language"          :"Language",
+                "IsPeFile"          :"IsPeFile"
                 }
                 record = OrderedDict([
                 ])
@@ -63,21 +63,25 @@ class Amcache():
                     names =win10_amache_mapping[value_name]
                     data =value.data()
 
-                    record[names]= data
+                    record[names]= strip_control_characters(str(data))
                 record["@timestamp"] = key_time
+                
+                if record["Sha1"].startswith("0000"):
+                    sha1 = record["Sha1"]
+                    record["Sha1"]= sha1[4:]
                 lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
             return lst
 
 
         elif Amcache7_user_settings_key:
             win8_amcache_mapping = {
-                    '0': 'product_name',
-                    '1': 'company_name',
-                    '2': 'file_version_number',
-                    '3': 'language_code',
-                    '4': 'switchback_context',
-                    '5': 'file_version',
-                    '6': 'file_size',
+                    '0': 'ProductName',
+                    '1': 'CompanyName',
+                    '2': 'FileVersionNum',
+                    '3': 'Language',
+                    '4': 'SwitchBackContext',
+                    '5': 'FileVersion',
+                    '6': 'FileSize',
                     '7': 'pe_header_hash',
                     '8': 'unknown1',
                     '9': 'pe_header_checksum',
@@ -89,11 +93,11 @@ class Amcache():
                     '10': 'unknown5',
                     '11': 'last_modified_timestamp',
                     '12': 'created_timestamp',
-                    '15': 'full_path',
+                    '15': 'Path',
                     '16': 'unknown6',
                     '17': 'last_modified_timestamp_2',
-                    '100': 'program_id',
-                    '101': 'sha1'
+                    '100': 'ProgramId',
+                    '101': 'Sha1'
                 }
             for sid_key in Amcache7_user_settings_key.subkeys():
                 for sidd_key in sid_key.subkeys():
@@ -119,8 +123,14 @@ class Amcache():
                             else:
                                 data = convert_datetime(data)
 
-                        record[names]= data
+                        record[names]= strip_control_characters(str(data))
+
+                    if len(record) == 0:
+                        continue
                     record["@timestamp"] = key_time
+                    if record["Sha1"].startswith("0000"):
+                        sha1 = record["Sha1"]
+                        record["Sha1"]= sha1[4:]
                     lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
             return lst
 

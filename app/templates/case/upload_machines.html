@@ -2,75 +2,75 @@
 
 
 {% block content %}
-	<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
-    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload.css')}}" />
-    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload-ui.css')}}" />
-    <!-- CSS adjustments for browsers with JavaScript disabled -->
-    <noscript><link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload-noscript.css')}}"/></noscript>
-    <noscript><link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload-ui-noscript.css')}}"/></noscript>
-	
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload.css')}}" />
+<link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload-ui.css')}}" />
+<!-- CSS adjustments for browsers with JavaScript disabled -->
+<noscript><link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload-noscript.css')}}"/></noscript>
+<noscript><link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload-ui-noscript.css')}}"/></noscript>
 
 
-      <div class="row">
-        <div class="col-xs-12">
-          <div class="box">
-            <div class="box-header">
-              <h3 class="box-title"><i class="fa fa-upload"></i> Upload Machines <a data-toggle="tooltip" data-placement="bottom" title="Only zip files accepted less than 5GB size, the file name will be the machine name, make sure it is not password protected"><i class="fa fa-info-circle"></i></a></h3>
-				
-            </div>
-            <!-- /.box-header -->
-            <div class="box-body">
 
-
-				<!-- The file upload form used as target for the file upload widget -->
-				<form id="fileupload" enctype="multipart/form-data">
-					
-					<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-					<div class="row fileupload-buttonbar">
-					<div class="col-lg-7">
-					
-						<!-- The fileinput-button span is used to style the file input field as button -->
-						<div class="btn-group">
-
-							<span class="btn btn-success fileinput-button">
-							
-							<i class="glyphicon glyphicon-plus"></i>
-							<span>Add files...</span>
-							<input type="file" name="files[]" multiple />
-							</span>
-							<button type="submit" class="btn btn-primary start">
-							<i class="glyphicon glyphicon-upload"></i>
-							<span>Start upload</span>
-							</button>
-							<button type="reset" class="btn btn-warning cancel">
-							<i class="glyphicon glyphicon-ban-circle"></i>
-							<span>Cancel upload</span>
-							</button>
-						</div>
-						<!-- The global file processing state -->
-						<span class="fileupload-process"></span>
-					</div>
-					<!-- The global progress state -->
-					<div class="col-lg-5 fileupload-progress fade">
-						<!-- The global progress bar -->
-						<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-							<div class="progress-bar progress-bar-prime" style="width:0%;"></div>
-						</div>
-						<!-- The extended global progress state -->
-						<div class="progress-extended">&nbsp;</div>
-					</div>
-					</div>
-					<div><ul id="files_list"></ul></div>
-					<!-- The table listing the files available for upload/download -->
-					<table role="presentation" class="table table-striped">
-					<tbody class="files"></tbody>
-					</table>
-				</form>
-            </div>
-            <!-- /.box-body -->
-          </div>
-          <!-- /.box -->
+    <div class="row">
+    <div class="col-xs-12">
+        <div class="box">
+        <div class="box-header">
+            <h3 class="box-title"><i class="fa fa-upload"></i> Upload Machines <a data-toggle="tooltip" data-placement="bottom" title="Only zip files accepted less than 5GB size, the file name will be the machine name, make sure it is not password protected"><i class="fa fa-info-circle"></i></a> <small class="label bg-red">Don't change the page untill upload finish</small> </h3>
+            
         </div>
+        <!-- /.box-header -->
+        <div class="box-body">
+
+
+            <!-- The file upload form used as target for the file upload widget -->
+            <form id="fileupload" enctype="multipart/form-data">
+                
+                <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+                <div class="row fileupload-buttonbar">
+                <div class="col-lg-7">
+                
+                    <!-- The fileinput-button span is used to style the file input field as button -->
+                    <div class="btn-group">
+
+                        <span class="btn btn-success fileinput-button">
+                        
+                        <i class="glyphicon glyphicon-plus"></i>
+                        <span>Add files...</span>
+                        <input type="file" name="files[]" multiple />
+                        </span>
+                        <button type="submit" class="btn btn-primary start">
+                        <i class="glyphicon glyphicon-upload"></i>
+                        <span>Start upload</span>
+                        </button>
+                        <button type="reset" class="btn btn-warning cancel">
+                        <i class="glyphicon glyphicon-ban-circle"></i>
+                        <span>Cancel upload</span>
+                        </button>
+                    </div>
+                    <!-- The global file processing state -->
+                    <span class="fileupload-process"></span>
+                </div>
+                <!-- The global progress state -->
+                <div class="col-lg-5 fileupload-progress fade">
+                    <!-- The global progress bar -->
+                    <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-bar progress-bar-prime" style="width:0%;"></div>
+                    </div>
+                    <!-- The extended global progress state -->
+                    <div class="progress-extended">&nbsp;</div>
+                </div>
+                </div>
+                <div><ul id="files_list"></ul></div>
+                <!-- The table listing the files available for upload/download -->
+                <table role="presentation" class="table table-striped">
+                <tbody class="files"></tbody>
+                </table>
+            </form>
+        </div>
+        <!-- /.box-body -->
+        </div>
+        <!-- /.box -->
+    </div>
 
 
 {% raw %}
@@ -118,6 +118,8 @@
 {% endraw %}
 
 
+
+
 <!-- jQuery 3 -->
 <script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
 
@@ -137,7 +139,6 @@
 <!-- AdminLTE for demo purposes -->
 <script src="../../static/dist/js/demo.js"></script>
 
-<script src="../../static/json_viewer/json-viewer.js"></script>
 
 <script src="../../static/dist/jquery_file_upload/js/vendor/tmpl.min.js"></script>
 
@@ -179,28 +180,26 @@ jQuery(function($){
 
 	// Initialize the jQuery File Upload widget:
 	$('#fileupload').fileupload({
-			downloadTemplateId: null,	// disable downloadTemplateId 
-			disableImagePreview: true, 	// disable preview
-			dataType: 'json',
-			edit: false,
-			autoUpload: false,
-			acceptFileTypes: /(\.|\/)(zip)$/i,
-			maxFileSize: 5000000000, // 5 GB
-			maxNumberOfFiles: 100,
-			url: "{{url_for('case_upload_machine', case_id=case_details['casename'] )}}",
+			downloadTemplateId      : null,	// disable downloadTemplateId 
+			disableImagePreview     : true, 	// disable preview
+			dataType                : 'json',
+			edit                    : false,
+			autoUpload              : false,
+			acceptFileTypes         : /(\.|\/)(zip)$/i,
+			maxFileSize             : 5000000000, // 5 GB
+			maxNumberOfFiles        : 100,
+            sequentialUploads       : true,
+			url                 : "{{url_for('case_upload_machine', case_id=case_details['casename'] )}}",
 			done: function (e, data) {
-				console.log(data)
+                console.log('done')
+                console.log(data)
+
 				if( data._response.result.result == false){
-					console.log(data._response.result.message)
-					data.context.find('.error').text(data._response.result.message)
+					data.context.find('.error').html(data._response.result.message)
 					data.context.find('.progress').html('<div class="progress-bar progress-bar-red" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>')
 				} else {
 					data.context.find('.buttons').html('<i class="fa fa-fw fa-check"></i>');
 					data.context.find('.progress').html('<div class="progress-bar progress-bar-green" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>')
-					
-					console.log(data)
-					var filename = data._response.result.data['name']
-					var zip_content = data._response.result.data['zip_content']
 				}
 				data.context.find('.progress').removeClass('active')
 				data.context.find('.progress').removeClass('progress-striped')

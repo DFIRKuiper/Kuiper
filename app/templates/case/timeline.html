@@ -7,23 +7,23 @@
     <div class="row">
 
         <div class="col-md-12">
-            <div class="box box-default collapsed-box">
-                <div class="box-header with-border">
+            <div class="box collapsed-box">
+                <div class="box-header">
                     <h3 class="box-title"><i class="fa fa-clock-o"></i> Timeline tags</h3>
 
                     <!-- =============== start Buttons =============== -->
-                    <span class="box-tools">
-                      <div class="btn-group">
-                        <button type="button" class="btn btn-default" id="export_csv" ><i class="fa fa-download" title="Export timeline as .CSV"></i></button>
-                        <button type="button" class="btn btn-default" data-widget="collapse"><i class="fa fa-plus" title="Create a time line message"></i></button>
+                      <div class="btn-group box-tools pull-right">
+                        <button type="button" class="btn btn-sm btn-primary" id="show_as_table" ><i class="fa fa-table" title="Show tags as table"></i></button>
+                        <button type="button" class="btn btn-sm btn-default" id="show_as_timeline" ><i class="fa fa-reorder" title="show tags as timeline"></i></button>
+                        <button type="button" class="btn btn-sm btn-default" id="export_csv" ><i class="fa fa-download" title="Export timeline as .CSV"></i></button>
+                        <button type="button" class="btn btn-sm btn-default" data-widget="collapse"><i class="fa fa-plus" title="Create a time line message"></i></button>
                       </div>
-                    </span>
                     <!-- =============== end Buttons =============== -->
-
+                    <br />
                     <!-- /.box-tools -->
                 </div>
                 <!-- /.box-header -->
-                <div class="box-body" style="display: none;">
+                <div class="box-body no-padding" style="display: none;">
 
                     <div class="form-group">
 
@@ -67,7 +67,7 @@
       </div>
 
       <div class="modal-body  no-padding">
-        
+        <div id="record_details">  </div>
       </div>
 
     </div><!-- modal-content -->
@@ -99,7 +99,6 @@
 <!-- AdminLTE for demo purposes -->
 <script src="../../static/dist/js/demo.js"></script>
 
-<script src="../../static/json_viewer/json-viewer.js"></script>
 
 
 
@@ -185,15 +184,7 @@
   }
 
 /* ----- MODAL STYLE ----- */
-  .modal-content {
-    border-radius: 0;
-    border: none;
-  }
 
-  .modal-header {
-    border-bottom-color: #EEEEEE;
-    background-color: #FAFAFA;
-  }
 
 
 </style>
@@ -212,6 +203,7 @@ var record_important_fields = ({{ CASE_FIELDS|tojson|safe }});
 
 var listOfDates             = {}
 
+var view_type               = 'table'
 
 // ========================== Functions
 
@@ -414,7 +406,7 @@ function get_tag_message(tag , label , with_label = false){
     } else
       var icon                = "fa fa-tags  bg-red"
     
-    var isRecord_tag          = ("record_details" in tag['_source']['Data']) ? true : false;
+    var isRecord_tag          = tag['_source']['Data'].hasOwnProperty("record_details");
     var record_details_button = ""
     var important_fields      = ""
 
@@ -428,7 +420,7 @@ function get_tag_message(tag , label , with_label = false){
         for(var j = 0 ; j < imp_rec.length; j++){
             var search_field_path = imp_rec[j][1].substring( imp_rec[j][1].indexOf('.') +1  );
             var field_value = get_field_from_json_path(record , imp_rec[j][1]);
-            important_fields += ' <span class="badge bg-default"> ' + imp_rec[j][0]+'</span> <span>' + field_value + '</span>';
+            important_fields += ' <span class="badge bg-blue"> ' + imp_rec[j][0]+'</span> <span>' + field_value + '</span>';
         }
         important_fields = '<div class="timeline-body">' + important_fields + '</div>'
     }
@@ -458,7 +450,48 @@ function get_tag_message(tag , label , with_label = false){
 
 
 
+function get_tag_table(tag){
+    console.log(tag)
+    var tr                      = "<tr>"
+    var message                 = tag['_source']['Data'].hasOwnProperty("message") ? tag['_source']['Data']['message']: "" 
+    var timestamp               = tag['_source']['Data']['@timestamp'].split('.')[0].replace('T' , ' ')
+    var tag_id                  = tag['_id']
+    var machine                 = ""
+    var important_fields        = ""
+    var record_details_button   = ""
 
+    // build the important fields cell if exists
+    if(tag['_source']['Data'].hasOwnProperty("record_details")){
+        record_details_button = '<a data="'+tag_id+'"  data-target="#tag_details" class="record_details_button btn btn-primary btn-xs"><span class="fa fa-caret-square-o-right"></span> </a>';
+
+        var record = tag['_source']['Data']['record_details']
+        var date_type = record['_source']['data_type']
+        var imp_rec = record_important_fields[date_type];
+        for(var j = 0 ; j < imp_rec.length; j++){
+            var search_field_path = imp_rec[j][1].substring( imp_rec[j][1].indexOf('.') +1  );
+            var field_value = get_field_from_json_path(record , imp_rec[j][1]);
+            important_fields += ' <span class="badge bg-blue"> ' + imp_rec[j][0]+'</span> <span>' + field_value + '</span><br />';
+        }
+        important_fields = '<div class="timeline-body">' + important_fields + '</div>'
+
+        machine = tag['_source']['Data']['record_details']['_source']['machine'].substring(tag['_index'].length + 1)
+    }
+
+    var options = '<div class="btn-group-vertical">\
+                        <a data="'+tag_id+'" class="tag_delete_button btn btn-danger btn-xs"><span class="fa fa-remove"></span></a>\
+                        '+record_details_button+'\
+                    </div>'
+
+    tr += '<td style="white-space:nowrap;" >'+timestamp+'</td>'
+    tr += '<td style="white-space:nowrap;" >'+machine+'</td>'
+    tr += '<td>'+message+'</td>'
+    tr += '<td>'+important_fields+'</td>'
+    tr += '<td>'+options+'</td>'
+
+    tr += '</tr>'
+
+    return tr
+}
 
 
 
@@ -475,8 +508,8 @@ function request_all_tags(){
       success: function(result) {
         var result = JSON.parse(result);
         
-        if(result['tags'] == "no such index"){
-          toast_msg("No such index, make sure to process the artifacts" , 'error' , 'Error')
+        if(result['result'] == 'failed'){
+          toast_msg(result['tags'] , 'error' , 'Error')
           tags = []
         } else {
           tags = result['tags']  
@@ -498,27 +531,56 @@ function request_all_tags(){
 function print_tag(){
 
     request_all_tags()
-
-    var last_label        = "";
     var timeline          = $('ul.timeline')
-    var timeline_content  = "";
-    for( var i = 0 ; i < tags.length ; i++){
-        var d = tags[i]['_source']['Data']['@timestamp'].split(' ')[0].substring(0, 10);
+    timeline.html("")
 
-        var with_label = false;
-        if( d != last_label ){
-            last_label = d;
-            with_label = true;
-            listOfDates[last_label] = 1;
-        } else
-            listOfDates[last_label]++;
+    
+    if(view_type == 'timeline'){
+        var last_label        = "";
         
+        var timeline_content  = "";
+        for( var i = 0 ; i < tags.length ; i++){
+            var d = tags[i]['_source']['Data']['@timestamp'].split(' ')[0].substring(0, 10);
 
-        timeline_content += get_tag_message(tags[i] , last_label , with_label) 
+            var with_label = false;
+            if( d != last_label ){
+                last_label = d;
+                with_label = true;
+                listOfDates[last_label] = 1;
+            } else
+                listOfDates[last_label]++;
+            
+
+            timeline_content += get_tag_message(tags[i] , last_label , with_label) 
+        }
+        
+        timeline_content += '<li><i class="fa fa-clock-o bg-gray"></i></li>';
+        timeline.html(timeline_content)
+    } else if(view_type == 'table'){
+
+        var timeline_content = '<div class="box"><div class="box-body no-padding">\
+              <table class="table table-striped">\
+              <col width="1%" />\
+              <col width="1%" />\
+              <col width="30%" />\
+              <col width="30%" />\
+              <col width="1%" />\
+                <tbody><tr>\
+                  <th>Timestamp</th>\
+                  <th>Machine</th>\
+                  <th>Message</th>\
+                  <th>Important Fields</th>\
+                  <th>Op.</th>\
+                </tr>';
+
+        for( var i = 0 ; i < tags.length ; i++){
+            timeline_content += get_tag_table(tags[i]) 
+        }
+
+        timeline_content += '</tbody></table></div></div>'
+        timeline.html(timeline_content)
     }
     
-    timeline_content += '<li><i class="fa fa-clock-o bg-gray"></i></li>';
-    timeline.html(timeline_content)
 }
 
 
@@ -526,6 +588,9 @@ function print_tag(){
 
 
 // ========================== Listeners
+
+
+
 
 // on clicked export time line as csv
 $('#export_csv').on('click' , function(){
@@ -570,6 +635,26 @@ $('#export_csv').on('click' , function(){
 
 
 
+$("#show_as_table").on('click' , function(){
+    view_type = 'table'
+    print_tag()
+    $("#show_as_table").addClass("btn-primary")
+    $("#show_as_table").removeClass("btn-default")
+    $("#show_as_timeline").removeClass("btn-primary")
+    $("#show_as_timeline").addClass("btn-default")
+})
+
+
+$("#show_as_timeline").on('click' , function(){
+    view_type = 'timeline'
+    print_tag()
+    $("#show_as_timeline").addClass("btn-primary")
+    $("#show_as_timeline").removeClass("btn-default")
+    $("#show_as_table").removeClass("btn-primary")
+    $("#show_as_table").addClass("btn-default")
+
+})
+
 
 
 
@@ -599,9 +684,9 @@ $('.timeline').on( 'click' , 'a.record_details_button' , function(){
     
     var data_type = record['_source']['data_type']
       if( data_type == "windows_events" )
-        var html = build_windows_event_table(record);
+        var html = build_windows_event_table(record , $('#record_details'));
       else {
-        var html = build_simple_artifacts_table(record , false);
+        var html = build_simple_artifacts_table(record , $('#record_details') , false);
       }
 
     $('#tag_details').find('.modal-body').html(html)

@@ -8,6 +8,8 @@ import shutil
 import yaml 
 import zipfile
 import hashlib
+import base64 
+
 
 from flask import Flask
 from flask import request, redirect, render_template, url_for, flash
@@ -30,7 +32,8 @@ y = yaml.load( open( 'configuration.yaml' , 'r' ) , Loader=yaml.FullLoader )
 
 SIDEBAR = {
     "sidebar"   : y['case_sidebar'],
-    "open"      : app.config['SIDEBAR_OPEN']
+    "open"      : app.config['SIDEBAR_OPEN'],
+    'current_version'   : y['Git']['k_version']
 }
 
 RemoveRawFiles = y['Kuiper']['RemoveRawFiles'] # remove the uploaded raw files after unzip it to the machine files
@@ -47,14 +50,17 @@ def create_folders(path):
         return [True, "Folder ["+path+"] created"]
     except OSError as e:
         if "File exists" in str(e):
-            return [False , "Folder ["+path+"] already exists" ]
+            return [True , "Folder ["+path+"] already exists" ]
         else:
             return [False , str(e) ]
+    except Exception as e:
+        return [False , str(e) ]
 
 # ================================ remove folder
 def remove_folder(path):
     try:
         shutil.rmtree(path)
+        return [True, "Folder ["+path+"] removed"]
     except Exception as e:
         return [False, "Error: " + str(e)] 
 
@@ -75,17 +81,23 @@ def is_file_exists(path):
 
 # ================================ MD5 for file
 def md5(fname):
-    hash_md5 = hashlib.md5()
-    with open(fname, "rb") as f:
-        for chunk in iter(lambda: f.read(4096), b""):
-            hash_md5.update(chunk)
-    return hash_md5.hexdigest()
+    try:
+        hash_md5 = hashlib.md5()
+        with open(fname, "rb") as f:
+            for chunk in iter(lambda: f.read(4096), b""):
+                hash_md5.update(chunk)
+        return [True, hash_md5.hexdigest()]
+    except Exception as e:
+        return [False, str(e)]
 
 # ================================ unzip file
 # unzip the provided file to the dst_path
 def unzip_file(zip_path,dst_path):
     try:
-        create_folders(dst_path)
+        createfolders = create_folders(dst_path)
+        if createfolders[0] == False:
+            return createfolders
+        
         with zipfile.ZipFile(zip_path , mode='r') as zfile:
             zfile.extractall(path=dst_path )
         return [True , "All files of ["+zip_path+"] extracted to ["+dst_path+"]"]
@@ -95,7 +107,7 @@ def unzip_file(zip_path,dst_path):
         return [True , "All files of ["+zip_path+"] partialy extracted to ["+dst_path+"]"]
     except Exception as e:
         return [False, "Error extract the zip content: " + str(e)]
-
+    
     
 # ================================ list zip file content
 # list zip file content
@@ -108,9 +120,9 @@ def list_zip_file(zip_path):
             if z.endswith('/'):
                 continue
             zip_content.append(z)
-        return zip_content
+        return [True, zip_content]
     except Exception as e:
-        print "Error: " + str(e)
+        return [False, str(e)]
 
 
 # ================================ json beautifier
@@ -123,14 +135,188 @@ def json_beautifier(js):
 # return json of all parsers and the important fields (field , json path)
 def get_CASE_FIELDS():
     parsers_details = db_parsers.get_parser()
+    if parsers_details[0] == False:
+        return parsers_details # if failed return the error message
+
     case_fields = {}
-    for p in parsers_details:
+    for p in parsers_details[1]:
         case_fields[ p['name'] ] = []
         if 'important_field' in p.keys():
             for f in p['important_field']:
                 case_fields[ p['name'] ].append( [ f['name'] , "_source.Data." + f['path'] ] )
-    return case_fields
+    return [True, case_fields]
 
+
+
+# ============================= upload files
+# this function handle uploaded files, decompress it, create machine if machine uploaded, etc.
+def upload_file(file , case_id , machine=None , base64_name=None):
+    
+    source_filename = secure_filename(file.filename) if base64_name is None else base64.b64decode(base64_name)
+    isUploadMachine = True if machine is None else False 
+    
+    logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Handle uploaded file ["+source_filename+"]")
+    # ====== prepare the variables 
+    
+    temp_filename   = str(datetime.now() ).split('.')[0].replace(' ' , 'T') + "-" + source_filename
+    
+    if isUploadMachine:
+        # if the option is upload machine
+        machine_name    = source_filename.rstrip('.zip')
+        machine_id      = case_id + "_" + machine_name
+    else:
+        # if upload artifacts
+        machine_id      = machine
+    
+
+    try: 
+        # ======= validate machine exists or not  
+        # check if machine already exists
+        machine_info = db_cases.get_machine_by_id(machine_id)
+        if machine_info[0] == False:
+            # if there was exception when checking if the machine exists
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed checking if the machine ["+machine_id+"] already exists", reason=machine_info[1])
+            return [False, {'result' : False , 'filename' : source_filename , 'message' : 'Failed checking if the machine already exists: ' + str(machine_info[1])}]
+
+
+        if isUploadMachine:
+            # if upload machine, then make sure there is no other machine already exists
+            if machine_info[0] == True and machine_info[1] is not None:
+                # if the machine already exists
+                logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed uploading machine" , reason="Machine ["+machine_id+"] already exists")
+                return [ False, {'result' : False , 'filename' : source_filename , 'message' : 'Machine already exists'}]
+        else:
+            # if upload artifacts, then make sure there is machine to upload the artifacts to it
+            if machine_info[0] == True and machine_info[1] is None:
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed uploading artifacts" , reason="Machine ["+machine_id+"] not found")
+                return [ False, {'result' : False , 'filename' : source_filename , 'message' : 'Machine not exists'}]
+
+
+        # ======= create folders 
+        # create the machine folder in files folder
+        files_folder    = app.config["UPLOADED_FILES_DEST"]     + "/" + case_id + "/" + machine_id + "/"
+        raw_folder      = app.config["UPLOADED_FILES_DEST_RAW"] + "/" + case_id + "/" + machine_id + "/"
+            
+        create_files_folder = create_folders( files_folder )  # create the folder for the case in files if not exists
+        create_raw_folder   = create_folders( raw_folder )    # create the folder for the case in raw folder if not exists
+        if create_files_folder[0] == False:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed creating the folder ["+files_folder+"]", reason=create_files_folder[1])
+            return [False, {'result' : False , 'filename' : source_filename , 'message' : "Failed creating the folder ["+files_folder+"], " + create_files_folder[1]}]
+        if create_raw_folder[0] == False:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed creating the folder ["+raw_folder+"]", reason=create_raw_folder[1])
+            return [False, {'result' : False , 'filename' : source_filename , 'message' : "Failed creating the folder ["+raw_folder+"], " + create_raw_folder[1]}]
+
+        
+                
+
+        # ====== save the file
+        # save the file to the raw data
+        try:
+            file.save(raw_folder + temp_filename)   
+        except Exception as e:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed saving the file ["+source_filename+"]", reason=str(e))
+            return jsonify({'result' : False , 'filename' : source_filename , 'message' : 'Failed saving the file ['+source_filename+']: ' + str(e)})
+        
+
+        # ======= check hash if exists        
+        file_hash       = md5(raw_folder + temp_filename)
+        # get hash values for all files for this machine
+        for (dirpath, dirnames, filenames) in os.walk(raw_folder):
+            for f in filenames:
+                if md5(dirpath + f) == file_hash and f != temp_filename:
+                    logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed uploading file ["+temp_filename+"]", reason="Match same hash of file ["+f+"]")
+                    return [False, {'result': False , 'filename': source_filename , 'message' : 'The following two files has same MD5 hash<br > - Uploaded: ' + temp_filename + '<br > - Exists: '+f}]
+        
+
+        # ====== decompress zip file or move it to files folder
+        if temp_filename.endswith(".zip"):
+            # if zip file
+            # unzip the file to machine files
+            try:
+                unzip_fun = unzip_file(raw_folder + temp_filename ,  files_folder + temp_filename + "/")
+
+                if unzip_fun[0] == True:
+                    
+                    
+                    if RemoveRawFiles:
+                        # remove the raw file
+                        remove_raw_files = remove_file(raw_folder + temp_filename)
+                        if remove_raw_files[0] == False:
+                            logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed removing raw file ["+raw_folder + temp_filename+"]", reason=remove_raw_files[1])
+
+
+                else:
+                    
+
+                    
+                    remove_raw_files = remove_file(raw_folder +  temp_filename) # remove file if exists
+                    if remove_raw_files[0] == False:
+                        logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed removing raw file ["+raw_folder + temp_filename+"]", reason=remove_raw_files[1])
+
+                    remove_files_folder = remove_folder(files_folder + temp_filename + "/") # remove file if exists
+                    if remove_files_folder[0] == False:
+                        logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed removing files folder ["+files_folder + temp_filename + "/"+"]", reason=remove_files_folder[1])
+                    
+
+                    logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed decompressing the file ["+raw_folder + temp_filename+"]", reason=unzip_fun[1])
+                    return [False, {'result' : False , 'filename' : source_filename , 'message' : unzip_fun[1]}]
+            
+            # if unzip failed
+            except Exception as e:
+                if 'password required' in str(e):
+                    logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed decompressing the file ["+raw_folder + temp_filename+"]", reason='password required')
+                    return [False, {'result' : False , 'filename' : source_filename , 'message' : 'File require password'}]
+                else:
+                    logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed decompressing the file ["+raw_folder + temp_filename+"]", reason=str(e))
+                    return [False, {'result' : False , 'filename' : source_filename , 'message' : 'Failed to unzip the file: ' + str(e)}]
+        else:
+            # if not zip file
+
+            try:
+                # create folder in files folder to include the file 
+                create_files_folder   = create_folders( files_folder + temp_filename + "/" )    # create the folder which will include the uploaded file (we are using folder to keep the original file name untouched)
+                if create_files_folder[0] == False:
+                    logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed creating the folder ["+files_folder+"]", reason=create_files_folder[1])
+                    return [False, {'result' : False , 'filename' : source_filename , 'message' : "Failed creating the folder ["+files_folder+"], " + create_files_folder[1]}]
+
+                shutil.copy(raw_folder + temp_filename, files_folder + temp_filename + "/" + source_filename)  
+            except Exception as e:
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed moving the file ["+raw_folder + temp_filename+"] to files folder", reason=str(e))
+                return [False, {'result' : False , 'filename' : source_filename , 'message' : 'Failed moving the file to files folder: ' + str(e)}]
+
+
+        # ====== create machine
+        if isUploadMachine:
+            create_m = db_cases.add_machine({
+                'main_case'     : case_id,
+                'machinename'   : machine_name
+            })
+
+            if create_m[0] == False: # if creating the machine failed
+                remove_file(raw_folder +  temp_filename) # remove file if exists
+                remove_folder(files_folder + temp_filename + "/") # remove file if exists
+
+                if remove_file[0] == False:
+                    logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed removing files folder ["+raw_folder +  temp_filename + "/"+"]", reason=remove_file[1])
+
+                if remove_folder[0] == False:
+                    logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed removing files folder ["+files_folder + temp_filename + "/"+"]", reason=remove_folder[1])
+
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed uploading the machine ["+machine_id+"]", reason=create_m[1])
+                return jsonify({'result' : False , 'filename' : source_filename , 'message' : create_m[1]}) 
+
+            logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: Machine ["+machine_id+"] uploaded")
+        else:
+            logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: File ["+source_filename+"] uploaded to machine ["+machine_id+"]")
+
+        return [True, {'result': True , 'filename' : source_filename, 'message': source_filename}]
+
+    except Exception as e:
+        if isUploadMachine:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed uploading the machine", reason=str(e))
+        else:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed uploading the artifacts for machine ["+machine_id+"]", reason=str(e))
+        return [False, {'result' : False , 'filename' : source_filename , 'message' : "Failed uploading the artifacts for machine ["+machine_id+"]: " + str(e)}]
 
 
 # =================================================
@@ -146,24 +332,35 @@ def get_CASE_FIELDS():
 
 # =================== Dashboard =======================
 
-
 # ================================ dashboard page
 @app.route('/case/<case_id>/dashboard', methods=['GET'])
 def case_dashboard(case_id):
 
+
     case = db_cases.get_case_by_id(case_id)
+    if case[0] == False:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case details", reason=case[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message=case[1])
+
+    
+    if case[1] is None:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case information", reason='Index not found')
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Case["+case_id+"]: Failed getting case information<br />Index not found")
+
+
 
     # get rules information
     all_rules = db_rules.get_rules()
     if all_rules[0] == False:
-        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS , message=all_rules[0])
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting rules", reason=all_rules[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message=all_rules[1])
 
-
+    
     alerts = {
-        "Critical" : 0,
-        "High" : 0,
-        "Medium" : 0,
-        "Low" : 0,
+        "Critical"  : 0,
+        "High"      : 0,
+        "Medium"    : 0,
+        "Low"       : 0,
         "Whitelist" : 0
     }
 
@@ -172,30 +369,33 @@ def case_dashboard(case_id):
         body = {
                 "query":{
                     "query_string":{
-                        "query" : rule['rule']
+                        "query" : rule['rule'],
+                        "default_field": "catch_all"
                     }
                 },
                 "size":0
         }
         res = db_es.query( case_id, body )
-        if res['result'] == False:
-            print res['data']
+        if res[0] == False:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting rules", reason=all_rules[1])
             continue
 
-        alerts[rule['rule_severity']] += res['data']['hits']['total']
+        alerts[rule['rule_severity']] += res[1]['hits']['total']['value']
 
 
     # get machines information
     machines = db_cases.get_machines(case_id)
+    if machines[0] == False:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case machines", reason=machines[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message=machines[1])
 
     # dashboard info to be pushed
     dashboard_info = {
         'alerts' : alerts,
-        'machines' : machines
+        'machines' : machines[1]
     }
 
-
-    return render_template('case/dashboard.html',case_details=case ,SIDEBAR=SIDEBAR , dashboard_info=dashboard_info)
+    return render_template('case/dashboard.html',case_details=case[1] ,SIDEBAR=SIDEBAR , dashboard_info=dashboard_info)
 
 
 
@@ -203,28 +403,67 @@ def case_dashboard(case_id):
 
 # ================================ list machines
 # list all machines in the case
-@app.route("/case/<case_id>")
-def all_machines(case_id):
+@app.route("/case/<case_id>/" , defaults={'group_name': None})
+@app.route("/case/<case_id>/<group_name>")
+def all_machines(case_id , group_name):
+
 
     # check messages or errors 
     message = None if 'message' not in request.args else request.args['message']
     err_msg = None if 'err_msg' not in request.args else request.args['err_msg']
-
-    machines = db_cases.get_machines(case_id)
-    case = db_cases.get_case_by_id(case_id)
+    # collect information 
+    machines        = db_cases.get_machines(case_id , group_name)
+    case            = db_cases.get_case_by_id(case_id)
     parsers_details = db_parsers.get_parser()
+    groups_list     = db_groups.get_groups(case_id)
 
-    return render_template('case/machines.html',case_details=case , all_machines=machines,SIDEBAR=SIDEBAR ,parsers_details =parsers_details , message = message , err_msg=err_msg)
+    # check if there is error getting the information
+    error = None
+    if machines[0] == False:    
+        error = ["Case["+case_id+"]: Failed getting case machines" , machines[1]]
+    elif case[0] == False:
+        error = ["Case["+case_id+"]: Failed getting case information" , case[1]]
+    elif case[1] is None:
+        error = ["Case["+case_id+"]: Failed getting case information" , 'Index not found']
+    elif parsers_details[0] == False:
+        error = ["Case["+case_id+"]: Failed getting parsers information" , parsers_details[1]]
+    elif groups_list[0] == False:
+        error = ["Case["+case_id+"]: Failed getting groups information" , groups_list[1]]
+
+
+    # add specifiy the selected group in the list
+    if group_name is not None:
+        for i in groups_list[1]:
+            if i['_id'] == case_id + "_" + group_name:
+                i['selected'] = True
+
+
+    if error is not None:
+        logger.logger(level=logger.ERROR , type="case", message=error[0], reason=error[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message=error[0] + "<br />" + error[1])
+
+    return render_template('case/machines.html',case_details=case[1] , all_machines=machines[1],SIDEBAR=SIDEBAR ,parsers_details =parsers_details[1] , groups_list=groups_list[1] , message = message , err_msg=err_msg)
+
+
 
 # ================================ get processing progress
-@app.route("/case/<case_id>/<machine_id>/progress")
-def all_machines_progress(case_id , machine_id):
-    machines = db_files.get_parsing_progress(machine_id)
-    if machines[0]:
-        return json.dumps(machines[1])
+@app.route("/case/<case_id>/progress" , methods=['POST'])
+def all_machines_progress(case_id):
+    if request.method == 'POST':
+        ajax_str            =  urllib.unquote(request.data).decode('utf8')
+        machines_list       = json.loads(ajax_str)['machines_list']
+        machines_progress   = []
+        for machine in machines_list:
+            
+            machines        = db_files.get_parsing_progress(machine)
+            if machines[0]:
+                machines_progress.append( {'machine': machine , 'progress' : machines[1] } )
+            else:
+                logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed getting the process progress for machine ["+machine+"]", reason=machines[1])
+                return redirect(url_for('all_machines',case_id=case_id , err_msg=machine[1]))
+        return json.dumps(machines_progress)
     else:
-        return redirect(url_for('all_machines',case_id=case_id , err_msg=machine[1]))
-
+        return redirect(url_for('home_page'))
 
 # ================================ machine files status 
 # this will list all files and their parser and show their status (done, parsing, pending, etc)
@@ -233,35 +472,24 @@ def case_machine_files_status(case_id , machine_id):
     # upload machine page
     if request.method == 'GET':
 
-        case = db_cases.get_case_by_id(case_id)
+        case        = db_cases.get_case_by_id(case_id)
         CASE_FIELDS = get_CASE_FIELDS()
 
         # if there is no case exist
-        if case is None:
-            print "[-] Error: ["+case_id+"] not exists"
-            return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS , message="Case not found")
+        if case[0] == False:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case information", reason=case[1])
+            return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting case information<br />" + case[1])
+        if case[0] == True and case[1] is None:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case information", reason='case not found')
+            return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting case information<br />case not found")
 
         # get files
         files = db_files.get_by_machine(machine_id)
+        if files[0] == False:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting machine files", reason=files[1])
+            return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting machine files<br />" + files[1])
         
-        machine_files_status = []
-        if files[0]:
-            
-            for f in files[1]['files']:
-                for p in f['parsers']:
-                    message = p['message'] if 'message' in p.keys() else ''
-                    badge_class = {
-                        'pending'   : 'bg-red' if message != '' else 'bg-gray',
-                        'done'      : 'bg-green',
-                        'parsing'   : 'bg-light-blue'
-                    }
-                    badge = 'bg-gray'
-                    if p['status'] in badge_class.keys(): badge = badge_class[p['status']]
-
-                    status = '<span class="badge badge-pill '+badge+'" style="padding:5px">'+p['status']+'</span>'
-                    machine_files_status.append([ f['file_path'] ,str(f['file_size'])+"B" , p['parser_name'] , status , p['start_time'].split('.')[0] , message ])
-
-        return render_template('case/machine_file_status.html',case_details=case ,SIDEBAR=SIDEBAR, machine_id=machine_id , db_files=files[1]['files'] )
+        return render_template('case/machine_file_status.html',case_details=case[1] ,SIDEBAR=SIDEBAR, machine_id=machine_id , db_files=files[1]['files'] )
 
 
 
@@ -278,17 +506,24 @@ def case_disable_enable_selected_files(case_id , machine_id):
         ajax_data = json.loads(ajax_str)['data']
         case = db_cases.get_case_by_id(case_id)
         # if there is no case exist
-        if case is None:
-            return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS , message="Error: "+case_id+" Case not found")
-        
+        if case[0] == False:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed "+ ajax_data['action']+ " file ["+ajax_data['path']+"]", reason=case[1])
+            return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed "+ ajax_data['action']+ " file ["+ajax_data['path']+"]<br />" + case[1])
+        elif case[0] == True and case[1] is None:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed "+ ajax_data['action']+ " file ["+ajax_data['path']+"]", reason='case not found')
+            return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed "+ ajax_data['action']+ " file ["+ajax_data['path']+"]<br />case not found")
+
+
         disable = True
         if ajax_data['action'] == 'enable':
             disable = False
         up = db_files.disable_enable_file(machine_id , ajax_data['path'] , ajax_data['parser'] , disable)
         
-        if up[0]:
+        if up[0] == True:
+            logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: File ["+ajax_data['path']+"] "+ ajax_data['action'])
             ajax_data['result'] = True 
         else:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed "+ ajax_data['action']+ " file ["+ajax_data['path']+"]", reason=up[1])
             ajax_data['result'] = False
             
         return jsonify(ajax_data)
@@ -302,14 +537,21 @@ def case_upload_machine(case_id):
     # upload machine page
     if request.method == 'GET':
 
-        case = db_cases.get_case_by_id(case_id)
         CASE_FIELDS = get_CASE_FIELDS()
-        if case is None:
-            print "[-] Error: ["+case_id+"] not exists"
-            return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS , message="There is no parsed artifacts, please upload and parse some artifacts to show this page")
+        if CASE_FIELDS[0] == False:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting parsers important fields", reason=CASE_FIELDS[1])
+            return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting parsers important fields<br />" + CASE_FIELDS[1])
+            
+        case = db_cases.get_case_by_id(case_id)
+        if case[0] == False:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case ["+case_id+"] information", reason=case[1])
+            return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting case information<br />" + case[1])
+        elif case[0] == True and case[1] is None:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case ["+case_id+"] information", reason='Index not found')
+            return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting case ["+case_id+"] information<br />Index not found")
+        
 
-
-        return render_template('case/upload_machines.html',case_details=case ,SIDEBAR=SIDEBAR )
+        return render_template('case/upload_machines.html',case_details=case[1] ,SIDEBAR=SIDEBAR )
 
     # upload the machine files ajax
     elif request.method == 'POST':
@@ -317,128 +559,43 @@ def case_upload_machine(case_id):
         file = request.files['files[]']
         # if there is a file to upload
         if file:
-            
-            filename        = secure_filename(file.filename)
-            file_name       = str(datetime.now() ).split('.')[0].replace(' ' , 'T') + "-" + filename
-            machine_name    = filename.rstrip('.zip')
-            machine_id      = case_id + "_" + machine_name
-            
-            # check if machine already exists
-            if db_cases.get_machine_by_id(machine_id) is not None:
-                return jsonify({'result' : False , 'filename' : filename , 'message' : 'Machine already exists'})
-            
+            base64_name = None if 'base64_name' not in request.form else request.form['base64_name'] 
+            # start handling uploading the file
+            uf = upload_file(file , case_id , base64_name=base64_name)
+            return json.dumps(uf[1])
 
-            # create the machine folder in files folder
-            files_folder = app.config["UPLOADED_FILES_DEST"] + "/" + case_id + "/" + machine_id + "/"
-            raw_folder = app.config["UPLOADED_FILES_DEST_RAW"] + "/" + case_id + "/" + machine_id + "/"
-                
-            create_folders( files_folder )  # create the folder for the case in files if not exists
-            create_folders( raw_folder )    # create the folder for the case in raw folder if not exists
-            
-            # save the file to the raw data
-            file.save(raw_folder + file_name)   
-
-            
-            # unzip the file to machine files
-            try:
-                unzip_fun = unzip_file(raw_folder + file_name ,  files_folder + file_name + "/")
-                
-                if unzip_fun[0] == True:
-                    
-                    
-                    if RemoveRawFiles:
-                        remove_file(raw_folder + file_name) # remove the raw file
-
-                else:
-                    remove_file(raw_folder +  file_name) # remove file if exists
-                    remove_folder(files_folder + file_name + "/") # remove file if exists
-                    return jsonify({'result' : False , 'filename' : filename , 'message' : unzip_fun[1]})
-            
-            # if unzip failed
-            except Exception as e:
-                if 'password required' in str(e):
-                    return jsonify({'result' : False , 'filename' : filename , 'message' : 'File require password'})
-                else:
-                    return jsonify({'result' : False , 'filename' : filename , 'message' : 'Failed to unzip the file'})
-
-            f = {
-                'name': filename
-            }
-            machine_details = {
-                'main_case' : case_id,
-                'machinename' : machine_name
-            }
-            
-            create_m = db_cases.add_machine(machine_details)
-            if create_m[0] == False:
-                remove_file(raw_folder +  file_name) # remove file if exists
-                remove_folder(files_folder + file_name + "/") # remove file if exists
-                return jsonify({'result' : False , 'filename' : filename , 'message' : create_m[1]}) 
-            return jsonify({'result': True , 'filename' : filename, 'data': f})
-
-
-        return json.dumps({'result' : False , 'filename' : filename , 'message' : 'There is no file selected'})
-
+        return json.dumps({'result' : False , 'filename' : '' , 'message' : 'There is no file selected'})
+    else:
+        return redirect(url_for('home_page'))
+        
 
 # ================================ Upload Artifacts
 # upload artifacts for specific machine
 @app.route('/case/<main_case_id>/uploadartifacts/<machine_case_id>', methods=['GET', 'POST'])
 def main_upload_artifacts(main_case_id,machine_case_id):
-    if request.method == 'POST' and 'file' in request.files:
-        file = request.files['file']
+    if request.method == 'POST':
+        try:
+            
+            # get file
+            file = request.files['files[]']
 
-        # if there is no file selected, return error
-        if request.files['file'].filename == '':
-            return jsonify({'results':'error' , 'data' : 'No file has been selected'})
+            
+            # if there is a file to upload
+            if file:
+                base64_name = None if 'base64_name' not in request.form else request.form['base64_name']       
+                # start handling uploading the file
+                uf = upload_file(file , main_case_id , machine_case_id , base64_name=base64_name)
+                return json.dumps(uf[1])
 
-        files_folder = app.config["UPLOADED_FILES_DEST"] + "/" + main_case_id + "/" + machine_case_id + "/"
-        raw_folder = app.config["UPLOADED_FILES_DEST_RAW"] + "/" + main_case_id + "/" + machine_case_id + "/"
+            return json.dumps({'result' : False , 'filename' : '' , 'message' : 'There is no file selected'})
+
+        except Exception as e:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+main_case_id+"]: Failed upload artifacts" , reason=str(e))
+            return jsonify({'result':'error' , 'message':str(e)})
+            
+    else:
+        return redirect(url_for('home_page'))
         
-        
-        create_folders( files_folder )  # create the folder for the case in files if not exists
-        create_folders( raw_folder )    # create the folder for the case in raw folder if not exists
-        
-        # save the file to raw folder
-        file_name       = str(datetime.now() ).split('.')[0].replace(' ' , 'T') + "-" + secure_filename(file.filename)
-        file_content    = file.read()
-        file_hash       = hashlib.md5(file_content).hexdigest() 
-
-        # get hash values for all files for this machine
-        exists_files = []
-        for (dirpath, dirnames, filenames) in os.walk(raw_folder):
-            for f in filenames:
-                exists_files.append( [ f , md5(dirpath + f) ] )
-        
-        # check if file exists by hash
-        for i in exists_files:
-            if file_hash == i[1]:
-                return jsonify({'results':'error' , 'data' : 'The following two files has same MD5 hash<br > - Uploaded: ' + file_name + '<br > - Exists: '+i[0]})
-
-        # save the file to raw folder
-        f = open(raw_folder +  file_name , 'wb')
-        f.write(file_content)
-        f.close()
-        
-        # unzip the file if it is zip file, else juwst copy the files to machine folder
-        if file_name.endswith(".zip"):
-            unzip_fun = unzip_file(raw_folder + file_name ,  files_folder + file_name + "/" )
-            if unzip_fun[0] == True:
-                files = list_zip_file(raw_folder + file_name)
-                
-                if RemoveRawFiles:
-                        remove_file(raw_folder + file_name) # remove the raw file
-            else:
-                remove_file(raw_folder +  file_name) # remove file if exists
-                remove_folder(files_folder + file_name + "/") # remove file if exists
-                return jsonify({'results':'error' , 'data' : unzip_fun[1]})
-        else:
-            shutil.copy(raw_folder + file_name, files_folder + file_name)  
-            files = [file_name]
-
-        for f in range(0 , len(files) ):
-            files[f] = main_case_id + "/" + machine_case_id + "/" + files[f]
-        return jsonify({'data':files})
-
 
 
 # ================================ add machine
@@ -447,16 +604,18 @@ def main_upload_artifacts(main_case_id,machine_case_id):
 def add_machine(case_id):
     if request.method == 'POST':
         machine_details = {
-            'machinename':request.form['machinename'],
-            'main_case':case_id,
-            'ip':request.form['ip'],
+            'machinename'   :request.form['machinename'],
+            'main_case'     :case_id,
+            'ip'            :request.form['ip'],
 
         }
 
         machine = db_cases.add_machine(machine_details)
         if machine[0]:
+            logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: Machine ["+machine_details['machinename']+"] created")
             return redirect(url_for('all_machines',case_id=case_id , message= "Machine [" + machine[1].lstrip(case_id + "_") + "] created"))
         else:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed creating machine ["+machine_details['machinename']+"]", reason=machine[1])
             return redirect(url_for('all_machines',case_id=case_id , err_msg=machine[1]))
 
 
@@ -468,12 +627,15 @@ def add_machine(case_id):
 @app.route("/case/<case_id>/delete_machine/<machines_list>" , methods=['GET'])
 def delete_machine(case_id , machines_list):
     if request.method == 'GET':
-        print machines_list
 
+        logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Delete machines" , reason=machines_list)
         # delete machine from mongo db
         for machine in machines_list.split(','):
             db_machine = db_cases.delete_machine(machine)
-            
+            if db_machine[0] == False:
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed deleting machine ["+machine+"]" , reason=db_machine[1])
+                continue
+
             # delete machines records from elasticsearch
             q = {"query": {
                     "query_string": {
@@ -483,7 +645,7 @@ def delete_machine(case_id , machines_list):
             } 
             es_machine = db_es.del_record_by_query(case_id , q)
             if es_machine:
-                print "[+] Machine ["+machine+"] records removed"
+                logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: Machine ["+machine+"] deleted")
 
         # delete all records for the machines
         
@@ -491,15 +653,126 @@ def delete_machine(case_id , machines_list):
 
 
 
+
 # ================================ process artifacts
 # run the selected parser for the machines specified
 @app.route('/case/<main_case_id>/processartifacts/<machine_case_id>/<parser_name>', methods=['GET'])
 def main_process_artifacts(main_case_id,machine_case_id,parser_name):
-    parsers = parser_name.split(',')
+    logger.logger(level=logger.DEBUG , type="case", message="Case["+main_case_id+"]: Start processing machine ["+machine_case_id+"], parsers ["+parser_name+"]")
 
-    task = parser_management.run_parserss.apply_async((main_case_id,machine_case_id,parsers))
-    
+    parsers = parser_name.split(',')
+    task = parser_management.run_parsers.apply_async((main_case_id,machine_case_id,parsers) , link_error=parser_management.task_error_handler.s())
+    #task = parser_management.run_parsers.apply_async((main_case_id,machine_case_id,parsers))
+    logger.logger(level=logger.DEBUG , type="case", message="Case["+main_case_id+"]: task ID ["+task.id+"]")
     return jsonify({'data': 'started processing'})
+
+
+
+
+
+
+
+# ================================ add group
+# add a group to the case
+@app.route("/case/<case_id>/add_group" , methods=['POST','GET'])
+def add_group(case_id):
+    
+    if request.method == 'POST':
+        group_name  = request.form['group_name']
+        group       = db_groups.add_group(case_id , group_name)
+
+        if group[0]:
+            logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: Group ["+group_name+"] created")
+            return redirect(url_for('all_machines',case_id=case_id , message= "Group ["+group_name+"] created"))
+        else:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed creating group ["+group_name+"]", reason=group[1])
+            return redirect(url_for('all_machines',case_id=case_id , err_msg=group[1]))
+
+    else:
+        return redirect(url_for('home_page'))
+
+
+
+
+
+
+# ================================ assign to group 
+# assign the selected machines to group
+@app.route("/case/<case_id>/assign_to_group/" , methods=['POST'])
+def assign_to_group(case_id):
+    
+    if request.method == 'POST':
+        ajax_str        =  urllib.unquote(request.data).decode('utf8')
+        machines_list   = json.loads(ajax_str)['machines_list']
+        group_name      = json.loads(ajax_str)['group_name']
+        res       = db_cases.assign_to_group(machines_list , group_name)
+
+        if res[0]:
+            logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: assigned machines to group ["+group_name+"]" , reason=",".join(machines_list))
+            return json.dumps({'result' : 'successful' , 'message' : 'assigned to groups'})
+        else:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed assigning  machines to group ["+group_name+"]", reason=res[1])
+            return json.dumps({'result' : 'failed' , 'message' : res[1]})
+
+    else:
+        return redirect(url_for('home_page'))
+
+
+
+
+# ================================ deassign from group 
+# deassign the selected machines from group
+@app.route("/case/<case_id>/deassign_from_group/" , methods=['POST'])
+def deassign_from_group(case_id):
+    
+    if request.method == 'POST':
+        ajax_str        =  urllib.unquote(request.data).decode('utf8')
+        machines_list   = json.loads(ajax_str)['machines_list']
+        group_name      = json.loads(ajax_str)['group_name']
+        res       = db_cases.deassign_from_group(machines_list , group_name)
+
+        if res[0]:
+            logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: deassigned machines from group ["+group_name+"]" , reason=",".join(machines_list))
+            return json.dumps({'result' : 'successful' , 'message' : 'deassigned from group'})
+        else:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed deassigning  machines from group ["+group_name+"]", reason=res[1])
+            return json.dumps({'result' : 'failed' , 'message' : res[1]})
+
+    else:
+        return redirect(url_for('home_page'))
+
+
+
+
+
+
+# ================================ deassign to group 
+# deassign the selected machines from group
+@app.route("/case/<case_id>/delete_group/<group_name>" , methods=['GET'])
+def delete_group(case_id , group_name):
+    
+    if request.method == 'GET':
+        res       = db_groups.delete_group(case_id , group_name)
+
+        if res[0]:
+            logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: Group ["+group_name+"] deleted")
+            return json.dumps({'result' : 'successful' , 'message' : 'Group deleted'})
+        else:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed deleting group ["+group_name+"]", reason=res[1])
+            return json.dumps({'result' : 'failed' , 'message' : res[1]})
+
+    else:
+        return redirect(url_for('home_page'))
+
+
+
+
+
+
+
+
+
+
 
 
 # =================== Artifacts =======================
@@ -511,101 +784,135 @@ def main_process_artifacts(main_case_id,machine_case_id,parser_name):
 def browse_artifacts_list_ajax(case_id):
 
     if request.method == "POST":
-        ajax_str =  urllib.unquote(request.data).decode('utf8')
-        print ajax_str
-        ajax_data = json.loads(ajax_str)['data']
-        print ajax_data['query']
+        try:
+            ajax_str    =  urllib.unquote(request.data).decode('utf8')
+            ajax_data   = json.loads(ajax_str)['data']
 
-        body = {
-            "query":{
-                "query_string":{
-                    "query" : ajax_data['query']
-                }
-            },
-            "aggs":{
-                  "data_type": {
-                      "terms" : {
-                          "field" : "data_type.keyword",
-                          "size" : 500
-                      }
+            body = {
+                "query":{
+                    "query_string":{
+                        "query" : ajax_data['query'],
+                        "default_field" : "catch_all"
+                        
+                    }
+                },
+                
 
-                  }
-              },
+                "size":0
+            }
+            logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Query artifacts list", reason=json.dumps(body))
+            res = db_es.query( case_id, body )
+            if res[0] == False:
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed query artifacts list from dataabase", reason=res[1])
+                return json.dumps( {'res' : res[1]} )
 
-            "size":0
-        }
+            res = res[1]["aggregations"]["data_type"]["buckets"]
 
-        res = db_es.query( case_id, body )
-        if res['result'] == False:
-            return json.dumps( {'res' : res['data']} )
-
-
-        res = res['data']["aggregations"]["data_type"]["buckets"]
-        print res
-
-
-        return json.dumps({'res' : res})
-
+            return json.dumps({'res' : res})
+        except Exception as e:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed query artifacts list from dataabase", reason=str(e))
+            return json.dumps({'res' : 'Failed query artifacts list: ' + str(e)})
+    else:
+        return redirect(url_for('home_page'))
 
 # ================================ get artifacts records ajax
 # retrive all artifacts records using ajax
 @app.route('/case/<case_id>/browse_artifacts_ajax', methods=["POST"])
 def case_browse_artifacts_ajax(case_id):
     if request.method == "POST":
-        ajax_str =  urllib.unquote(request.data).decode('utf8')
-        ajax_data = json.loads(ajax_str)['data']
-        body = {
-            "from": int(ajax_data["wanted_page"]) * 30,
-            "size":30,
+        try:
+            ajax_str =  urllib.unquote(request.data).decode('utf8')
+            ajax_data = json.loads(ajax_str)['data']
+            body = {
+                "from": int(ajax_data["wanted_page"]) * 30,
+                "size":30,
 
-        }
-        if ajax_data['query'] != "None":
-            body["query"] = {
-                "query_string" : {
-                    "query" : ajax_data['query']
+            }
+            if ajax_data['query'] != "None":
+                body["query"] = {
+                    "query_string" : {
+                        "query" : ajax_data['query'],
+                        "default_field" : "catch_all"
+                    }
                 }
-            }
 
-        if ajax_data['sort_by'] != "None":
-            order = "asc" if ajax_data['sort_by']['order'] == 0 else "desc"
-            body["sort"] = {
-                ajax_data['sort_by']['name'] : {"order" : order}
-            }
+            if ajax_data['sort_by'] != "None":
+                order = "asc" if ajax_data['sort_by']['order'] == 0 else "desc"
+                body["sort"] = {
+                    ajax_data['sort_by']['name'] : {"order" : order}
+                }
+            
+            body["aggs"] = {
+                    "data_type": {
+                        "terms" : {
+                            "field" : "data_type.keyword",
+                            "size" : 500
+                        }
 
-        res = db_es.query( case_id, body )
+                    }
+                }
+            logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Query artifacts", reason=json.dumps(body))
+            res = db_es.query( case_id, body )
+            if res[0] == False:
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed query artifacts from dataabase", reason=res[1])
+                return json.dumps({'res_total' : 0 , 'res_records' : [] , 'aggs' : []})
 
-        if res['result'] == False:
-            return json.dumps( {'res_total' : 0 , "res_records" : res['data']} )
+            res_records = res[1]['hits']['hits']
+            res_total   = res[1]['hits']['total']['value']
+            aggs_records= res[1]["aggregations"]["data_type"]["buckets"]
 
-        res_records = res['data']['hits']['hits']
-        res_total = res['data']['hits']['total']
-        for i in range( 0  , len(res_records) ):
-            if "machine" in res_records[i]['_source'].keys():
-                machine = db_cases.get_machine_by_id(res_records[i]['_source']['machine'])
-                if machine is not None:
-                    res_records[i]['_source']['machinename'] = machine['machinename']
+            for i in range( 0  , len(res_records) ):
+                if "machine" in res_records[i]['_source'].keys():
+                    machine = db_cases.get_machine_by_id(res_records[i]['_source']['machine'])
+                    if machine[0] == True:
+                        res_records[i]['_source']['machinename'] = machine[1]['machinename']
+                    else:
+                        logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed getting the machine name", reason=machine[1])
+                    
+            ajax_res = {"res_total" : res_total , "res_records" : res_records , 'aggs' : aggs_records}
 
-        ajax_res = {"res_total" : res_total , "res_records" : res_records}
+            return json.dumps(ajax_res)
 
-        return json.dumps(ajax_res)
+
+        except Exception as e:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting the browser artifacts", reason=str(e))
+            return json.dumps({"res_total" : 0 , "res_records" : []})
+
+    else:
+        return redirect(url_for('home_page'))
 
 
 # ================================ get artifacts data types
 # get all artifacts for case
 @app.route('/case/<case_id>/browse_artifacts', methods=['GET'])
 def case_browse_artifacts(case_id):
-    case = db_cases.get_case_by_id(case_id)
 
     
     CASE_FIELDS = get_CASE_FIELDS()
+    if CASE_FIELDS[0] == False:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting parsers important fields", reason=CASE_FIELDS[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting parsers important fields<br />" + CASE_FIELDS[1])
+            
 
+
+    case = db_cases.get_case_by_id(case_id)
+
+    if case[0] == False:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case information" , reason=case[1])
+        return render_template('case/error_page.html',case_details=case[1] ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting case information, <br />"+case[1])
+    
+    if case[1] is None:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case information", reason='Index not found')
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Case["+case_id+"]: Failed getting case information<br />Index not found")
+
+    
     # get all fields from elasticsearch
     # used for advanced search to list all fields when searching
-    try:
-        fields_mapping = db_es.get_mapping_fields(case_id)
-    except Exception as exc:
-        print "[-] Error: ["+case_id+"] - " + str(exc)
-        return render_template('case/error_page.html',case_details=case ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS , message="There is no parsed artifacts, please upload and parse some artifacts to show this page")
+    fields_mapping = db_es.get_mapping_fields(case_id)
+    if fields_mapping[0] == False:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting the mapping fields " , reason=fields_mapping[1])
+        return render_template('case/error_page.html',case_details=case[1] ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting the mapping fields for case ["+case_id+"], <br />"+fields_mapping[1])
+        
     
     query = {
             "AND" : []
@@ -621,11 +928,12 @@ def case_browse_artifacts(case_id):
     # get all rules
     all_rules = db_rules.get_rules()
     if all_rules[0] == False:
-        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS , message=all_rules[0])
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting the rules information" , reason=all_rules[1])
+        return render_template('case/error_page.html',case_details=case[1] ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting the rules information, <br />" + all_rules[1])
 
 
     q = json.dumps(query)
-    return render_template('case/browse_artifacts.html',case_details=case ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS , search_query = q , fields_mapping=fields_mapping , rules = all_rules[1])
+    return render_template('case/browse_artifacts.html',case_details=case[1] ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , search_query = q , fields_mapping=fields_mapping[1] , rules = all_rules[1])
 
 
 
@@ -638,15 +946,24 @@ def case_browse_artifacts(case_id):
 # get the time line page
 @app.route('/case/<case_id>/timeline', methods=['GET'])
 def case_timeline(case_id):
-    case = db_cases.get_case_by_id(case_id)
+
     
     CASE_FIELDS = get_CASE_FIELDS()
+    if CASE_FIELDS[0] == False:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting parsers important fields", reason=CASE_FIELDS[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting parsers important fields<br />" + CASE_FIELDS[1])
+            
 
-    if case is None:
-        print "[-] Error: ["+case_id+"] not exists"
-        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS , message="There is no parsed artifacts, please upload and parse some artifacts to show this page")
+    case = db_cases.get_case_by_id(case_id)
+    if case[0] == False:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case information", reason=case[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting case information<br />" + case[1])
+    
+    if case[1] is None:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case information", reason='Index not found')
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Case["+case_id+"]: Failed getting case information<br />Index not found")
 
-    return render_template('case/timeline.html',case_details=case ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS )
+    return render_template('case/timeline.html',case_details=case[1] ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1])
 
 
 # ================================ get tags ajax
@@ -654,68 +971,85 @@ def case_timeline(case_id):
 @app.route('/case/<case_id>/timeline_ajax', methods=['POST'])
 def case_timeline_ajax(case_id ):
     if request.method == "POST":
-        ajax_str =  urllib.unquote(request.data).decode('utf8')
-        ajax_data = json.loads(ajax_str)['data']
+        try:
+            ajax_str =  urllib.unquote(request.data).decode('utf8')
+            ajax_data = json.loads(ajax_str)['data']
 
 
-        body = {
-            "query": {
-                "query_string" : {
-                    "query" : 'data_type:"tag"'
-                }
-            },
-            "sort":{
-                "Data.@timestamp" : {"order" : "asc"}
-            },
-            "size": 200
-        }
-        res = db_es.query( case_id, body )
+            body = {
+                "query": {
+                    "query_string" : {
+                        "query" : 'data_type:tag'
+                    }
+                },
+                "sort":{
+                    "Data.@timestamp" : {"order" : "asc"}
+                },
+                "size": 200
+            }
+            res = db_es.query( case_id, body )
 
-        if res['result'] == False:
-            return json.dumps( {'tags' : res['data']} )
-
-
-        #print res
-        total_tags = res['data']['hits']['total']
-        tags =  res['data']['hits']['hits']
+            if res[0] == False:
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed retriving timeline from database", reason=res[1])
+                return json.dumps( {'result': 'failed' , 'tags' : res[1]} )
 
 
-        for t in range(0 , len(tags)):
-            if 'record_id' in tags[t]['_source']['Data'].keys():
-                record_id = tags[t]['_source']['Data']['record_id']
-                rec = db_es.get_record_by_id(case_id , record_id)
-                if rec != False:
-                    tags[t]['_source']['Data']['record_details'] = rec
+            total_tags  = res[1]['hits']['total']['value']
+            tags        =  res[1]['hits']['hits']
 
 
-        return json.dumps({"tags" : tags})
+            for t in range(0 , len(tags)):
+                if 'record_id' in tags[t]['_source']['Data'].keys():
+                    record_id = tags[t]['_source']['Data']['record_id']
+                    rec = db_es.get_record_by_id(case_id , record_id)
+                    if rec[0] == False:
+                        logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed getting record details in timeline", reason=rec[1])
 
+                    if rec[0] == True and rec[1] != False:
+                        tags[t]['_source']['Data']['record_details'] = rec[1]
+
+
+            return json.dumps({ 'result' : 'successful' , "tags" : tags})
+
+        except Exception as e:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed retriving timeline", reason=str(e))
+            return json.dumps( {'result': 'failed' , 'tags' : "Failed retriving timeline" + str(e)} )
+
+    else:
+        return redirect(url_for('home_page'))
 
 # ================================ delete tag ajax
 # delete a specific tag by its ID
 @app.route('/case/<case_id>/timeline_delete_tag_ajax', methods=['POST'])
 def case_timeline_delete_tag(case_id ):
     if request.method == "POST":
-        ajax_str =  urllib.unquote(request.data).decode('utf8')
-        print ajax_str
-        ajax_data = json.loads(ajax_str)['data']
+        ajax_str    =  urllib.unquote(request.data).decode('utf8')
+        ajax_data   = json.loads(ajax_str)['data']
+        logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Delete tag", reason=json.dumps(ajax_data))
 
-        tag_id =  ajax_data['tag_id']
-        record_id = ajax_data['record_id']
-        print record_id
-        print tag_id
+        tag_id      =  ajax_data['tag_id']
+        record_id   = None if 'record_id' not in ajax_data.keys() else ajax_data['record_id']
 
+        # delete the tag record
         delete = db_es.del_record_by_id( case_id = case_id , record_id = tag_id)
-        print delete
-        if(delete):
+        if delete[0] == False:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed deleting tag", reason=delete[1])
+            return json.dumps({'result' : 'failed' , 'data': 'Failed:' + delete[1]})
+        
+        # if the tag associated with artifact record
+        if record_id is not None:
+            # delete the tag record from record
+            update_field = db_es.update_field( {"script": "ctx._source.remove(\"tag_id\")"}  , record_id , case_id)
+            if update_field[1] == False:
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed adding tag_id to artifact record", reason=update_field[1])
+                return json.dumps({'result' : 'failed' , 'data': 'Failed deleting tag_id from artifact record: ' + update_field[1]})
 
-            if record_id is not None:
-                if not db_es.update_field( {"script": "ctx._source.remove(\"tag_id\")"}  , record_id , case_id):
-                    return json.dumps({"result" : 'failed1'})
 
-            return json.dumps({"result" : 'successful'})
-        else:
-            return json.dumps({"result" : 'failed'})
+
+        logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: tag ["+tag_id+"] deleted")
+        return json.dumps({'result' : 'successful'})
+    else:
+        return redirect(url_for('home_page'))
 
 # ================================ add tag ajax
 # add tag to a specifc record
@@ -725,6 +1059,8 @@ def case_add_tag_ajax(case_id):
         ajax_str =  urllib.unquote(request.data).decode('utf8')
         record_id = None
         ajax_data = json.loads(ajax_str)['data']
+
+        
         Data = {
             "tag" : ajax_data['time'] ,
             "@timestamp" : ajax_data['time']
@@ -736,19 +1072,30 @@ def case_add_tag_ajax(case_id):
         if 'message' in ajax_data.keys():
             Data['message']     = ajax_data['message']
 
-        up = db_es.es_add_tag(data = { "Data" : Data  , "data_type" : 'tag' } , case_id = case_id )
-        #up = db_es.update_field(tag ={"tag" : ajax_data["tag"]} , doc_id = ajax_data["doc_id"], indx=case_id)
-        if up['_shards']['successful'] == True:
-            if record_id is not None:
-                if db_es.update_field( {'doc': {'tag_id' : up['_id'] }}  , record_id , case_id):
-                    return json.dumps({"result" : 'successful'})
-                else:
-                    return json.dumps({'result' : 'created'})
-            else:
-                #return redirect(url_for('case_timeline' , case_id = case_id))
-                return json.dumps({"result" : 'successful' , 'id' : up['_id']})
+        logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Add tag", reason=json.dumps(Data))
+
+        # add new record tag
+        
+        up = db_es.bulk_queue_push( [Data] , case_id , source = None , machine = None , data_type = 'tag', data_path = None , chunk_size=500)
+        #db_es.es_add_tag(data = { "Data" : Data  , "data_type" : 'tag' } , case_id = case_id )
+        if up[0] == False:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed adding tag", reason=up[1])
+            return json.dumps({'result' : 'failed' , 'data': 'Failed adding tag: ' + up[1]})
+
+        # update the tag_id to artifact record
         else:
-            return json.dumps({"result" : 'failed'})
+            if record_id is not None and len(up[3]) != 0:
+
+                # for each successful tag added
+                for tag_id in up[3]:
+                    update_field = db_es.update_field( {'doc': {'tag_id' : tag_id }}  , record_id , case_id)
+                    if update_field[0] == False:
+                        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed adding tag_id to artifact record", reason=update_field[1])
+                        return json.dumps({'result' : 'failed' , 'data': 'Failed adding tag_id to artifact record: ' + update_field[1]})
+
+                logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: Tag created")
+                return json.dumps({"result" : 'successful' , 'tag_id' : up[3][0]})
+        
 
 
 
@@ -758,38 +1105,59 @@ def case_add_tag_ajax(case_id):
 # ================================ get all artifacts for case
 @app.route('/case/<case_id>/alerts', methods=['GET'])
 def case_alerts(case_id):
-    case = db_cases.get_case_by_id(case_id)
+    logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Open alerts page")
+
     CASE_FIELDS = get_CASE_FIELDS()
+    if CASE_FIELDS[0] == False:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting parsers important fields", reason=CASE_FIELDS[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting parsers important fields<br />" + CASE_FIELDS[1])
+            
 
+    case = db_cases.get_case_by_id(case_id)
+    if case[0] == False:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case information", reason=case[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting case information<br />" + case[1])
+    
 
-    if case is None:
-        print "[-] Error: ["+case_id+"] - No index "
-        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS , message="There is no parsed artifacts, please upload and parse some artifacts to show this page")
+    if case[1] is None:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case information", reason='Index not found')
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Case["+case_id+"]: Failed getting case information<br />Index not found")
 
 
     all_rules = db_rules.get_rules()
     if all_rules[0] == False:
-        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS , message=all_rules[0])
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting rules information", reason=all_rules[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message=all_rules[1])
 
+
+    requests = []
+    
     for rule in all_rules[1]:
-        body = {
+        requests.append({
                 "query":{
                     "query_string":{
-                        "query" : rule['rule']
+                        "query" : rule['rule'],
+                        "default_field": "catch_all"
                     }
                 },
                 "size":0
-        }
+        })
+    
 
-        res = db_es.query( case_id, body )
-        if res['result'] == False:
-            print res['data']
+    
+    if len(requests):
+        res = db_es.multiqueries(case_id, requests)
+    else:
+        res = [True, []] # if there is no rules
+    if res[0] == False:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting total hits of rules from database", reason=res[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message=res[1])
 
-        rule['hits'] = res['data']['hits']['total']
+    for r in range(0 , len(res[1])):
+        all_rules[1][r]['hits'] =  res[1][r]['hits']['total']['value']
+    
 
-
-
-    return render_template('case/alerts.html',case_details=case ,SIDEBAR=SIDEBAR , all_rules= all_rules[1] )
+    return render_template('case/alerts.html',case_details=case[1] ,SIDEBAR=SIDEBAR , all_rules= all_rules[1] )
 
 
 
@@ -799,7 +1167,25 @@ def case_alerts(case_id):
 # ================================ show the graph page
 @app.route('/case/<case_id>/graph/<record_id>')
 def graph_display(case_id , record_id):
+    logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Open graph for record ["+record_id+"]")
+
+    CASE_FIELDS = get_CASE_FIELDS()
+    if CASE_FIELDS[0] == False:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting parsers important fields", reason=CASE_FIELDS[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting parsers important fields<br />" + CASE_FIELDS[1])
+       
+
     case = db_cases.get_case_by_id(case_id)
+    if case[0] == False:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case details", reason=case[1])
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message=case[1])
+
+    if case[1] is None:
+        logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case information", reason='Index not found')
+        return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Case["+case_id+"]: Failed getting case information<br />Index not found")
+
+
+
     record = []
     if record_id is not None:
         query = {
@@ -811,13 +1197,12 @@ def graph_display(case_id , record_id):
         }
 
         record = db_es.query( case_id, query )
-        print json_beautifier( record )
-        if record['result'] == False:
-            print record['data']
-            return {'result' : False , 'data' : record['data']}
-        record = record['data']['hits']['hits']
-
-    return render_template('case/graph.html',SIDEBAR=SIDEBAR,case_details=case , init_records = record , page_header="Graph")
+        if record[0] == False:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting record information for graph", reason=record[1])
+            return {'result' : False , 'data' : record[1]}
+        record = record[1]['hits']['hits']
+    
+    return render_template('case/graph.html',case_details=case[1] , SIDEBAR=SIDEBAR, init_records = record , page_header="Graph")
 
 
 
@@ -828,11 +1213,15 @@ def graph_display(case_id , record_id):
 @app.route('/case/<case_id>/expand_graph', methods=["POST"])
 def graph_expand(case_id):
     if request.method == "POST":
+
+
         ajax_str =  urllib.unquote(request.data).decode('utf8')
-        print ajax_str
         ajax_data = json.loads(ajax_str)['data']
         field = ajax_data['field']
         value = ajax_data['value']
+        logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Expand search ["+field+":"+value+"]")
+
+
 
         special_chars = [ '\\' , '/' , ':' , '-' , '{' , '}' , '(', ')' , ' ' , '@' ]
         for sc in special_chars:
@@ -841,26 +1230,28 @@ def graph_expand(case_id):
         body = {
             "query": {
                 "query_string":{
-                        "query" : '"' + str(value) + '"'
+                        "query" : "*" + str(value) + "*",
+                        "default_field" : "catch_all"
                     }
             },
             "size": 500
         }
 
-        print json_beautifier( body)
         try:
             res = db_es.query( case_id, body )
-            if res['result'] == False:
-                print "[-] Error: "  + str(res['data'])
-                ajax_res = {'response' : 'error' , 'data' : str(res['data'])}
+            if res[0] == False:
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting record information for graph", reason=res[1])
+                ajax_res = {'response' : 'error' , 'data' : str(res[1])}
 
-            res_total = res['data']['hits']['total']
-            res_records = res['data']['hits']['hits']
+            res_total = res[1]['hits']['total']['value']
+            res_records = res[1]['hits']['hits']
             ajax_res = {'response' : 'OK' , "res_total" : res_total , "res_records" : res_records}
-        except:
+        except Exception as e:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting record information for graph", reason=str(e))
             ajax_res = {'response' : 'error'}
-            pass
-
+            
 
 
         return json.dumps(ajax_res)
+    else:
+        return redirect(url_for('home_page'))

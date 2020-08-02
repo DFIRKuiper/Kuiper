@@ -8,4 +8,3 @@ import yaml
 
 y = yaml.load( open( 'configuration.yaml' , 'r' ) , Loader=yaml.FullLoader )
 
-

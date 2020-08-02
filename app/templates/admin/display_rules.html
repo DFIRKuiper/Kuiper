@@ -10,9 +10,10 @@
             <div class="box-header">
               <h3 class="box-title"><i class="fa fa-list-alt"></i> Rules</h3>
             </div>
+            <br />
             <!-- /.box-header -->
-            <div id="rules_table" class="box-body table-responsive no-padding">
-              <table class="table table-hover">
+            <div id="rules_table" class="box-body no-padding">
+              <table class="table">
                 <tbody><tr>
                   <th width="10%">Rule Name</th>
                   <th width="10px" style="width: 10px">Severity</th>
@@ -54,7 +55,6 @@
 <!-- AdminLTE for demo purposes -->
 <script src="../../static/dist/js/demo.js"></script>
 
-<script src="../../static/json_viewer/json-viewer.js"></script>
 
 
 
@@ -114,7 +114,7 @@ function build_rule_severity_html(severity){
       case "Whitelist"  : var severity_class = "bg-light-blue"; break;
     }
 
-    return '<span class="badge badge-pill '+severity_class+'" style="padding:5px">' + severity + '</span>'
+    return '<span class="label '+severity_class+'">' + severity + '</span>'
 }
 
 
@@ -285,37 +285,29 @@ for(var i = 0 ; i < rules_list.length ; i++){
     var rule = build_rule_html( rules_list[i]['rule'] )
 
     // rule 
-    rule = '<div id="rule_'+rules_list[i]['_id']+'" class="text-muted well well-sm no-shadow" style="padding: 4px 9px;margin-bottom: 0px;">'+rule+'</div>'
+    rule = '<div id="rule_'+rules_list[i]['_id']+'" style="padding: 4px 9px;margin-bottom: 0px;">'+rule+'</div>'
     
     // options buttons
     var options = '<span class="box-tools">\
                   <div class="btn-group">\
-                    <button type="button" class="btn btn-default btn-sm edit_rule" data="'+rules_list[i]['_id']+'" ><i class="fa fa-gear" title="Edit rule"></i></button>\
-                    <button type="button" class="btn btn-default btn-sm delete_rule" data="'+rules_list[i]['_id']+'" ><i class="fa fa-remove" title="Delete rule"></i></button>\
+                    <button type="button" class="btn btn-default btn-sm edit_rule" data="'+rules_list[i]['_id']+'" ><i class="fa fa-edit" title="Edit rule"></i></button>\
+                    <button type="button" class="btn btn-danger btn-sm delete_rule" data="'+rules_list[i]['_id']+'" ><i class="fa fa-remove" title="Delete rule"></i></button>\
                   </div>\
               </span>';
 
     // rule name
-    var rule_name = '<span class="label label-default" style="padding:5px">' + rules_list[i]['rule_name'] + '</span></div>'
+    var rule_name = '' + rules_list[i]['rule_name'] + ''
 
     // rule severity
     var rule_severity = '<div id="rule_severity_'+rules_list[i]['_id']+'">' +  build_rule_severity_html(rules_list[i]['rule_severity']) + '</div>'
 
     // rule description
-    var rule_desc = '<div id="rule_desc_'+rules_list[i]['_id']+'" class="text-muted well well-sm no-shadow" style="padding: 4px 9px;margin-bottom: 0px; height: 30px">'+rules_list[i]['rule_description']+'</div>'
+    var rule_desc = '<div id="rule_desc_'+rules_list[i]['_id']+'" style="padding: 4px 9px;margin-bottom: 0px; height: 30px">'+rules_list[i]['rule_description']+'</div>'
 
 
     var td = '<td style="vertical-align: middle;">'
     $('#rules_table tbody').append("<tr>" + td +rule_name+"</td>" + td +rule_severity+"</td>" + td +rule_desc+"</td>"+ td +rule+"</td>" + td +options+"</td></tr>")  
 }
-
-
-
-// ================ preparing end
-
-// ================ on click buttons start
-
-// ================ on click buttons end
 
 
 </script>

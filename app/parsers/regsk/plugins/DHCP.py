@@ -19,9 +19,16 @@ class DHCP():
         self.log_files = log_files
 
     def run(self):
-        lst= []
-        DHCP_user_settings_path = u"ControlSet001\\Services\\Tcpip\\Parameters\\Interfaces"
         hive = get_hive(self.prim_hive,self.log_files)
+        select_key = hive.find_key(u'Select')
+        current_path=''
+        if select_key:
+            current_value = select_key.value(name=u"Current")
+            current_path = u"ControlSet{:03d}".format(current_value.data())
+        else:
+            current_path ='ControlSet001'
+        lst= []
+        DHCP_user_settings_path = u"\\".join([current_path,u"Services\\Tcpip\\Parameters\\Interfaces"])
         DHCP_user_settings_key = hive.find_key(DHCP_user_settings_path)
         if DHCP_user_settings_key:
             for sid_key in DHCP_user_settings_key.subkeys():

@@ -2,7 +2,7 @@ import os,sys
 from lib.walker import defind_files_logs,defind_single_file_logs,get_files,logs_folder
 from os import walk
 import argparse
-from plugins import UserAssist,Bam,OpenSaveMRU,LastVisitedMRU,MuiCache,AppCompatFlags,LaunchTracing,ProfileList,Uninstall,InstalledApp,InstalledComponents,ShellExtensions,Sysinternals,RunMRU,StreamMRU ,TimeZoneInformation ,ComputerName,TypedUrls,DHCP,TypedPaths,WordWheelQuery,TerminalServerClient,BagMRU,VolatileEnvironment,PortForwading,Amcache
+from plugins import UserAssist,Bam,OpenSaveMRU,LastVisitedMRU,MuiCache,AppCompatFlags,LaunchTracing,ProfileList,Uninstall,InstalledApp,InstalledComponents,ShellExtensions,Sysinternals,RunMRU,StreamMRU ,TimeZoneInformation ,ComputerName,TypedUrls,DHCP,TypedPaths,WordWheelQuery,TerminalServerClient,BagMRU,VolatileEnvironment,PortForwading,Amcache,Services
 import glob
 """This function is to include the address function of each praser as well as the trget hive with some discription"""
 def all_plugins():
@@ -27,7 +27,9 @@ def all_plugins():
                 "WordWheelQuery": {'function':WordWheelQuery.WordWheelQuery,"Target_hives":"NTUSER.DAT","Discription":"test"},
                 "TerminalServerClient":{'function':TerminalServerClient.TerminalServerClient,"Target_hives":"NTUSER.DAT","Discription":"test"},
                 "PortForwading":{'function':PortForwading.PortForwading,"Target_hives":"SYSTEM","Discription":"test"},
-                "Amcache":{'function':Amcache.Amcache,"Target_hives":"Amcache.hve","Discription":"test"}}
+                "Amcache":{'function':Amcache.Amcache,"Target_hives":"Amcache.hve","Discription":"test"},
+                "Services":{'function':Services.Services,"Target_hives":"SYSTEM","Discription":"Collect services from the SYSTEM registry"}
+                }
 
     return plugins
 
@@ -63,6 +65,7 @@ def get_single_plugin(file,log,plugin):
 """print outpit for kuiper"""
 def print_for_kuiper(file,log,plugin):
     if file is not None:
+        #print(file)
         #rsult_fd = create_folder(file)
         defined_f = defind_single_file_logs(file,log)
         plugins = all_plugins()
@@ -113,6 +116,7 @@ def main(argv=None):
                     if plugins[plu]['Target_hives'] in files[key][0]:
                         get_single_plugin(files[key][0],logs,plu)
                         print ("[*] Parsing "+plu + " :" + files[key][0])
+    
     # parse single file with specific plugin
     if args.plugin and args.kuiper == False:
         file = args.file
@@ -121,6 +125,7 @@ def main(argv=None):
 
     if args.kuiper:
         file = args.file
+        
         logs =logs_folder(file)
         print_for_kuiper(file,logs,args.plugin)
 

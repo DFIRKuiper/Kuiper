@@ -86,7 +86,7 @@ class InstalledComponents():
                             ("Enabled", Enabled_data),
                             ("DontAsk", DontAsk_data),
                             ("IsInstalled", IsInstalled_data),
-                            ("timestamp",timestamp)
+                            ("@timestamp",timestamp)
 
 
                         ])

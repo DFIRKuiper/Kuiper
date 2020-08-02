@@ -34,28 +34,28 @@ class LastVisitedMRU():
                 sid_key_values = iter(LastVisitedPidMRU_settings_key.values())
                 while True:
                     try:
+                        
                         value = next(sid_key_values)
                         value_name = value.name()
-                        if value_name != "MRUListEx" or value_name !="(Default)":
+                        if value_name != "MRUListEx" and value_name !="(Default)":
                             data = value.data()
                             format = Struct(
-                                    'filename' / CString("utf16"),
-                                    'CreationDate' /Int32ul
+                                    'filename' / CString("utf16")
                                 )
                             File_name = format.parse(data)
-
                             File_name = File_name.filename
-
                             data = data.hex()
                             data = data.split("0400efbe")
                             path = ""
                             counter = 0
                             a_time=""
                             c_time=""
+                            record = None
                             for d in data:
                                 if counter == 0 :
-                                    a_time = "1601-01-01T00:00:00.00"
+                                    a_time = ""
                                 else:
+                                    
                                     dax =bytes.fromhex(d)
                                     format = Struct(
                                             'CreationDate' / Bytes(4),
@@ -65,17 +65,21 @@ class LastVisitedMRU():
                                             'sequence'/ Bytes(16),
                                             'unkowun' /Bytes(4),
                                             'Path' /CString("utf16")
-
                                         )
+                                    
                                     dd = format.parse(dax)
                                     path += "\\"+dd.Path
                                     cc_time = dd.CreationDate
                                     aa_time = dd.AccessDate
-                                    c_time  = from_fat(cc_time.hex())
-                                    a_time = from_fat(aa_time.hex())
+                                    if cc_time == b'\x00\x00\x00\x00':
+                                        c_time  = dat_key
+                                    else:
+                                        c_time =from_fat(cc_time.hex())
 
-
-
+                                    if aa_time == b'\x00\x00\x00\x00':
+                                        a_time  = dat_key
+                                    else:
+                                        a_time = from_fat(aa_time.hex())
 
                                 counter = counter + 1
                                 if value_name == "MRUListEx":
@@ -90,7 +94,8 @@ class LastVisitedMRU():
                                         ("File_name", File_name),
                                         ("path", path)
                                     ])
-                            lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
+                            if record is not None:
+                                lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
 
                     except StopIteration:
                         break

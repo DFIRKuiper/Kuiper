@@ -17,7 +17,7 @@ table.dataTable tbody td {
 <div class="col-xs-12">
 	<div class="box">
 	<div class="box-header">
-		<h3 class="box-title">Machine Files Status <b ><span id="machine_name_title" class="label label-primary"></span> </b></h3>
+		<h3 class="box-title"><i class="fa fa-file-text-o"></i> Machine Files Status <b ><span id="machine_name_title" class="label label-primary"></span> </b></h3>
 	</div>
 	<!-- /.box-header -->
 	<div class="box-body">
@@ -62,7 +62,6 @@ table.dataTable tbody td {
 <script src="{{url_for('static', filename='dist/js/adminlte.min.js')}}"></script>
 <!-- AdminLTE for demo purposes -->
 <script src="{{url_for('static', filename='dist/js/demo.js')}}"></script>
-<script src="{{url_for('static', filename='json_viewer/json-viewer.js')}}"></script>
 <script src="{{url_for('static', filename='dist/jquery_file_upload/js/vendor/tmpl.min.js')}}"></script>
 
 <script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
@@ -92,7 +91,7 @@ function get_datatable_list(files){
 		'parsing'   : 'bg-light-blue'
 	}
 	
-
+    var regex = /Pushed \[([0-9]+)\] \/ Failed \[([0-9]+)\]/;
 	for(var f in files){
 		for(var p in files[f]['parsers']){
 			var msg = (files[f]['parsers'][p]['message'] == undefined) ? '' : files[f]['parsers'][p]['message'];
@@ -104,6 +103,18 @@ function get_datatable_list(files){
 			var disabled_flag = ' <i class="fa fa-fw fa-chain'+( files[f]['parsers'][p].hasOwnProperty('disable') && files[f]['parsers'][p]['disable'] == 'True' ? '-broken' : '' )+'"></i> '
 			var disabled = ( files[f]['parsers'][p].hasOwnProperty('disable') && files[f]['parsers'][p]['disable'] == 'True' ? true : false )
 			var disable_enable_btn = '<button type="button" class="btn_disable_enable_files btn btn-'+(disabled?'warning' : 'success') +' btn-xs" data-action="'+(disabled?'enable' : 'disable') +'" title="File parsing is '+(disabled?'disabled' : 'enabled') +'" data-path="'+files[f]['file_path']+'" data-parser="'+files[f]['parsers'][p]['parser_name']+'"><i class="fa fa-fw fa-chain'+(disabled?'-broken' : '') +'"></i></button>'
+
+
+            // match the msg to display tags if results are "Pushed [<num>] / Failed [<num>]"
+            var msg_regex = msg.match(regex)
+            if( msg_regex != null){
+                var sucess = '<span class="badge badge-pill bg-green" style="padding:5px">' + msg_regex[1] + '</span>'
+                if(msg_regex[2] == "0")
+                    var failed = '<span class="badge badge-pill bg-gray" style="padding:5px">' + msg_regex[2] + '</span>'
+                else
+                    var failed = '<span class="badge badge-pill bg-red" style="padding:5px">' + msg_regex[2] + '</span>'
+                msg = 'Pushed '+sucess+' / Failed '+failed
+            }
 
 			list.push([ disable_enable_btn, file_path , files[f]['file_size'] , files[f]['parsers'][p]['parser_name'] , status , start_time , msg ])
 		}

@@ -40,7 +40,7 @@ class RunMRU():
                         ("Sequence", sid_name),
                         ("Command", file_name),
                         ("Key_Timestamp",timestamp),
-                        ("@timestmap",timestamp)
+                        ("@timestamp",timestamp)
                     ])
 
                 lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))

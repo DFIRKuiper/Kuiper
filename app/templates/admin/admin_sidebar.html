@@ -3,17 +3,57 @@
 -->
 <html>
   <head>
+
+<!-- jQuery 3 -->
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+
   </head>
+
+
+
+
+
   <body>
+
+
+<!-- About Kuiper dialog -->
+<div class="modal fade" id="about-modal" tabindex="-1" role="dialog" aria-labelledby="about-modal-label">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="about-modal-label">About Kuiper</h4>
+      </div>
+
+
+      <div class="modal-body" style="text-align: center;">
+        <img src="{{url_for('static', filename='dist/img/logo2.png')}}" width="30%" height="30%">
+        <br />
+        <b>DFIRKuiper</b> - Digital Investigation Platform
+        <br />
+        <b>Kuiper version:</b> {{SIDEBAR['current_version']}}
+        <br /><br />
+
+        <a href="https://github.com/DFIRKuiper/Kuiper" title="Kuiper - Github" >DFIRKuiper - Github</a>
+
+      </div>
+      <div class="modal-footer">
+        <span id="update-message" class="pull-left"></span>
+        <button type="button" class="btn btn-primary" id="btn-check_update">Check Update <i style="display:none" class="fa fa-spin fa-refresh"></i></button>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
     {% block leftsidebar %}
     <aside class="main-sidebar">
       <section class="sidebar">
 
 
         <ul class="sidebar-menu">
-          <li class="header">
-            ADMINISTRATION
-          </li>
 
 
           <!-- side bar elements -->
@@ -34,7 +74,11 @@
             {% if title['SubTitles'] is not none %}
             <ul class="treeview-menu">
               {% for subtitle in title['SubTitles'] %}
-                  <li><a href="{{subtitle[1]}}"><i class="fa fa-circle-o"></i>{{subtitle[0]}} </a></li>
+                  {% if subtitle[0] == "About" %}
+                      <li><a href="#"  data-toggle="modal" data-target="#about-modal"><i class="fa fa-circle-o"></i>{{subtitle[0]}} </a></li>
+                  {% else %}
+                      <li><a href="{{subtitle[1]}}"><i class="fa fa-circle-o"></i>{{subtitle[0]}} </a></li>
+                  {% endif %}
               {% endfor %}
             </ul>
             {% endif %}
@@ -43,7 +87,11 @@
           {% endfor %}
           <!-- end side bar elements -->
 
+          
+          <li   class="treeview" style="position: absolute; bottom:0;"><a href="#" class="sidebar-toggle" data-toggle="push-menu"><i class="fa fa-bars"></i></a></li>
         </ul>
+
+
 
 
 
@@ -51,4 +99,77 @@
     </aside>
     {% endblock %}
   </body>
+
+
+
+
+
+<script>
+
+var Current_version         = "{{SIDEBAR['current_version']}}"
+var check_update_interval   = 5000
+var new_release             = ""
+
+
+
+  // whne click sidebar open/close button, store the information on session storage
+  $('.sidebar-toggle').click(function() {
+    event.preventDefault();
+    if (Boolean(sessionStorage.getItem("sidebar-toggle-collapsed"))) {
+      sessionStorage.setItem("sidebar-toggle-collapsed", "");
+    } else {
+      sessionStorage.setItem("sidebar-toggle-collapsed", "1");
+    }
+  });
+
+
+
+// ========== check update ========= //
+$('#btn-check_update').click(function(){
+    $('#btn-check_update .fa-refresh').show()
+    $.ajax({
+        type : 'GET',
+        url : "/admin/check_update",
+
+        beforeSend: function() {
+            
+        },
+        success: function(result) {
+            var result = JSON.parse(result);
+            var update_message = $("#update-message")
+            if(result['results'] == 'true'){
+
+                // if upate Avaliable
+                if(result['msg'] > Current_version){
+                    update_message.attr('class' , 'text-success')
+                    update_message.html('New Update Avaliable: <b>' + result['msg'] + "</b>")    
+
+                    new_release = result['msg']
+
+                } else {
+
+                    // if kuiper is up-to-date
+                    update_message.attr('class' , 'text-success')
+                    update_message.html('Kuiper is <b>up-to-date<b/>')    
+                }
+            } else {
+
+                // if connection to github failed
+                update_message.attr('class' , 'text-danger')
+                update_message.html('<b>Failed:</b> ' + result['msg'])
+            }
+            
+        },  
+        error: function(error){
+            toast_msg('Connection to update request failed, check connection' , type='error' , header = "Error")
+        }
+    }).always(function() {
+        $('#btn-check_update .fa-refresh').hide()
+    });;
+
+
+})
+
+</script>
 </html>
+
