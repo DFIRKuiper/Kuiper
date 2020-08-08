@@ -1,6 +1,6 @@
 
 
-![logo.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/logo2.png?raw=true)
+<p align="center"><img src="https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/logo2.png" width="400"></p>
 
 
 ## Table of Contents
