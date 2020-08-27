@@ -4,7 +4,7 @@
 
 To download a virtual machine with Kuiper and all its dependencies installed, please visit the following link 
 ```
-https://mega.nz/#F!i9UjyaQQ!DK97l_CzzhCa-y_E1dPULQ
+https://mega.nz/folder/OslmmaxL#7AUJEdU9hiAHHuD19uNF2w
 ```
 
 ## Credentials
@@ -18,9 +18,9 @@ Password: kuiper
 
 ## Run Kuiper
 
-run the following commands after launching the virtual machine 
+run the following commands after launching the virtual machine
 
 ```
-$ cd Kuiper/
+$ cd kuiper/
 $ ./kuiper_install.sh -run 
 ```
