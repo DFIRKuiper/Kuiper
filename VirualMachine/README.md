@@ -1,5 +1,5 @@
-# Virtual Machine
-
+# Virtual Machine - Kuiper v2.0.0
+Note: we recommend using the latest version from releases
 ## Download Link
 
 To download a virtual machine with Kuiper and all its dependencies installed, please visit the following link 
@@ -18,7 +18,7 @@ Password: kuiper
 
 ## Run Kuiper
 
-run the following commands after launching the virtual machine
+Run the following commands after launching the virtual machine
 
 ```
 $ cd kuiper/
