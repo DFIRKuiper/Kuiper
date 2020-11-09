@@ -1,4 +1,5 @@
 # Virtual Machine
+Note: we recommend to use this VM machine for testing only, it is preferable to use the latests version from releases
 
 ## Download Link
 
