@@ -298,15 +298,22 @@ class ES_DB:
 
     # ================================ push records to elasticsearch
     # data: is a list of json data 
-    def bulk_queue_push(self, data , case_id , source = None , machine = None , data_type = None, data_path = None , chunk_size=500):
+    def bulk_queue_push(self, data , case_id , source = None , machine = None , data_type = None, data_path = None , chunk_size=500,kjson=False):
         case_id = case_id.lower()
         bulk_queue = []
+
         for d in data:
             di = {
                 "_index": case_id,
-                "_source": { "Data" : d },
+                "_source": {},
                 '_id' : str(uuid.uuid4())
             }
+
+            di['_source']['Data'] = d['Data'] if kjson else d
+            source                = d['data_source'] if kjson else source
+            data_type             = d['data_type'] if kjson else source
+            data_path             = d['data_path'] if kjson else source
+
             if source is not None:
                 di['_source']['data_source'] = source
             if machine is not None:
@@ -317,6 +324,8 @@ class ES_DB:
                 di['_source']['data_path'] = data_path
                 
             bulk_queue.append(di)
+        
+        
         logger.logger(level=logger.DEBUG , type="elasticsearch", message="Index ["+case_id+"]: Pushing ["+str(len(bulk_queue))+"] records")
 
         push_es = self.bulk_to_elasticsearch( bulk_queue , case_id , chunk_size )

@@ -864,9 +864,10 @@ def case_browse_artifacts_ajax(case_id):
             for i in range( 0  , len(res_records) ):
                 if "machine" in res_records[i]['_source'].keys():
                     machine = db_cases.get_machine_by_id(res_records[i]['_source']['machine'])
-                    if machine[0] == True:
+                    if machine[0] == True and machine[1] is not None:
                         res_records[i]['_source']['machinename'] = machine[1]['machinename']
                     else:
+                        res_records[i]['_source']['machinename'] = res_records[i]['_source']['machine']
                         logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed getting the machine name", reason=machine[1])
                     
             ajax_res = {"res_total" : res_total , "res_records" : res_records , 'aggs' : aggs_records}

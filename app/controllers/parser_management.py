@@ -100,8 +100,27 @@ class Parser_Manager:
                 self.tmp_total_files += len(files_list_to_be_parsed)
 
 
+            # ==== Get Kjson files
+            kjson_details = {
+                "name"                                  : 'kjson',
+                'parser_files_categorization_type'      : 'extension',
+                'parser_files_categorization_values'    : 'kjson'
+            }
+            files_list_to_be_parsed = self.get_files_not_parsed(kjson_details) 
+
+            # if failed getting the files to be parsed then stop the parsing
+            if files_list_to_be_parsed == False:
+                raise Exception("Failed collecting the list of files to be parsed")
+
+            self.parser_files_mapping[kjson_details['name']] = {
+                'db_parser_details'        : kjson_details , 
+                'files_list_to_be_parsed'  : files_list_to_be_parsed    
+            }
+            self.tmp_total_files += len(files_list_to_be_parsed)
+
+
             
-            # set the status of the task
+            # === set the status of the task
             self.set_task_state("STARTED")
             logger.logger(level=logger.DEBUG , type="parser", message="Files to be parsed ["+str(self.tmp_total_files)+"]")
             return True
@@ -111,6 +130,8 @@ class Parser_Manager:
             logger.logger(level=logger.ERROR , type="parser", message="Failed getting the files" , reason=str(e))
             return False
     
+
+    # this function will start parsing all the collected files from the specified parsers
     def start_parsing(self):
         try:
             # ===== Start parsing the files
@@ -118,28 +139,32 @@ class Parser_Manager:
 
                 
                 parser_details      = self.parser_files_mapping[parser]['db_parser_details']
+                parser_name         = self.parser_files_mapping[parser]['db_parser_details']['name']
                 files_to_be_parsed  = self.parser_files_mapping[parser]['files_list_to_be_parsed']
 
                 start_time          = str(datetime.now())
-                parser_folder       = parser_details['parser_folder']
-                parser_file         = parser_details['interface_function'].split('.')[0]
-                parser_func         = parser_details['interface_function'].split('.')[1]
                 
-                # import the parser module
-                logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_details['name']+"]: Parser Mudole [app.parsers." + parser_folder + "." + parser_file + "]")
+                # if any parser other than jkson, then collect the parser function information
+                if parser_name != 'kjson':
+                    parser_folder       = parser_details['parser_folder']
+                    parser_file         = parser_details['interface_function'].split('.')[0]
+                    parser_func         = parser_details['interface_function'].split('.')[1]
+                
+                    # import the parser module
+                    logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_name+"]: Parser Mudole [app.parsers." + parser_folder + "." + parser_file + "]")
 
-                try:
-                    parser_module = importlib.import_module('app.parsers.' + parser_folder + '.' + parser_file )
-                except Exception as e:
-                    # if failed getting the parser modules, then set all files message
-                    self.files_failed += len(files_to_be_parsed)
-                    for f in files_to_be_parsed:
-                        logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_details['name']+"]: Failed getting parser module to parse ["+f+"]" , reason=str(e))
-                        add_file = self.edit_db_file_status(f , parser_details , start_time , "error" , message=str(e) , end_time=str(datetime.now()) )
-                        if not add_file[0]:
-                            logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_details['name']+"]: Failed editing file status ["+f+"] to failed" , reason=add_file[1])
-                    
-                    continue
+                    try:
+                        parser_module = importlib.import_module('app.parsers.' + parser_folder + '.' + parser_file )
+                    except Exception as e:
+                        # if failed getting the parser modules, then set all files message
+                        self.files_failed += len(files_to_be_parsed)
+                        for f in files_to_be_parsed:
+                            logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_name+"]: Failed getting parser module to parse ["+f+"]" , reason=str(e))
+                            add_file = self.edit_db_file_status(f , parser_name , start_time , "error" , message=str(e) , end_time=str(datetime.now()) )
+                            if not add_file[0]:
+                                logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_name+"]: Failed editing file status ["+f+"] to failed" , reason=add_file[1])
+                        
+                        continue
 
 
                 num_files_to_be_parsed  = len(files_to_be_parsed)
@@ -152,109 +177,151 @@ class Parser_Manager:
                         f           = str(files_to_be_parsed[pos]).encode('utf-8')
                         file_size   = os.path.getsize( f )
                         if self.wait_memory_free(file_size):
-                            logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_details['name']+"]: Wait to parse file ["+f+"]" , reason="Wait for avaliable memory to start parsing the file")
+                            logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_name+"]: Wait to parse file ["+f+"]" , reason="Wait for avaliable memory to start parsing the file")
                             time.sleep(5)
                             continue
                         
                         del files_to_be_parsed[pos]
 
-                        logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_details['name']+"]: Start parsing the file: " , reason=f)
+                        logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_name+"]: Start parsing the file: " , reason=f)
                         
                         # === add the files as parsing for the provided parser in database
                         start_time = str(datetime.now())
-                        add_file = self.edit_db_file_status( f , parser_details , start_time , "parsing" )
+                        add_file = self.edit_db_file_status( f , parser_name , start_time , "parsing" )
                         if not add_file[0]:
-                            logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_details['name']+"]: Failed editing file ["+f+"] status" , reason=add_file[1])
+                            logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_name+"]: Failed editing file ["+f+"] status" , reason=add_file[1])
                             continue
                         
                         
-                        # === call parser to parse the file
-                        json_res = getattr(parser_module , parser_func)( file=f , parser = parser_details['name'] )
                         
-
-                        if isinstance(json_res , tuple) and json_res[0] is None: # if parser failed, continue to next file
-
-                            logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_details['name']+"]: Failed parsing file ["+f+"]" , reason=json_res[1])
-
-
-                            add_file = self.edit_db_file_status(f , parser_details , start_time , "error" , message=json_res[1] )
-                            if not add_file[0]:
-                                logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_details['name']+"]: Failed editing file status ["+f+"] to failed" , reason=add_file[1])
-                            
-                            continue
-                        
-
+                        # === push the results to elasticsearch
                         pushed          = True
                         pushed_records  = 0
                         failed_records  = 0
                         message         = ''
-                        if isinstance(json_res , file):
-                            json_res_path = os.path.realpath(json_res.name)
-                            while True:
-                                res = getattr(parser_module , parser_func + "_pull")( json_res , self.es_chunks_size )
+                        
+                        # ===== call the parser function and push the results to database
+                        if parser_name == 'kjson':
+                            # ===== collect and push the kjson file results
+                            kjson_records = []
+                            with open(f , 'r') as kjson_handle:
+                                for rec in kjson_handle:
+                                    json_res = json.loads(rec)
+                                    kjson_records.append(json_res) 
+
+                                    # if the collect lines match the chunk size, then push the data to elasticsearch
+                                    if len(kjson_records) == self.es_chunks_size:
+                                        pushing_results = self.fix_and_push_parsed_data(kjson_records , parser_name , f , start_time)
+                                        pushed          = pushing_results[0]
+                                        pushed_records  += pushing_results[1]
+                                        failed_records  += pushing_results[2]
+                                        message         = pushing_results[3]
+
+                                        if pushed == False:
+                                            break
+                                        
+                                        kjson_records = []
                                 
-                                # if exception found in the function
-                                if isinstance(res , tuple) and res[0] == False :
-                                    pushed  = False 
-                                    message = res[1]
-                                    break 
-                                
-                                # if there is a results to push
-                                if len(res):
-                                    pushing_results =  self.fix_and_push_parsed_data(res , parser_details , f , start_time)
-                                    pushed          =  pushing_results[0]
+
+                                # if there are data not pushed yet, then push it to elasticsearch
+                                if len(kjson_records):
+                                    pushing_results = self.fix_and_push_parsed_data(kjson_records , parser_name , f , start_time)
+                                    pushed          = pushing_results[0]
                                     pushed_records  += pushing_results[1]
                                     failed_records  += pushing_results[2]
-                                    message         =  pushing_results[3]
+                                    message         = pushing_results[3]
+
                                     if pushed == False:
                                         break
-                                else:
-                                    # if there is no more results to push
-                                    break
 
+                                    kjson_records = []
 
-                            # get the real path of the temp file and delete it
-                            json_res.close()
-                            os.remove(json_res_path)
 
                         else:
-                            pushing_results = self.fix_and_push_parsed_data(json_res , parser_details , f , start_time)
-                            pushed          = pushing_results[0]
-                            pushed_records  = pushing_results[1]
-                            failed_records  = pushing_results[2]
-                            message         = pushing_results[3]
+                            # if used parser, not kjson results
+
+                            # === call parser to parse the file
+                            json_res = getattr(parser_module , parser_func)( file=f , parser = parser_name )
+                            
+
+                            if isinstance(json_res , tuple) and json_res[0] is None: # if parser failed, continue to next file
+
+                                logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_name+"]: Failed parsing file ["+f+"]" , reason=json_res[1])
+
+
+                                add_file = self.edit_db_file_status(f , parser_name , start_time , "error" , message=json_res[1] )
+                                if not add_file[0]:
+                                    logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_name+"]: Failed editing file status ["+f+"] to failed" , reason=add_file[1])
+                                
+                                continue
+                            
+                            if isinstance(json_res , file):
+                                json_res_path = os.path.realpath(json_res.name)
+                                while True:
+                                    res = getattr(parser_module , parser_func + "_pull")( json_res , self.es_chunks_size )
+                                    
+                                    # if exception found in the function
+                                    if isinstance(res , tuple) and res[0] == False :
+                                        pushed  = False 
+                                        message = res[1]
+                                        break 
+                                    
+                                    # if there is a results to push
+                                    if len(res):
+                                        pushing_results =  self.fix_and_push_parsed_data(res , parser_name , f , start_time)
+                                        pushed          =  pushing_results[0]
+                                        pushed_records  += pushing_results[1]
+                                        failed_records  += pushing_results[2]
+                                        message         =  pushing_results[3]
+                                        if pushed == False:
+                                            break
+                                    else:
+                                        # if there is no more results to push
+                                        break
+
+
+                                # get the real path of the temp file and delete it
+                                json_res.close()
+                                os.remove(json_res_path)
+
+                            else:
+                                pushing_results = self.fix_and_push_parsed_data(json_res , parser_name , f , start_time)
+                                pushed          = pushing_results[0]
+                                pushed_records  = pushing_results[1]
+                                failed_records  = pushing_results[2]
+                                message         = pushing_results[3]
                                 
                         
 
-                        logger.logger(level=logger.INFO , type="parser", message="Parser["+parser_details['name']+"]: Total pushed records ["+str(pushed_records)+"] and failed ["+str(failed_records)+"]")
+                        logger.logger(level=logger.INFO , type="parser", message="Parser["+parser_name+"]: Total pushed records ["+str(pushed_records)+"] and failed ["+str(failed_records)+"]")
 
                         # === add the file as parsed for the provided parser in database
                         if pushed:
-                            add_file = self.edit_db_file_status(f , parser_details , start_time , "done" , message="Pushed ["+str(pushed_records)+"] / Failed ["+str(failed_records)+"]" , end_time=str(datetime.now()) )
+                            add_file = self.edit_db_file_status(f , parser_name , start_time , "done" , message="Pushed ["+str(pushed_records)+"] / Failed ["+str(failed_records)+"]" , end_time=str(datetime.now()) )
                             if not add_file[0]:
-                                logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_details['name']+"]: Failed editing file status ["+f+"] to parsed" , reason=add_file[1])
+                                logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_name+"]: Failed editing file status ["+f+"] to parsed" , reason=add_file[1])
                                 continue
 
                             self.files_parsed += 1 # this counter for total files parsed from all parsers
                             num_files_parsed  += 1 # this counter for current parser files done 
                             self.update_state("PROCESSING" , self.files_parsed)
                         else:
-                            logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_details['name']+"]: Failed pushing ["+f+"]" , reason=message)
-                            add_file = self.edit_db_file_status(f , parser_details , start_time , "error" , message=message + " - pushed rec. " + str(pushed_records) , end_time=str(datetime.now()) )
+                            logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_name+"]: Failed pushing ["+f+"]" , reason=message)
+                            add_file = self.edit_db_file_status(f , parser_name , start_time , "error" , message=message + " - pushed rec. " + str(pushed_records) , end_time=str(datetime.now()) )
                             if not add_file[0]:
-                                logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_details['name']+"]: Failed editing file status ["+f+"] to failed" , reason=add_file[1])
+                                logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_name+"]: Failed editing file status ["+f+"] to failed" , reason=add_file[1])
                             
                     except Exception as e:
-                        add_file = self.edit_db_file_status(f , parser_details , start_time, "error" , message="Failed: " + str(e) , end_time=str(datetime.now()) )
+                        add_file = self.edit_db_file_status(f , parser_name , start_time, "error" , message="Failed: " + str(e) , end_time=str(datetime.now()) )
                         if add_file[0] == False:
-                            logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_details['name']+"]: Failed editing file status ["+f+"] to parsed" , reason=add_file[1])
+                            logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_name+"]: Failed editing file status ["+f+"] to parsed" , reason=add_file[1])
                             continue
                         exc_type, exc_obj, exc_tb = sys.exc_info()
                         
-                        logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_details['name']+"]: failed parsing file ["+f+"]" , reason=str(e) + " - Line" + str(exc_tb.tb_lineno))
+                        logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_name+"]: failed parsing file ["+f+"]" , reason=str(e) + " - Line" + str(exc_tb.tb_lineno))
 
                 self.files_failed += num_files_to_be_parsed - num_files_parsed
-                logger.logger(level=logger.INFO , type="parser", message="Parser["+parser_details['name']+"]: Done parsing ["+str(num_files_to_be_parsed)+"], ["+str(num_files_to_be_parsed - num_files_parsed)+"] failed")
+                logger.logger(level=logger.INFO , type="parser", message="Parser["+parser_name+"]: Done parsing ["+str(num_files_to_be_parsed)+"], ["+str(num_files_to_be_parsed - num_files_parsed)+"] failed")
 
             logger.logger(level=logger.INFO , type="parser", message="Done processing all files" , reason="Files: [" + str(self.files_parsed) + "] Parsed, [" + str(self.files_failed) + "] Failed")
             return True
@@ -266,28 +333,35 @@ class Parser_Manager:
 
 
 
-    def fix_and_push_parsed_data(self, json_res , parser_details , file_path , start_time):
+    def fix_and_push_parsed_data(self, json_res , parser_name , file_path , start_time):
         pushed          = True
         pushed_records  = 0
         failed_records  = 0
         
         try:
             # === fix data type issue with received data
-            fixed , failed_records = self.fix_issues_with_parsed_data(json_res)
-            logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_details['name']+"]: fixed issues with parsed data")
+            is_kjson = True if parser_name == 'kjson' else False 
+            fixed , failed_records = self.fix_issues_with_parsed_data(json_res , is_kjson)
+
+
+            logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_name+"]: fixed issues with parsed data")
 
             # === push result to database 
             if json_res is not None and len(json_res) != 0:
                 for i in range( 0 , len(json_res) , self.es_chunks_size):
                     
-                    logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_details['name']+"]: Pushing result of file ["+file_path+"] to elasticsearch")
-                    p = db_es.bulk_queue_push(json_res[ i : (i+self.es_chunks_size) ] ,self.case_id, source = parser_details['name'] , machine = self.machine_id , data_type=parser_details['name'] , data_path = file_path , chunk_size=self.es_chunks_size)
-                    
+                    logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_name+"]: Pushing result of file ["+file_path+"] to elasticsearch")
+
+                    if parser_name == 'kjson':
+                        p = db_es.bulk_queue_push(json_res[ i : (i+self.es_chunks_size) ] ,self.case_id, machine = self.machine_id , chunk_size=self.es_chunks_size , kjson=True)
+                    else:
+                        p = db_es.bulk_queue_push(json_res[ i : (i+self.es_chunks_size) ] ,self.case_id, source = parser_name , machine = self.machine_id , data_type=parser_name , data_path = file_path , chunk_size=self.es_chunks_size, kjson=False)
+
                     if p[0] == False:
                         return [False, pushed_records , failed_records , p[1]]
                         
 
-                    logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_details['name']+"]: Pushed records ["+str(len(json_res[ i : (i+self.es_chunks_size) ]) - len(p[2]))+"] and failed ["+str(len(p[2]))+"]" , reason=p[1])
+                    logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_name+"]: Pushed records ["+str(len(json_res[ i : (i+self.es_chunks_size) ]) - len(p[2]))+"] and failed ["+str(len(p[2]))+"]" , reason=p[1])
                     pushed_records+=len(json_res[ i : (i+self.es_chunks_size) ]) - len(p[2])
                     failed_records+=len(p[2])
 
@@ -305,7 +379,9 @@ class Parser_Manager:
     # this will get all files need to be parsed by the parser (files not parsed and not parsing currently)
     def get_files_not_parsed(self, parser_details):
         try:
-            logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_details['name']+"]: Collect files to be parsed")
+            parser_name = parser_details['name']
+
+            logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_name+"]: Collect files to be parsed")
             
             files_folder = app.config["UPLOADED_FILES_DEST"] + "/" + self.case_id + "/" + self.machine_id + "/"
             files_folder = files_folder.encode('utf-8')
@@ -324,32 +400,32 @@ class Parser_Manager:
                 if self.verifiy_file_for_parser(f, parser_details):
                     
                     # === check if the file parsed or not by the parser
-                    is_parsed = self.is_file_parsed( f , parser_details['name'])
+                    is_parsed = self.is_file_parsed( f , parser_name)
                     if is_parsed[0] == False:
                         continue 
                     elif is_parsed[0] == True and is_parsed[1] == True:
-                        logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_details['name']+"]: File ["+f+"] already parsed")
+                        logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_name+"]: File ["+f+"] already parsed")
                         continue
                     
                     
                     # === check if the file parsing disabled on this file
-                    is_disabled = self.is_file_parsing_disabled( f , parser_details['name'])
+                    is_disabled = self.is_file_parsing_disabled( f , parser_name)
                     if is_disabled[0] == False:
                         continue
                     elif is_disabled[0] == True and is_disabled[1] == True:
-                        logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_details['name']+"]: File ["+f+"] parsing disabled")
+                        logger.logger(level=logger.DEBUG , type="parser", message="Parser["+parser_name+"]: File ["+f+"] parsing disabled")
                         continue
                     
                     # === add the files as parsing for the provided parser in database
                     start_time = str(datetime.now())
-                    add_file = self.edit_db_file_status(f , parser_details , start_time , "queued" )
+                    add_file = self.edit_db_file_status(f , parser_name , start_time , "queued" )
                     if add_file[0] == False:
-                        logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_details['name']+"]: File ["+f+"] failed chaning status to queued" , reason=add_file[1])
+                        logger.logger(level=logger.ERROR , type="parser", message="Parser["+parser_name+"]: File ["+f+"] failed chaning status to queued" , reason=add_file[1])
                         continue
                     
                     files_to_be_parsed.append(f)
             
-            logger.logger(level=logger.INFO , type="parser", message="Parser["+parser_details['name']+"]: Total ["+str(len(files_to_be_parsed))+"] file to be parsed")
+            logger.logger(level=logger.INFO , type="parser", message="Parser["+parser_name+"]: Total ["+str(len(files_to_be_parsed))+"] file to be parsed")
             return files_to_be_parsed
 
         except Exception as e:
@@ -456,11 +532,11 @@ class Parser_Manager:
 
     # ================================ change file status
     # change file status (pending, parsing, done, error)
-    def edit_db_file_status(self, file , parser_details , start_time , status , message ="", end_time=""):
+    def edit_db_file_status(self, file , parser_name , start_time , status , message ="", end_time=""):
         file_details = {
             "file_path" : file,
             "parsers"   : {
-                "parser_name"   : parser_details['name'] , 
+                "parser_name"   : parser_name , 
                 "start_time"    : start_time , 
                 "status"        : status , 
                 "message"       : message,
@@ -470,7 +546,7 @@ class Parser_Manager:
             }
         add_file = db_files.add_file(self.machine_id , file_details)
         if add_file[0]:
-            return [ True, "Changed ["+file+"] for parser ["+parser_details['name']+"] to: " + status]
+            return [ True, "Changed ["+file+"] for parser ["+parser_name+"] to: " + status]
         else:
             return [ False,  add_file[1]] 
 
@@ -487,7 +563,7 @@ class Parser_Manager:
     # ================================ Fix values issues 
     # convert the data received from the parser to string
     # solve other issues with elasticsearch
-    def fix_issues_with_parsed_data(self, data):
+    def fix_issues_with_parsed_data(self, data , kjson=False):
         fixed       = 0    # this store the number of fixed records, or even if does not need to be fixed
         not_fixed   = 0    # this store the number of records failed to be fixed
         if data is not None and len(data) > 0:
@@ -495,14 +571,25 @@ class Parser_Manager:
             while d < len(data):
                 try:
                     # convert the provided data to string, instead of integers
-                    self.convert_json_fields_to_str( data[d] )
+                    if kjson:
+                        self.convert_json_fields_to_str( data[d]['Data'] )
+                        
+                        # if timestamp contain space " " replace it with "T" to meet the ISO format
+                        if '@timestamp' not in data[d]['Data'] or data[d]['Data']['@timestamp'] is None:
+                            data[d]['Data']['@timestamp'] = '1700-01-01T00:00:00'
 
-                    # if timestamp contain space " " replace it with "T" to meet the ISO format
-                    if '@timestamp' not in data[d] or data[d]['@timestamp'] is None:
-                        data[d]['@timestamp'] = '1700-01-01T00:00:00'
+                        if '@timestamp' in data[d]['Data']:
+                            data[d]['Data']['@timestamp'] = data[d]['Data']['@timestamp'].replace(' ' , 'T')
 
-                    if '@timestamp' in data[d]:
-                        data[d]['@timestamp'] = data[d]['@timestamp'].replace(' ' , 'T')
+                    else:
+                        self.convert_json_fields_to_str( data[d] )
+
+                        # if timestamp contain space " " replace it with "T" to meet the ISO format
+                        if '@timestamp' not in data[d] or data[d]['@timestamp'] is None:
+                            data[d]['@timestamp'] = '1700-01-01T00:00:00'
+
+                        if '@timestamp' in data[d]:
+                            data[d]['@timestamp'] = data[d]['@timestamp'].replace(' ' , 'T')
                     
                     fixed +=1 
                     d += 1

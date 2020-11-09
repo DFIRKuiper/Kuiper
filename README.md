@@ -1,6 +1,6 @@
 
 
-![logo.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/logo2.png?raw=true)
+![logo.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/logo2.png?raw=true)
 
 
 ## Table of Contents
@@ -19,10 +19,12 @@
     - [3.2. Parsers](#Parsers)
 - [4. Getting Started](#getting-started)
     - [4.1. Requirements](#requirements)
-    - [4.1. Installation](#Installation)
-- [5. Issues Tracking and Contribution](#Issues-Tracking-and-Contribution)
-- [6. Licenses](#Licenses)
-- [7. Authors](#Authors)
+    - [4.2. Download](#Download) 
+    - [4.3. Installation](#Installation)
+- [5. TODO List](#TODO-List)
+- [6. Issues Tracking and Contribution](#Issues-Tracking-and-Contribution)
+- [7. Licenses](#Licenses)
+- [8. Authors](#Authors)
 
     
 
@@ -37,8 +39,7 @@ Digital Investigation Platform
 
 ## What is Kuiper?
 Kuiper is a digital investigation platform that provides a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast traige script like [Hoarder](https://github.com/muteb/Hoarder)). In additional, collaborate with other team members on the same platform by tagging artifacts and present it as a timeline, as well as setting rules for automating the detection. The main purpose of this project is to aid in streamlining digital investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
-
-![diagram.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/Diagram.png?raw=true)
+![diagram.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/diagram.png?raw=true)
 
 
 ## Why Kuiper?
@@ -73,10 +74,10 @@ With a large number of cases and a large number of team members, it becomes hard
 # Examples
 
 **Create cases and upload artifacts**
-![create_cases](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/create_case_upload_machines.gif?raw=true)
+![create_cases](https://github.com/DFIRKuiper/Kuiper/blob/master/img/create_case.gif?raw=true)
 
-**Investigate parsed artifacts in Kuiper**
-![create_cases](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/analysis.gif?raw=true)
+**Analysis example in Kuiper**
+![create_cases](https://github.com/DFIRKuiper/Kuiper/blob/master/img/analysis.gif?raw=true)
 
 
 
@@ -87,30 +88,82 @@ With a large number of cases and a large number of team members, it becomes hard
 
 Kuiper use the following components:
 
-- **Flask:** A web framework written in Python, used as the primary web application component. 
+**Flask:** A web framework written in Python, used as the primary web application component. 
 
-- **Elasticsearch:** A distributed, open source search and analytics engine, used as the primary database to store parser results.
+**Elasticsearch:** A distributed, open source search and analytics engine, used as the primary database to store parser results.
 
-- **MongoDB:** A database that stores data in JSON-like documents that can vary in structure, offering a dynamic, flexible schema, used to store Kuiper web application configurations and information about parsed files. 
+**MongoDB:** A database that stores data in JSON-like documents that can vary in structure, offering a dynamic, flexible schema, used to store Kuiper web application configurations and information about parsed files. 
 
-- **Redis:** A in-memory data structure store, used as a database, cache and message broker, used as a message broker to relay tasks to celery workers.
+**Redis:** A in-memory data structure store, used as a database, cache and message broker, used as a message broker to relay tasks to celery workers.
 
-- **Celery:** A asynchronous task queue/job queue based on distributed message passing, used as the main processing engine to process relayed tasks from redis.
+**Celery:** A asynchronous task queue/job queue based on distributed message passing, used as the main processing engine to process relayed tasks from redis.
 
-- **Gunicorn:** Handle multiple clients HTTPs requests
+
+## Parsers
+
+The following are parsers used in Kuiper project, some are custom built, and others have been modified to output the results in a compliant format in order to integrate it with Kuiper and some have been heavily modified to make it compatible with Kuiper.
+
+Parser 		         | Author
+-----------------   | -------------
+BrowserHistory      | [Saleh Muhaysin](https://github.com/salehmuhaysin/BrowserHistory_ELK)
+Srum                | [Saleh Muhaysin](https://github.com/salehmuhaysin/SRUM_parser)
+CSV                 | Custom by Saleh Muhaysin
+Recyclebin          | Custom by Muteb Alqahtani
+Scheduled Tasks     | Custom by Muteb Alqahtani
+Prefetch            | [MBromiley](https://github.com/bromiley/tools/tree/master/win10_prefetch)
+Windows Events      | [dgunter](https://github.com/dgunter/evtxtoelk)
+Amcache	            | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+bits_admin          | [ANSSI](https://github.com/ANSSI-FR/bits_parser)
+Jumplist            | [Bhupendra Singh](https://github.com/Bhupipal/JumpListParser)
+MFT                 | [dkovar](https://github.com/dkovar/analyzeMFT)
+RUA                 | [davidpany](https://github.com/davidpany/WMI_Forensics)
+Shellbags           | [Willi Ballenthin](https://github.com/williballenthin/shellbags)
+Shimcache           | [MANDIANT](https://github.com/mandiant/ShimCacheParser)
+Shortcuts           | [HarmJ0y](https://github.com/HarmJ0y/pylnker)
+UsnJrnl             | [PoorBillionaire](https://github.com/PoorBillionaire/USN-Journal-Parser)
+WMI_Persistence     | [davidpany](https://github.com/davidpany/WMI_Forensics)
+ComputerName        | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+DHCP                | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+InstalledApp        | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+InstalledComponents | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+LastVisitedMRU      | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+LaunchTracing       | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+OpenSaveMRU         | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+ProfileList         | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+ShellExtensions     | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+TimeZoneInformation | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+TypedUrls           | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+Uninstall           | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+UserAssist          | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+WordWheelQuery      | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+Bam                 | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+AppCompatFlags      | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+MuiCache            | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+RunMRU              | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+Sysinternals        | [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+TerminalServerClient| [Muteb Alqahtani](https://github.com/muteb/RegSkewer)
+
+
+
+
+
+To add your own parser on Kuiper, read documentation [Add Custom Parser](https://github.com/DFIRKuiper/Kuiper/wiki/Add-Custom-Parser)
+
 
 # Getting Started
 
 ## Requirements
 
-- **OS:** 64-bit Ubuntu 18.04.1 LTS (Xenial)  (preferred)
-- **RAM:**  4GB (minimum), 64GB (preferred)
+- **OS:** 64-bit Ubuntu 16.04.1 LTS (Xenial)  (preferred)
+- **RAM:**  4GB (minimum), 8GB (preferred)
 - **Cores:** 4 (minimum)
 - **Disk:** 25GB for testing purposes and more disk space depends on the amount of data collected.
 
-**Notes**
-- If you want to use RAM more than 64GB to increase Elasticsearch performence, it is recommended to use multiple nodes for Elasticsearch cluster instead in different machines
-- For parsing, Celery generate workers based on CPU cores (worker per core), each core parse one machine at a time and when the machine finished, the other queued machines will start parsing, if you have large number of machines to process in the same time you have to increase the cores number
+  
+## Download
+
+To download a prebuilt Kuiper on virtual machine, please visit the following page
+[Download Kuiper VM](https://github.com/DFIRKuiper/Kuiper/tree/master/VirualMachine)
 
 ## Installation 
 
@@ -140,6 +193,11 @@ $ ./kuiper_install.sh -run
 If everything runs correctly now you should be able to use Kuiper through the link (http://[kuiper-ip]:[kuiper-port]/).
 
 Happy hunting :).
+
+# TODO List:
+
+- Add Wiki
+- Fix issues with parsers
 
 # Issues Tracking and Contribution
 

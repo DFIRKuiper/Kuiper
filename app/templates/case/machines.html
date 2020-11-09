@@ -725,7 +725,12 @@ function build_start_process(caseid , machineids , machinenames){
     else
       general_parsers[ parsers_details[p]['parser_type_field'] ] = [ parsers_details[p]['name'] ]  
   }
+  if('os_general' in general_parsers)
+    general_parsers['os_general'].push('kjson')
+  else
+    general_parsers['os_general'] = ['kjson']
 
+    
   // build the table of parsers
   var parsers_tables_ul = '<ul class="nav nav-tabs">';
   var parsers_tables_tab = '<div class="tab-content">';
@@ -1052,11 +1057,7 @@ $('#parsers_box_container').on('click' , '.parsers_selection_next_btn' , functio
   $.each($('.parsers_selection_checkbox:checked') , function(){
       selected_parsers.push( $(this).val() )
   } )
-  // if no parsers selected stop
-  if(selected_parsers.length == 0){
-      toast_msg('One parser at least should be selected' , type = "error" , header = "Error")
-      return;
-  }
+  
   if(parsers_selected_machines.length == 0 ||  parsers_selected_case == ''){
       toast_msg('Machine or Case not properly selected' , type = "error" , header = "Error")
       return;

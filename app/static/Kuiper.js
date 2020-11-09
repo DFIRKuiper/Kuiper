@@ -32,9 +32,11 @@ function convert_json_to_list(json) {
 
 // it will take the json and the json_path and return the value
 function get_field_from_json_path(json, path) {
-    if (path.split('.').length == 1){
-        return json[path] // if there is not end then return the value
-    }
+    console.log(path)
+    console.log(json)
+    if (path.split('.').length == 1)
+        return (json == null) ? 'null' : json[path]; // if there is not end then return the value
+    
     var dot_index = path.indexOf('.');
     var field = path.substring(0, dot_index)
     var new_path = path.substring(dot_index + 1)
@@ -69,32 +71,33 @@ library.json = {
    };
 
 
-   
+
 // built the details window for windows event information
 function build_windows_event_table(record , container) {
     
     var open_badge = '<span class="badge bg-blue">'
-
+    console.log(record)
     var system = record['_source']['Data']["Event"]["System"]
-    var event_id_link = "http://www.eventid.net/display.asp?eventid=" + system["EventID"]["#text"];
+    var eventid = get_field_from_json_path(system , "EventID.#text")
+    var event_id_link = "http://www.eventid.net/display.asp?eventid=" + eventid;
     var fields = {
-        "EventID"           : "<a href=\"" + event_id_link + "\">" + system["EventID"]["#text"] + "</a> <a  target=\"_blank\" href=\"" + event_id_link + "\"><i class=\"fa fa-fw fa-external-link\"></i></a>",
+        "EventID"           : "<a href=\"" + event_id_link + "\">" + eventid + "</a> <a  target=\"_blank\" href=\"" + event_id_link + "\"><i class=\"fa fa-fw fa-external-link\"></i></a>",
         "Task"              : ("Task" in system) ? system["Task"] : "",
-        "TimeCreated"       : ("TimeCreated" in system) ? system["TimeCreated"]["@SystemTime"] : "",
-        "Level"             : ("Level" in system) ? system["Level"] : "",
-        "ActivityID"        : ("Correlation" in system) ? system["Correlation"]['@ActivityID'] : "",
-        "RelatedActivityID" : ("Correlation" in system) ? system["Correlation"]["@RelatedActivityID"] : "",
-        "Version"           : ("Version" in system) ? system["Version"] : "",
-        "Opcode"            : ("Opcode" in system) ? system["Opcode"] : "",
-        "EventRecordID"     : ("EventRecordID" in system) ? system["EventRecordID"] : "",
-        "Provider_GUID"     : ("Provider" in system) ? system["Provider"]["@Guid"] : "",
-        "Provider_Name"     : ("Provider" in system) ? system["Provider"]["@Name"] : "",
-        "Keywords"          : ("Keywords" in system) ? system["Keywords"] : "",
-        "ProcessID"         : ("Execution" in system) ? system["Execution"]["@ProcessID"] : "",
-        "ThreadID"          : ("Execution" in system) ? system["Execution"]["@ThreadID"] : "",
-        "Security_UserID"   : ("Security" in system) ? system["Security"]["@UserID"] : "",
-        "Computer"          : ("Computer" in system) ? system["Computer"] : "",
-        "Channel"           : ("Channel" in system) ? system["Channel"] : ""
+        "TimeCreated"       : get_field_from_json_path(system , "TimeCreated.@SystemTime"),
+        "Level"             : get_field_from_json_path(system , "Level"),
+        "ActivityID"        : get_field_from_json_path(system , "Correlation.@ActivityID"),
+        "RelatedActivityID" : get_field_from_json_path(system , "Correlation.@RelatedActivityID"),
+        "Version"           : get_field_from_json_path(system , "Version"),
+        "Opcode"            : get_field_from_json_path(system , "Opcode"),
+        "EventRecordID"     : get_field_from_json_path(system , "EventRecordID"),
+        "Provider_GUID"     : get_field_from_json_path(system , "Provider.@Guid"),
+        "Provider_Name"     : get_field_from_json_path(system , "Provider.@Name"),
+        "Keywords"          : get_field_from_json_path(system , "Keywords"),
+        "ProcessID"         : get_field_from_json_path(system , "Execution.@ProcessID"),
+        "ThreadID"          : get_field_from_json_path(system , "Execution.@ThreadID"),
+        "Security_UserID"   : get_field_from_json_path(system , "Security.@UserID"),
+        "Computer"          : get_field_from_json_path(system , "Computer"),
+        "Channel"           : get_field_from_json_path(system , "Channel")
     }
 
     
