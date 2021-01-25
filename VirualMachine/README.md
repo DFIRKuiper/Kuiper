@@ -5,7 +5,7 @@ Note: we recommend to use this VM machine for testing only, it is preferable to 
 
 To download a virtual machine with Kuiper and all its dependencies installed, please visit the following link 
 ```
-https://mega.nz/#F!i9UjyaQQ!DK97l_CzzhCa-y_E1dPULQ
+https://mega.nz/folder/OslmmaxL#7AUJEdU9hiAHHuD19uNF2w
 ```
 
 ## Credentials
