@@ -13,8 +13,6 @@ def auto_interface(file,parser):
             cmd = 'python3 '+ CurrentPath+'/regsk.py -k -f "' + file.replace("$" , '\$') + '" -pl ' + parser
             proc = subprocess.Popen(cmd, shell=True ,stdin=None , stdout=subprocess.PIPE , stderr=subprocess.PIPE)
             res , err = proc.communicate()
-            #print res 
-            #print err
             if err != "":
                 raise Exception(err.split("\n")[-2])
 
@@ -42,6 +40,7 @@ def auto_interface(file,parser):
         exc_type,exc_obj,exc_tb = sys.exc_info()
         msg = "[-] [Error] " + str(parser) + " Parser: " + str(exc_obj) + " - Line No. " + str(exc_tb.tb_lineno)
         return (None , msg)
+
 
 
 

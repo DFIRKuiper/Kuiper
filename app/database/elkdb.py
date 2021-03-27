@@ -311,8 +311,8 @@ class ES_DB:
 
             di['_source']['Data'] = d['Data'] if kjson else d
             source                = d['data_source'] if kjson else source
-            data_type             = d['data_type'] if kjson else source
-            data_path             = d['data_path'] if kjson else source
+            data_type             = d['data_type'] if kjson else data_type
+            data_path             = d['data_path'] if kjson else data_path
 
             if source is not None:
                 di['_source']['data_source'] = source

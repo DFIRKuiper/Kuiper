@@ -162,13 +162,13 @@ def upload_file(file , case_id , machine=None , base64_name=None):
     
     if isUploadMachine:
         # if the option is upload machine
-        machine_name    = source_filename.rstrip('.zip')
+        machine_name    = source_filename.rstrip('.zip').replace("/" , "_")
         machine_id      = case_id + "_" + machine_name
     else:
         # if upload artifacts
         machine_id      = machine
     
-
+    
     try: 
         # ======= validate machine exists or not  
         # check if machine already exists
@@ -289,7 +289,7 @@ def upload_file(file , case_id , machine=None , base64_name=None):
         if isUploadMachine:
             create_m = db_cases.add_machine({
                 'main_case'     : case_id,
-                'machinename'   : machine_name
+                'machinename'   : machine_name.replace("/" , "_")
             })
 
             if create_m[0] == False: # if creating the machine failed
@@ -604,7 +604,7 @@ def main_upload_artifacts(main_case_id,machine_case_id):
 def add_machine(case_id):
     if request.method == 'POST':
         machine_details = {
-            'machinename'   :request.form['machinename'],
+            'machinename'   :request.form['machinename'].replace("/" , "_"),
             'main_case'     :case_id,
             'ip'            :request.form['ip'],
 
@@ -647,8 +647,16 @@ def delete_machine(case_id , machines_list):
             if es_machine:
                 logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: Machine ["+machine+"] deleted")
 
-        # delete all records for the machines
-        
+            # delete all files
+            try:
+                files_folder    = app.config["UPLOADED_FILES_DEST"]     + "/" + case_id + "/" + machine + "/"
+                raw_folder      = app.config["UPLOADED_FILES_DEST_RAW"] + "/" + case_id + "/" + machine + "/"
+                shutil.rmtree(files_folder, ignore_errors=True)
+                shutil.rmtree(raw_folder, ignore_errors=True)
+                logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: deleted machine folders ["+machine+"]" , reason=files_folder + "," + raw_folder)
+            except Exception as e:
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed deleting machine folders ["+machine+"]" , reason=str(e))
+
         return redirect(url_for('all_machines',case_id=case_id))
 
 
@@ -1061,7 +1069,6 @@ def case_add_tag_ajax(case_id):
         record_id = None
         ajax_data = json.loads(ajax_str)['data']
 
-        
         Data = {
             "tag" : ajax_data['time'] ,
             "@timestamp" : ajax_data['time']
@@ -1096,8 +1103,7 @@ def case_add_tag_ajax(case_id):
 
                 logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: Tag created")
                 return json.dumps({"result" : 'successful' , 'tag_id' : up[3][0]})
-        
-
+            return json.dumps({"result" : 'successful' , 'tag_id' : up[3][0]})
 
 
 # =================== Alerts =======================

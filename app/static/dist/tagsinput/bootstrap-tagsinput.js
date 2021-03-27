@@ -151,13 +151,18 @@ function escapeHtml(unsafe) {
       // add a tag element
       // options tag html 
       //var html_tag_options = '<span data-role="options" class="fa fa-caret-down dropdown-toggle" data-toggle="dropdown"></span> ';
+
+
       var html_tag_options = '<span class="dropdown">\
-          <a data-role="options" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <span class="caret"></span>   </a>\
+          <a data-role="options" class="dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> <i class="fa fa-fw fa-sort-down"></i>   </a>\
           <ul class="dropdown-menu" aria-labelledby="dLabel">\
           </ul>\
         </span>';
 
-      var $tag = $('<span class="tag ' + htmlEncode(tagClass) + (itemTitle !== null ? ('" title="' + itemTitle) : '') + '">' + html_tag_options + ' '+ htmlEncode(itemText) + '<span data-role="remove"></span></span>');
+
+      var itemID = itemValue.split("|")[0]
+      var item_text_element = '<span enable_edit="false" class="tag_itemText" id="itemID_'+itemID+'">'+htmlEncode(itemText)+'</span>'
+      var $tag = $('<span class="tag ' + htmlEncode(tagClass) + (itemTitle !== null ? ('" title="' + itemTitle) : '') + '">' + html_tag_options + ' '+ item_text_element + '<span data-role="remove"></span></span>');
       $tag.data('item', item);
       self.findInputWrapper().before($tag);
       $tag.after(' ');
@@ -258,8 +263,6 @@ function escapeHtml(unsafe) {
     refresh: function() {
       var self = this;
       $('.tag', self.$container).each(function() {
-        console.log('self_container');
-        console.log($(this));
 
         if(self.objectItems){
               var $tag = $(this),
@@ -282,16 +285,10 @@ function escapeHtml(unsafe) {
         }
 
         else {
-            console.log("update: ");
             var $tag = $(this),
                 item = $tag.data('item'),
                 itemText = self.options.itemText(item),
                 tagClass = self.options.tagClass(item);
-
-            console.log($tag);
-            console.log(item);
-            console.log(itemText);
-            console.log(tagClass);
 
 
               $tag.attr('class', null);
@@ -428,10 +425,10 @@ function escapeHtml(unsafe) {
       }
 
       self.$container.on('click', $.proxy(function(event) {
-        if (! self.$element.attr('disabled')) {
+        if (! self.$element.attr('disabled') ) {
           self.$input.removeAttr('disabled');
         }
-        self.$input.focus();
+        //self.$input.focus();
       }, self));
 
       if (self.options.addOnBlur && self.options.freeInput) {
@@ -480,7 +477,6 @@ function escapeHtml(unsafe) {
                 }
                 else{
                   self.remove(prev.data('item'));
-                  //console.log('DONT remove b/c NOT sames name=value');
                 }
                 // >>>> TRP 12/27/15
 
@@ -493,10 +489,6 @@ function escapeHtml(unsafe) {
             if (doGetCaretPosition($input[0]) === 0) {
               var next = $inputWrapper.next();
               if (next.length) {
-                console.log('case=46, $input.val()');
-                console.log($input.val());
-                console.log("next.data('item')");
-                console.log(next.data('item'));
                 self.remove(next.data('item'));
               }
             }
@@ -546,7 +538,6 @@ function escapeHtml(unsafe) {
             // Only attempt to add a tag if there is data in the field
 
             if (text.length !== 0) {
-              //console.log("text.length !== 0"+text);
                //self.add(maxLengthReached ? text.substr(0, self.options.maxChars) : text); ////TRP 12/24/15
 
                //<<<<< TRP 12/24/15
@@ -557,8 +548,6 @@ function escapeHtml(unsafe) {
                  if (beforeFreeInputItemAdd.cancel)
                    return;
 
-                   //console.log('beforeFreeInputItemAdd.item');
-                   //console.log(beforeFreeInputItemAdd.item);
                  item2 = beforeFreeInputItemAdd.item;
                }
 
@@ -582,13 +571,54 @@ function escapeHtml(unsafe) {
       }, self));
 
 
+      // tag on click tag_itemText edit the content
+      self.$container.on('click', 'span[class=tag_itemText]', $.proxy(function(event){
+        if (self.$element.attr('disabled'))
+          return;
+        
+        var itemElement = $(event.target).closest('.tag_itemText')
+        if (itemElement.attr('enable_edit') == 'true')
+            return;
+
+        itemElement.attr('enable_edit' , 'true')
+        
+        var item = itemElement.closest('.tag').data('item');
+        var itemContent = item.split("|")[1]
+        itemElement.html('<input style="background:white; color:black" type="text" value="'+itemContent+'"/>')
+        var res = ""
+        itemElement.on('keypress' , function(event) { 
+            if(event.keyCode == 13){
+
+                // this to prevent duplicate
+                if (itemElement.attr('enable_edit') == 'false')
+                    return;
+
+                var old_tag_content = itemElement.closest('.tag').data('item').split("|")
+                var input_field = itemElement.children()[0].value
+                
+                var new_tag_content = old_tag_content[0] + "|" + input_field + "|" + old_tag_content[2]
+                itemElement.html("")
+
+                itemElement.attr('enable_edit' , 'false')
+
+
+                self.change_tag([itemElement.closest('.tag').data('item') , new_tag_content])
+                self.$element.trigger($.Event('TagInputEdit',  { item: item , html_item: itemElement }));
+            }
+            
+        });
+
+        //self.$element.trigger($.Event('tagOptions',  { item: item , html_item: $(event.target).closest('.tag') }));
+
+      }, self));
+
+
       // tagOptions icon clicked
       self.$container.on('click' , '[data-role=options]' , $.proxy(function(event){
           if (self.$element.attr('disabled')) {
             return;
           }
           var item = $(event.target).closest('.tag').data('item');
-          console.log("=====" + item )
           //$(event.target).closest('.tag').find('.dropdown-menu').dropdown('toggle');
           //self.tagOptions(item , $(event.target).closest('.tag'));
           self.$element.trigger($.Event('tagOptions',  { item: item , html_item: $(event.target).closest('.tag') }));
@@ -663,16 +693,11 @@ function escapeHtml(unsafe) {
     change_tag: function(tags){
         var oldt = tags[0];   
         var newt = tags[1];
-        //console.log("change_tag: ")
-        //console.log(tags)
-
         // get item container
-        //console.log( $('.tag', self.$container) )
-        console.log("old" + oldt)
         var $item_container = $('.tag', self.$container).filter(function() { 
-            console.log("found " + $(this).data('item'))
             return $(this).data('item') === oldt;
         });
+
 
         var item = $item_container.data('item');
         var itemText =this.options.itemText(newt);
@@ -682,8 +707,19 @@ function escapeHtml(unsafe) {
         $item_container.addClass('tag ' + htmlEncode(tagClass));
         $item_container.data('item' , newt);
 
-        
-        $item_container.contents().filter( function(){return this.nodeType == 3; })[0].nodeValue = htmlEncode(itemText);
+        var itemID = newt.split("|")[0]
+
+        var item_text_element = '<span enable_edit="false" class="tag_itemText" id="itemID_'+itemID+'">'+htmlEncode(itemText)+'</span>'
+        var item_container_tag_itemText =  $item_container.contents().filter( function(){
+            return $(this).hasClass('tag_itemText'); 
+        })[0]
+
+        $(item_container_tag_itemText).attr('enable_edit' , 'false')
+        $(item_container_tag_itemText).html(htmlEncode(itemText))//newt.split("|")[1])//
+        //$item_container.html(item_text_element)
+        //var item_container_tag_itemText = $item_container.contents().filter( function(){return this.nodeType == 3; })
+
+        //$item_container.contents().filter( function(){return this.nodeType == 3; })[0].html(item_text_element);
 
 
         // get and change the element values

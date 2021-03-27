@@ -32,3 +32,4 @@ gunicorn==19.4.5
 gevent==1.4.0
 psutil==5.7.0
 libesedb-python==20200418
+python-ldap=3.3.1

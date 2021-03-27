@@ -228,7 +228,7 @@
                 <button type="button" class="parsers_back_to_machines btn btn-info btn-sm"><i class="fa fa-fw fa-angle-left"></i> Back</button>
 
                 <div class="btn-group">    
-                    <button type="button" class="parsers_select_all btn btn-default btn-sm" data-action="select_all"><i class="fa fa-circle-o"></i> <span>Select</span></button>
+                    <button type="button" class="parsers_select_all btn btn-default btn-sm" data-action="select_all"><i class="fa fa-circle-o"></i> <span>Select All</span></button>
                     <button type="button" class="parsers_selection_next_btn btn btn-sm btn-warning"><i class="fa fa-play"></i> Next</button>
                 </div>
                 <br /><br />
@@ -1175,12 +1175,12 @@ $('#parsers_box_container').on('click' , '.parsers_select_all' , function(){
           $(this).click()
   });
   if($(this).data('action') == 'select_all'){
-    $(this).children('span').text('Deselect')
+    $(this).children('span').text('Deselect All')
     $(this).data('action' , 'deselect_all')
     $(this).children('i').removeClass('fa-circle-o')
     $(this).children('i').addClass('fa-circle')
   } else {
-    $(this).children('span').text('Select')
+    $(this).children('span').text('Select All')
     $(this).data('action' , 'select_all')
     $(this).children('i').addClass('fa-circle-o')
     $(this).children('i').removeClass('fa-circle')

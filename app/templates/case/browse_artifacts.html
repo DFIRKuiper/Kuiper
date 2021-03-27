@@ -454,6 +454,23 @@
     padding: 0 5px ;
 }
 
+
+
+
+
+
+.event_record_click>td>.popover {
+    max-width: 150px;
+    width:150px;
+}
+
+.event_record_click>td>.popover.right>.arrow:after {
+    border-right-color: #393e5a;
+}
+.event_record_click>td>.popover.right>.popover-content {
+  margin-right: 0px;
+}
+
 </style>
 
 
@@ -752,7 +769,7 @@ function search_button_click(){
     // if the search type not simple, then build the elasticsearch query 
     if(search_type != 'simple'){
         search_json     = build_elasticsearch_query_json();
-
+        console.log(search_json)
         // get the elasticsearch query string
         var search_es   = build_search_query(search_json);
     }
@@ -815,10 +832,44 @@ function update_search_query_input_tag(tag , id, option="contains"){
 
 // used to add a tag to the search query tags
 function add_search_query_input_tag(tag , option="contains"){
-    if(tag.split('|').length == 1 && lock_adding_tag == false && search_type == 'tagsinput'){
+    if(tag.split('|').length == 1 && lock_adding_tag == false && (search_type == 'tagsinput' || search_type == 'simple' )){
         lock_adding_tag = true; // lock adding new item tags input
 
-        search_query_tagsinput.tagsinput('add' , search_query_tagsinput.val().length + "|" + tag + "|" + option ); // trigger change to search query tag input
+        if(search_type == 'tagsinput')
+            search_query_tagsinput.tagsinput('add' , search_query_tagsinput.val().length + "|" + tag + "|" + option ); // trigger change to search query tag input
+        else if(search_type == 'simple'){
+            var old_search_query_simple = $('#search_query_simple').val() 
+            console.log(old_search_query_simple)
+            var search_json = {"AND" : []}
+
+
+            var index_of_first_colon  = tag.indexOf(':')
+            var col                   = tag.substring(0 , index_of_first_colon);
+            var val                   = tag.substring( index_of_first_colon +1 );
+            var colmn_name            = (col == "") ? "string" : col;   // if column field not specified
+            var column_value          = val;                           
+            var v                     = {};
+
+            switch(option){
+                case "not_contains" : colmn_name = '!~' + colmn_name; break;
+                case "contains"     : colmn_name = '=~' + colmn_name; break;
+                case "equal"        : colmn_name = '==' + colmn_name; break;
+                case "not_equal"    : colmn_name = '!=' + colmn_name; break;
+            }
+
+            v[colmn_name] = column_value;
+            search_json["AND"].push( {"string": old_search_query_simple} );
+            search_json["AND"].push( v );
+            console.log(search_json)
+
+            var search_es   = build_search_query(search_json);
+            console.log(search_es)
+
+            $('#search_query_simple').val( search_es )
+            change_sample_query_search(search_es)
+            search_button_click()
+        }
+
         lock_adding_tag = false; // disable lock adding new item tags input
         return true;
     } else{
@@ -925,28 +976,54 @@ function rebuild_records(records){
             </td>';
 
 
-
+    
 	if( records[i]['_source']['Data']['@timestamp'] != null && records[i]['_source']['Data']['@timestamp'].indexOf('.') != -1)
         	timestamp = timestamp.substring(0 , records[i]['_source']['Data']['@timestamp'].indexOf('.'))
+
         new_tr +='<td>'+ timestamp.replace('T' , ' ') +' \
-              <a style="cursor: pointer" id="Data.@timestamp:'+timestamp+'" class="add_to_search_query float_right">\
-                <i class="fa fa-search-plus"></i>\
-              </a> \
+              <a  style="cursor: pointer " class="table_timestamp_field_button float_right" data-id="'+i+'" data-toggle="popover" data-original-title="Time range (min.)"><i class="fa fa-search-plus"></i></a>\
+            \
+                <div id="table_timestamp_field_popover_'+i+'" class=" hide"   data-trigger="focus">\
+                    <input type="hidden" class="form-control" value="'+timestamp+'" id="table_timestamp_field_popover_timestamp_'+i+'">\
+                    <div class="input-group input-group-sm">\
+                        <input type="number" class="form-control" placeholder="min." id="table_timestamp_field_popover_min_'+i+'" width="5" value="0" min="0" step="1">\
+                        <span class="input-group-btn">\
+                        <button type="button" data-id="'+i+'" class="table_timestamp_field_popover_submit btn btn-primary btn-flat">\
+                            <i class="fa fa-arrow-right"></i>\
+                        </button>\
+                        </span>\
+                    </div>\
+                </div>\
+              \
             </td>';
 
 
-        new_tr +='<td>'+ records[i]['_source']['data_type'] +' \
-              <a style="cursor: pointer" id="data_type:'+records[i]['_source']['data_type']+'" class="add_to_search_query float_right">\
-                <i class="fa fa-search-plus"></i>\
-              </a> \
-            </td>';
+        new_tr += '<td>'+ records[i]['_source']['data_type'] +' \
+                <span class="dropdown float_right">\
+                    <a class="fields-dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="clickable fa fa-filter "></span></a>\
+                    <ul class="dropdown-menu">\
+                    <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
+                    <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
+                    <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
+                    <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
+                    <li class="clickable" data="item" id><a data="data_type" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
+                    </ul>\
+                </span>\
+                </td>';
+        
 
-
-        new_tr +='<td>'+ records[i]['_source']['machinename'] +' \
-              <a style="cursor: pointer" id="machine:'+records[i]['_source']['machine']+'" class="add_to_search_query float_right">\
-                <i class="fa fa-search-plus"></i>\
-              </a> \
-            </td>';
+        new_tr += '<td>'+ records[i]['_source']['machinename'] +' \
+                <span class="dropdown float_right">\
+                    <a class="fields-dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="clickable fa fa-filter "></span></a>\
+                    <ul class="dropdown-menu">\
+                    <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
+                    <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
+                    <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
+                    <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
+                    <li class="clickable" data="item" id><a data="machine" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
+                    </ul>\
+                </span>\
+                </td>';
 
         var date_type = records[i]['_source']['data_type']
         var imp_rec = record_important_fields[date_type];
@@ -969,7 +1046,7 @@ function rebuild_records(records){
                 <li class="clickable" data="item" id><a data="'+search_field_path+'" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
                 </ul>\
               </span>';
-            td_details += ' <span class="badge bg-blue"> ' + html_field_options + imp_rec[j][0]+'</span> ' + field_value;
+            td_details += ' <span class="badge bg-blue"> ' + html_field_options + imp_rec[j][0]+'</span> ' + escapeHtml(field_value);
         }
 
         new_tr +='<td>'+ td_details + '</td>';
@@ -1136,7 +1213,7 @@ function reload_records(search , wanted_page , sort_by = query_sort_by ){
           rebuild_records(ajax_records);
           
           // build data type drop-down list 
-          console.log(r)
+          //console.log(r)
           
           var list = ""
           if(r['res_total'] != 0){
@@ -1309,7 +1386,8 @@ function build_search_query(json_query){
             else
                 key = key + ":"
 
-
+            console.log("key: " + key)
+            console.log("val: " + val)
             // build the query string based on the operator
             switch(operator){
                 case "==":
@@ -1324,12 +1402,16 @@ function build_search_query(json_query){
                 case "!~":
                   query_string = "!" + key + '*'+val+'*';
                   break;
+                default:
+                  query_string = val;
+                  break;
             }
+            console.log("query_string: " + query_string)
             
             terms.push(query_string)
         }
     }
-
+    console.log(terms)
     return terms.join( ' ' + k + ' ' );
   }
   return ""; // if empty there is no results
@@ -1500,7 +1582,6 @@ function reset_search_terms_func(){
         $("#search_query_simple").hide()
     }
     
-    search_button_click()
 
     // enable the simple search tags
     $('.bootstrap-tagsinput').removeAttr('disabled')
@@ -1564,13 +1645,64 @@ $(function () {
     // set the position of the popover
   $(document).on('click' , '#sample_search_confirm_rule' , function(e){
                   $('.popover').css("left" , "-230px");
-                  $('.popover.bottom>.arrow').css('left' , "94%")
+                  $('.popover.bottom>.arrow').css('left' , "94%");
               })
+   
+
+
+
 
 })
 
+// if item clicked to be added to the search query (using fa-search-plus)
+$("#table_events,#dialog_content,#artifacts_list_container,#record_details_block").on('click' , 'a.table_timestamp_field_button' , function(){
 
+   var id = $(this).data("id")
+   console.log("id")
+   console.log(id)
+   $(this).popover({
+                 placement   : 'right',
+                 title       : 'timestamp',
+                 html        : true,
+                 content     : $('#table_timestamp_field_popover_' + id).html(),
+              })
+    
+    
+    // set the position of the popover
+    //$('.popover').css("width" , "90px");
+    //$('.popover.right>.arrow').css('border-right-color' , "#393e5a")
+  
+});
 
+$("#table_events,#dialog_content,#artifacts_list_container,#record_details_block").on('click' , 'button.table_timestamp_field_popover_submit' , function(){
+        var id                  = $(this).data("id")
+        var min                 = parseInt($('#table_timestamp_field_popover_min_' + id).val())
+        var timestamp           = $('#table_timestamp_field_popover_timestamp_' + id).val()
+        if(min == 0){
+            t = "Data.@timestamp:"+timestamp
+        } else {
+            if(timestamp.indexOf("Z") == -1)
+            timestamp += "Z"
+            
+            var timestamp_parsed    = new Date(timestamp)
+
+            var start_date          =  new Date(timestamp)
+            var end_date            = new Date(timestamp)
+
+            start_date.setMinutes(timestamp_parsed.getMinutes() - min);
+            end_date.setMinutes(timestamp_parsed.getMinutes() + min);
+
+            var start_date_str  = start_date.toISOString().replace(".000Z", "")
+            var end_date_str    = end_date.toISOString().replace(".000Z", "")
+
+            t = "Data.@timestamp:["+start_date_str+" TO "+end_date_str+"]"
+        }
+        
+        console.log(t)
+        add_search_query_input_tag(t , 'equal');
+        timestamp_range_search = search_query_tagsinput.val().length - 1;
+
+})
 
 
 
@@ -1596,6 +1728,23 @@ $(document).on('click', function (e) {
             $popover.popover('toggle');
         }
     });
+
+
+
+    $('.table_timestamp_field_button[data-toggle="popover"]').each(function () {
+        $popover = $(this);
+
+        if (!$popover.is(e.target) &&
+            $popover.has(e.target).length === 0 &&
+            $('.popover').has(e.target).length === 0)
+        {
+            $popover.popover('hide');
+        } else {
+            //fixes issue described above
+            $popover.popover('toggle');
+        }
+    });
+
 })
 
 
@@ -1681,6 +1830,9 @@ $('#search_button').click(function(){
 // on click open advanced search button
 $('#advance_search_dialog_opener_btn').click(function(){
     reset_search_terms_func()
+
+    search_button_click()
+
     $('.bootstrap-tagsinput').attr('disabled' , 'disabled')
     $('#advance_search_dialog').fadeIn()
     if($('#advance_search_dialog').is(":visible")){
@@ -1695,19 +1847,24 @@ $('#advance_search_dialog_opener_btn').click(function(){
 
 // on click the simple search query button 
 $('#simple_search_btn').click(function(){
-    reset_search_terms_func()
+    
+    
     
     if($(this).hasClass('btn-primary')){
+        var sample_query_search_content = $('#sample_query_search_content').text()
         // enable simple search
-        
+        reset_search_terms_func()
+
         $(this).removeClass('btn-primary')
         $(this).addClass('btn-success')
         $("#search_query_simple").show()
-        $("#search_query_simple").val("")
+        $("#search_query_simple").val(sample_query_search_content)
         $('.bootstrap-tagsinput').hide()
         search_type = 'simple'
         $('.bootstrap-tagsinput').attr('disabled' , 'disabled')
         
+        search_button_click()
+
     }
 })
 
@@ -1724,6 +1881,8 @@ $("#search_query_simple").keypress(function(event){
 // if reset search terms clicked, remove all searches from advanced search and simple search (input tags)
 $("#reset_search_terms").on('click' , function(){
     reset_search_terms_func()
+
+    search_button_click()
 })
 
 
@@ -1797,6 +1956,11 @@ $('#disable_enable_details_table').click(function(){
 
 
 
+// when a tag input modified, it will trigger this action to submit the modified data
+$('#search_query').on('TagInputEdit' , function( event ){
+search_button_click();
+
+});
 
 
 
@@ -2000,6 +2164,7 @@ function navegate_to_page(page){
     // if the search type not simple, then build the elasticsearch query 
     if(search_type != 'simple'){
         var search_json = build_elasticsearch_query_json();
+        
         // get the elasticsearch query string
         var search_es   = build_search_query(search_json);
     }

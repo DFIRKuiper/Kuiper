@@ -1,0 +1,192 @@
+ <!DOCTYPE html>
+ 
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Kuiper</title>
+    <link rel="icon" href="{{url_for('static', filename='dist/img/favicon.ico')}}" type="image/x-icon">  
+
+
+    <!-- Tell the browser to be responsive to screen width -->
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+    <!-- Bootstrap 3.3.5 -->
+      <link rel="stylesheet" href="{{url_for('static', filename='plugins/select2/select2.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='bootstrap/css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='bootstrap/css/chosen.min.css')}}">
+
+    <link rel="stylesheet" href="{{url_for('static', filename='fontawesome/css/font-awesome.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='fontawesome/css/font-awesome.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='plugins/datatables/dataTables.bootstrap.css')}}">
+  	  <link rel="stylesheet" href="{{url_for('static', filename='fancytree/src/skin-win8/ui.fancytree.css')}}">
+      <link rel="stylesheet" href="{{url_for('static', filename='fancytree/lib/prettify.css')}}">
+      <link rel="stylesheet" href="{{url_for('static', filename='fancytree/lib/sample.css')}}">
+
+
+  	<!-- Start_Exclude: This block is not part of the sample code -->
+    <link rel="stylesheet" href="{{url_for('static', filename='botsptree/dist/css/bootstrap-treenav.min.css')}}">
+      <link rel="stylesheet" href="{{url_for('static', filename='bootstrap/css/ionicons.min.css')}}">
+    <!-- Theme style -->
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/css/AdminLTE.css')}}">
+    <!-- AdminLTE Skins. Choose a skin from the css/skins
+         folder instead of downloading all of them to reduce the load. -->
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/css/skins/_all-skins.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/css/loader.css')}}">
+    <!-- iCheck -->
+    <link rel="stylesheet" href="{{url_for('static', filename='plugins/iCheck/flat/blue.css')}}">
+    <!-- Morris chart -->
+    <link rel="stylesheet" href="{{url_for('static', filename='plugins/morris/morris.css')}}">
+      <link rel="stylesheet" href="{{url_for('static', filename='plugins/timepicker/bootstrap-timepicker.min.css')}}">
+    <!-- jvectormap -->
+    <link rel="stylesheet" href="{{url_for('static', filename='plugins/jvectormap/jquery-jvectormap-1.2.2.css')}}">
+    <!-- Date Picker -->
+    <link rel="stylesheet" href="{{url_for('static', filename='plugins/datepicker/datepicker3.css')}}">
+    <!-- Daterange picker -->
+    <link rel="stylesheet" href="{{url_for('static', filename='plugins/daterangepicker/daterangepicker-bs3.css')}}">
+    <!-- bootstrap wysihtml5 - text editor -->
+    <link rel="stylesheet" href="{{url_for('static', filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css')}}">
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <link rel="stylesheet" href="{{url_for('static' , filename='Kuiper.css')}}">
+
+
+<style type="text/css">
+
+.content-wrapper, .main-footer {
+    margin-left: 0px;
+}
+.login-box-body, .register-box-body {
+    background: #26283c;
+    border: 1px solid #393e5a;
+}
+
+.login-box-msg{
+    color: #ffffff;
+}
+</style>
+  </head>
+
+
+<body id="body" class="hold-transition skin-purple ">
+
+
+
+    <div class="wrapper">
+
+      
+
+      <!-- Content Wrapper. Contains page content -->
+      <div class="content-wrapper">
+
+	
+	<section class="content">
+
+
+        <!-- ================ logon box START ================= -->
+        <div class="login-box">
+            
+            <!-- /.login-logo -->
+            <div class="login-box-body box-body">
+                <div class="login-logo">
+                    <a href="/"><span class="logo-lg"><img src="{{url_for('static', filename='dist/img/logo_dark.png')}}" width="164" height="84"></span></a>
+                </div>
+
+                <p class="login-box-msg">Sign in to start your session</p>
+
+                <form action="" method="post">
+                <div class="form-group has-feedback">
+                    <input type="text" class="form-control" placeholder="Username" name="user">
+                    <span class="glyphicon glyphicon-envelope form-control-feedback"></span>
+                </div>
+                <div class="form-group has-feedback">
+                    <input type="password" class="form-control" placeholder="Password" name="passwd">
+                    <span class="glyphicon glyphicon-lock form-control-feedback"></span>
+                </div>
+
+                {% if msg is not none %}
+                    <div class="callout callout-danger">
+                    <p>{{msg}}</p>
+                    </div>
+
+                {% endif %}
+                <div class="row">
+                    
+                    <!-- /.col -->
+                    <div class="col-xs-4">
+                    <button type="submit" class="btn btn-primary btn-block btn-flat">Sign In</button>
+                    </div>
+                    <!-- /.col -->
+                </div>
+
+
+
+                </form>
+
+
+            </div>
+            <!-- /.login-box-body -->
+            </div>
+
+
+        <!-- ================ Logon box END ================ -->
+  
+	</section>
+</div><!-- /.content-wrapper -->
+</div>
+    <!-- jQuery 2.1.4 -->
+    <script src="{{url_for('static', filename='plugins/jQuery/jQuery-2.2.0.min.js')}}"></script>
+    <!-- jQuery UI 1.11.4 -->
+    <!-- Bootstrap 3.3.5 -->
+    <script src="{{url_for('static', filename='bootstrap/js/bootstrap.min.js')}}"></script>
+    <!-- Morris.js charts -->
+
+
+
+    <!-- <script src="{{url_for('static', filename='plugins/jQuery/raphael-min.js')}}"></script> -->
+    <script src="{{url_for('static', filename='plugins/morris/morris.min.js')}}"></script>
+    <!-- Sparkline -->
+    <script src="{{url_for('static', filename='plugins/sparkline/jquery.sparkline.min.js')}}"></script>
+    <!-- jvectormap -->
+    <script src="{{url_for('static', filename='plugins/jvectormap/jquery-jvectormap-1.2.2.min.js')}}"></script>
+    <script src="{{url_for('static', filename='plugins/jvectormap/jquery-jvectormap-world-mill-en.js')}}"></script>
+    <!-- jQuery Knob Chart -->
+    <script src="{{url_for('static', filename='plugins/knob/jquery.knob.js')}}"></script>
+    <!-- daterangepicker -->
+    <script src="{{url_for('static', filename='dist/js/moment.min.js')}}"></script>
+    <script src="{{url_for('static', filename='plugins/daterangepicker/daterangepicker.js')}}"></script>
+    <!-- datepicker -->
+    <script src="{{url_for('static', filename='plugins/datepicker/bootstrap-datepicker.js')}}"></script>
+    <!-- Bootstrap WYSIHTML5 -->
+    <script src="{{url_for('static', filename='plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js')}}"></script>
+    <!-- Slimscroll -->
+    <script src="{{url_for('static', filename='plugins/slimScroll/jquery.slimscroll.min.js')}}"></script>
+    <!-- FastClick -->
+    <script src="{{url_for('static', filename='plugins/fastclick/fastclick.min.js')}}"></script>
+    <!-- AdminLTE App -->
+    <script src="{{url_for('static', filename='dist/js/app.min.js')}}"></script>
+    <script src="{{url_for('static', filename='plugins/datatables/dataTables.bootstrap.min.js')}}"></script>
+    <script src="{{url_for('static', filename='plugins/datatables/jquery.dataTables.min.js')}}"></script>
+    <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+
+
+
+    <script src="{{url_for('static', filename='plugins/iCheck/icheck.min.js')}}"></script>
+    <script src="{{url_for('static', filename='plugins/select2/select2.full.min.js')}}"></script>
+
+    <!-- AdminLTE for demo purposes -->
+    <script src="{{url_for('static', filename='dist/js/demo.js')}}"></script>
+
+    
+<style>
+/* fix the issue of padding 15px on body when closing dialogs */
+body { padding-right: 0 !important }
+
+</style>
+
+
+
+
+
+
+  </body>
+</html>

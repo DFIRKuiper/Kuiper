@@ -324,7 +324,7 @@ class SRUM_Parser():
 
 	def __init__(self , ese_file):
 		self.ese_db = pyesedb.open(ese_file)
-
+		print "here"
 		self.GUID_tables = {
 			'SruDbIdMapTable' 					: 'SruDbIdMapTable',
 			'NetworkDataUsageMonitor' 			: '{973F5D5C-1D90-4944-BE8E-24B94231A174}',

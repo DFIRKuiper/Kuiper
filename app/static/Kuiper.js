@@ -1,5 +1,30 @@
 var toast = $.toast;
 
+
+
+// escape html strings
+var entityMap = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;',
+    '/': '&#x2F;',
+    '`': '&#x60;',
+    '=': '&#x3D;'
+  };
+
+  function escapeHtml(string) {
+    return String(string).replace(/[&<>"'`=\/]/g, function (s) {
+      return entityMap[s];
+    });
+  }
+
+
+
+
+
+
 function toast_msg(msg, type = "info", header = "Information") {
     toast({
         text: msg,
@@ -32,8 +57,8 @@ function convert_json_to_list(json) {
 
 // it will take the json and the json_path and return the value
 function get_field_from_json_path(json, path) {
-    console.log(path)
-    console.log(json)
+    //console.log(path)
+    //console.log(json)
     if (path.split('.').length == 1)
         return (json == null) ? 'null' : json[path]; // if there is not end then return the value
     
@@ -76,7 +101,7 @@ library.json = {
 function build_windows_event_table(record , container) {
     
     var open_badge = '<span class="badge bg-blue">'
-    console.log(record)
+    //console.log(record)
     var system = record['_source']['Data']["Event"]["System"]
     var eventid = get_field_from_json_path(system , "EventID.#text")
     var event_id_link = "http://www.eventid.net/display.asp?eventid=" + eventid;
@@ -135,6 +160,7 @@ function build_windows_event_table(record , container) {
 }
 
 
+
 // build simple table (record contains key and values)
 function build_simple_artifacts_table(records , container, searchable = true) {
 
@@ -154,7 +180,7 @@ function build_simple_artifacts_table(records , container, searchable = true) {
             var search_plus = ''
 
         
-        html += '<tr><td> ' + open_badge + " " + field + ' </span> ' + search_plus + '</td><td>' + value + '</td></tr>';
+        html += '<tr><td> ' + open_badge + " " + field + ' </span> ' + search_plus + '</td><td>' + escapeHtml(value) + '</td></tr>';
         
 
         
@@ -183,7 +209,7 @@ function check_hash(records) {
         //data : JSON.stringify({'data': {"wanted_page":wanted_page , 'query' : decodeHtml('{{search_query}}') } }),
         data: JSON.stringify({ 'data': { "hash": records } }),
         success: function(result) {
-            console.log(result)
+            //console.log(result)
             d = result
         },
         error: function(error) {
