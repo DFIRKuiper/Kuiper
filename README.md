@@ -123,6 +123,7 @@ $ git clone https://github.com/DFIRKuiper/Kuiper.git
 Change your current directory location to the new Kuiper directory, and run the **kuiper_install.sh** bash script as root.
 
 ```
+$ sudo apt-get update && sudo apt-get upgrade
 $ cd Kuiper/
 $ sudo ./kuiper_install.sh -install 
 ```
@@ -143,7 +144,7 @@ Happy hunting :).
 
 #### Files Paths
 
-before installation, make sure to change the certificate paths if needed
+1. before installation, make sure to change the certificate paths if needed
 
 in `kuiper-nginx.conf` change the path of certificates
 
@@ -152,10 +153,18 @@ in `kuiper-nginx.conf` change the path of certificates
     ssl_certificate_key /home/kuiper/kuiper/cert/MyKey.key;
 ```
 
-also change the socket file path
+2. also change the socket file path
 
 ```
         proxy_pass              http://unix:/home/kuiper/kuiper/kuiper.sock;
+```
+
+3. change mode permission for the following files
+
+```
+chmod +x ./kuiper_install.sh
+chmod +x ./app/parsers/WinEvents/evtx_dump
+chmod +x ./app/parsers/MFT_Parser/mft_dump
 ```
 
 # Issues Tracking and Contribution
