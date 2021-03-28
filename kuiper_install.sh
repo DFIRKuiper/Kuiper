@@ -151,8 +151,9 @@ if [ "$1" == "-install" ]; then
         if [ $ERROR -ne 0 ]; then
             echoerror "Could not install apt-transport-https (Error Code: $ERROR)."
         fi
-
-    echo "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main" >  /etc/apt/sources.list.d/elastic-7.x.list >> $LOGFILE_INSTALL 2>&1
+    
+    rm /etc/apt/sources.list.d/elastic-7.x.list
+    echo "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list >> $LOGFILE_INSTALL 2>&1
     ERROR=$?
         if [ $ERROR -ne 0 ]; then
             echoerror "Could not add elastic packages source list definitions to your source list (Error Code: $ERROR)."
@@ -195,8 +196,9 @@ if [ "$1" == "-install" ]; then
         if [ $ERROR -ne 0 ]; then
             echoerror "Could not write the public signing key to the host (Error Code: $ERROR)."
         fi
-
-    echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" > /etc/apt/sources.list.d/mongodb-org-4.2.list>> $LOGFILE_INSTALL 2>&1
+    
+    rm /etc/apt/sources.list.d/mongodb-org-4.2.list
+    echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list>> $LOGFILE_INSTALL 2>&1
     ERROR=$?
         if [ $ERROR -ne 0 ]; then
             echoerror "Could not write the public signing key to the host (Error Code: $ERROR)."
