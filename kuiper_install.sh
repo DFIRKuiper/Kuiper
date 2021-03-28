@@ -211,7 +211,7 @@ if [ "$1" == "-install" ]; then
         fi
 
     echo "Installing MongoDB "
-    apt-get install -y mongodb-org >> $LOGFILE_INSTALL 2>&1
+    apt-get install -y mongodb >> $LOGFILE_INSTALL 2>&1
     ERROR=$?
         if [ $ERROR -ne 0 ]; then
             echoerror "Could not install MongoDB (Error Code: $ERROR)."
@@ -224,7 +224,7 @@ if [ "$1" == "-install" ]; then
 
     [Service]
     User=mongodb
-    ExecStart=/usr/bin/mongod --quiet --config /etc/mongod.conf
+    ExecStart=/usr/bin/mongod --quiet --config /etc/mongodb.conf
 
     [Install]
     WantedBy=multi-user.target" > /etc/systemd/system/mongodb.service
