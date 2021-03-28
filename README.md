@@ -141,6 +141,23 @@ If everything runs correctly now you should be able to use Kuiper through the li
 
 Happy hunting :).
 
+#### Files Paths
+
+before installation, make sure to change the certificate paths if needed
+
+in `kuiper-nginx.conf` change the path of certificates
+
+```
+    ssl_certificate     /home/kuiper/kuiper/cert/MyCertificate.crt;
+    ssl_certificate_key /home/kuiper/kuiper/cert/MyKey.key;
+```
+
+also change the socket file path
+
+```
+        proxy_pass              http://unix:/home/kuiper/kuiper/kuiper.sock;
+```
+
 # Issues Tracking and Contribution
 
 We are happy to receive any issues, contribution, and ideas.
