@@ -186,7 +186,7 @@ jQuery(function($){
 			edit                    : false,
 			autoUpload              : false,
 			acceptFileTypes         : /(\.|\/)(zip)$/i,
-			maxFileSize             : 5000000000, // 5 GB
+			maxFileSize             : 64000000000, // 64 GB
 			maxNumberOfFiles        : 100,
             sequentialUploads       : true,
 			url                 : "{{url_for('case_upload_machine', case_id=case_details['casename'] )}}",

@@ -637,8 +637,8 @@ class Parser_Manager:
                     k = str(k)
 
                 # replace "." and " " in field name with "_" (to avoid elasticsearch issue)
-                if "." in k or " " in k:
-                    k_tmp = k.replace("." , "_").replace(" " , "_") 
+                if "." in k or " " in k or '/' in k:
+                    k_tmp = k.replace("." , "_").replace(" " , "_").replace("/" , "_")
                     json_data[k_tmp] = json_data[k]
                     del json_data[k]
                     k = k_tmp

@@ -55,7 +55,7 @@ if [ "$1" == "-install" ]; then
 
     # *********** Installing python Requirments ***************
     echo "Installing Python"
-    apt install -y  python-minimal python3 python-dev>> $LOGFILE_INSTALL 2>&1
+    apt install -y  python-minimal python3 python-dev libsasl2-dev libldap2-dev libssl-dev>> $LOGFILE_INSTALL 2>&1
     ERROR=$?
         if [ $ERROR -ne 0 ]; then
             echoerror "Could not install Python (Error Code: $ERROR)."
@@ -128,9 +128,9 @@ if [ "$1" == "-install" ]; then
 
     echo "Installing JDK"
 
-    apt-get install -y openjdk-12-jre >> $LOGFILE_INSTALL 2>&1
+    apt-get install -y openjdk-11-jre >> $LOGFILE_INSTALL 2>&1
 
-    echo "JAVA_HOME=/usr/bin/java" >> /etc/environment 2>&1
+    echo "JAVA_HOME=/usr" >> /etc/environment 2>&1
     source /etc/environment 2>&1
 
     ERROR=$?
@@ -151,8 +151,9 @@ if [ "$1" == "-install" ]; then
         if [ $ERROR -ne 0 ]; then
             echoerror "Could not install apt-transport-https (Error Code: $ERROR)."
         fi
-
-    echo "deb https://artifacts.elastic.co/packages/7.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-7.x.list >> $LOGFILE_INSTALL 2>&1
+    
+    rm /etc/apt/sources.list.d/elastic-7.x.list
+    echo "deb https://artifacts.elastic.co/packages/oss-7.x/apt stable main" | sudo tee /etc/apt/sources.list.d/elastic-7.x.list >> $LOGFILE_INSTALL 2>&1
     ERROR=$?
         if [ $ERROR -ne 0 ]; then
             echoerror "Could not add elastic packages source list definitions to your source list (Error Code: $ERROR)."
@@ -165,8 +166,11 @@ if [ "$1" == "-install" ]; then
             echoerror "Could not install updates (Error Code: $ERROR)."
         fi
 
+    wget https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-oss-7.8.1-amd64.deb
+    dpkg -i ./elasticsearch-oss-7.8.1-amd64.deb
+    rm ./elasticsearch-oss-7.8.1-amd64.deb*
     echo "Installing Elasticsearch.."
-    apt-get install elasticsearch >> $LOGFILE_INSTALL 2>&1
+    #apt-get install elasticsearch >> $LOGFILE_INSTALL 2>&1
     ERROR=$?
         if [ $ERROR -ne 0 ]; then
             echoerror "Could not install elasticsearch (Error Code: $ERROR)."
@@ -192,7 +196,8 @@ if [ "$1" == "-install" ]; then
         if [ $ERROR -ne 0 ]; then
             echoerror "Could not write the public signing key to the host (Error Code: $ERROR)."
         fi
-
+    
+    rm /etc/apt/sources.list.d/mongodb-org-4.2.list
     echo "deb [ arch=amd64 ] https://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/4.2 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-4.2.list>> $LOGFILE_INSTALL 2>&1
     ERROR=$?
         if [ $ERROR -ne 0 ]; then
@@ -206,7 +211,7 @@ if [ "$1" == "-install" ]; then
         fi
 
     echo "Installing MongoDB "
-    apt-get install -y mongodb-org >> $LOGFILE_INSTALL 2>&1
+    apt-get install -y mongodb >> $LOGFILE_INSTALL 2>&1
     ERROR=$?
         if [ $ERROR -ne 0 ]; then
             echoerror "Could not install MongoDB (Error Code: $ERROR)."
@@ -219,7 +224,7 @@ if [ "$1" == "-install" ]; then
 
     [Service]
     User=mongodb
-    ExecStart=/usr/bin/mongod --quiet --config /etc/mongod.conf
+    ExecStart=/usr/bin/mongod --quiet --config /etc/mongodb.conf
 
     [Install]
     WantedBy=multi-user.target" > /etc/systemd/system/mongodb.service
@@ -232,6 +237,27 @@ if [ "$1" == "-install" ]; then
             echoerror "Could not start MongoDB and set MongoDB to start automatically when the system boots (Error Code: $ERROR)."
         fi
 
+
+
+    # *********** Installing Nginx ***************
+    echo "Installing Nginx"
+    apt install nginx >> $LOGFILE_INSTALL 2>&1
+    ERROR=$?
+        if [ $ERROR -ne 0 ]; then
+            echoerror "Could not install Nginx (Error Code: $ERROR)."
+        fi
+
+
+
+    rm -f /etc/nginx/sites-available/default /etc/nginx/sites-enabled/default /etc/nginx/sites-enabled/kuiper-nginx.conf /etc/nginx/sites-available/kuiper-nginx.conf
+    cp ./kuiper-nginx.conf /etc/nginx/sites-available/kuiper-nginx.conf
+    
+    ln -s /etc/nginx/sites-available/kuiper-nginx.conf /etc/nginx/sites-enabled/
+    systemctl restart nginx
+    ERROR=$?
+        if [ $ERROR -ne 0 ]; then
+            echoerror "Failed reloading Nginx config (Error Code: $ERROR)."
+        fi
 
     echo "**********************************************************************************************************"
     echo " "
@@ -281,7 +307,7 @@ elif [ "$1" == "-run" ]; then
         WORKER_CLASS\t[$GUNICORN_WORKER_CLASS] 
         TIMEOUT\t\t[$GUNICORN_TIMEOUT]"
     echo "Running Kuiper"
-    nohup gunicorn --bind $GUNICORN_IP:$GUNICORN_PORT Kuiper:app --worker-class $GUNICORN_WORKER_CLASS --workers=$GUNICORN_WORKERS --threads=$GUNICORN_THREADS -p $LOGFILE_GUNICORN_PID --timeout=$GUNICORN_TIMEOUT --access-logfile $LOGFILE_ACCESS_LOG --certfile $GUNICORN_SSL_CERT --keyfile $GUNICORN_SSL_KEY >> $LOGFILE_APP_LOG &
+    nohup gunicorn --bind $GUNICORN_IP:$GUNICORN_PORT Kuiper:app --worker-class $GUNICORN_WORKER_CLASS --workers=$GUNICORN_WORKERS --threads=$GUNICORN_THREADS -p $LOGFILE_GUNICORN_PID --timeout=$GUNICORN_TIMEOUT --access-logfile $LOGFILE_ACCESS_LOG >> $LOGFILE_APP_LOG &
     echo "Kuiper can be accessed at https://$GUNICORN_IP:$GUNICORN_PORT/"
 
 

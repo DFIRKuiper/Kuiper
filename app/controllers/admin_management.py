@@ -180,6 +180,9 @@ def get_folder_size(start_path = '.'):
 # =================================================
 
 
+
+
+
 # =================== Cases =======================
 #call admin page will all content from content_management
 @app.route('/admin/')

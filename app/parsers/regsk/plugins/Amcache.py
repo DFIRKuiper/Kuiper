@@ -46,7 +46,10 @@ class Amcache():
                 "BinProductVersion" :"BinProductVersion",
                 "Size"              :"FileSize",
                 "Language"          :"Language",
-                "IsPeFile"          :"IsPeFile"
+                "IsPeFile"          :"IsPeFile",
+                "OriginalFileName"  :"OriginalFileName",
+                "AppxPackageFullName":"AppxPackageFullName",
+                "AppxPackageRelativeId":"AppxPackageRelativeId"
                 }
                 record = OrderedDict([
                 ])
