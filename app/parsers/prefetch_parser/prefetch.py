@@ -2,32 +2,22 @@
 # Windows 10 Prefetch Parser
 # Created by 505Forensics (http://www.505forensics.com)
 #
-# Usage: Utilize this script to parse either a single or set of Windows 10 prefetch files
+# Usage: Utilize this script to parse a single Windows 10 prefetch file
 #
 # Dependencies: This script requires the installation of libscca (https://github.com/libyal/libscca), and was only tested in a Linux environment
 #
-# Output: Script will output in CSV to stdout by default.
-#
 #######################
-import argparse
-import csv
 import sys
-import os
-import json
 # Try importing pyscca; fail if it doesn't import
 try:
-    import pyscca #Import pyscca, necessary from libscca
+    import pyscca  # Import pyscca, necessary from libscca
 except ImportError:
     print "Please install libscca with Python bindings"
 
-output = {}
 
-
-
-
-
-# Parse individual file. Output is placed in 'output' dictionary
+# Parse individual file
 def parse_file(pf_file,volume_information):
+    output = {}
     try:
         scca = pyscca.open(pf_file)
         last_run_times = []
@@ -74,24 +64,15 @@ def parse_file(pf_file,volume_information):
         print "[-] [Error] " + str(exc_obj) + " - Line No. " + str(exc_tb.tb_lineno)
         return None
 
-# Parse an entire directory of Prefetch files. Note that it searches based on .pf extension
-def parse_dir(dir,volume_information):
-    for item in os.listdir(dir):
-        if item.endswith(".pf"): #Only focus on .pf files
-            parse_file(dir+item,volume_information)
-        else:
-            continue
-    return output
 
 def outputResults(output):
-    #if output_type:
     for k, v in output.iteritems():
         json_output = {
             'Executable_Name' : k,
             'Run_Count' : v[0],
             'Location_Hash' :  v[1],
         }
-        #Let the script iterate through run times for us, instead of just dumping a list
+        # Let the script iterate through run times for us, instead of just dumping a list
         run_list = {}
         
         first_date = v[2][0]
@@ -112,7 +93,7 @@ def outputResults(output):
 
 
 def main(path):
-    output = parse_file(path,False)
+    output = parse_file(path, False)
     rtn = outputResults(output)
     rtn['prefetch_file'] = path.split('/')[-1]
     return rtn
