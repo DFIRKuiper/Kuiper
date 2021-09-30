@@ -36,7 +36,7 @@ Digital Investigation Platform
 
 
 ## What is Kuiper?
-Kuiper is a digital investigation platform that provides a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast traige script like [Hoarder](https://github.com/muteb/Hoarder)). In additional, collaborate with other team members on the same platform by tagging artifacts and present it as a timeline, as well as setting rules for automating the detection. The main purpose of this project is to aid in streamlining digital investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
+Kuiper is a digital investigation platform that provides a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast triage script like [Hoarder](https://github.com/muteb/Hoarder)). Additionally, collaborate with other team members on the same platform by tagging artifacts and present it as a timeline, as well as setting rules for automating the detection. The main purpose of this project is to aid in streamlining digital investigation activities and allow advanced analytics capabilities with the ability to handle a large amount of data. 
 
 ![diagram.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/Diagram.png?raw=true)
 
@@ -44,7 +44,7 @@ Kuiper is a digital investigation platform that provides a capabilities for the 
 ## Why Kuiper?
 Today there are many tools used during the digital investigation process, though these tools help to identify the malicious activities and findings, as digital analysts there are some shortages that needs to be optimized:
 
-- Speeding the work flow.
+- Speeding up the work flow.
 - Increase the accuracy.
 - Reduce resources exhaustion.
 
@@ -52,8 +52,8 @@ With a large number of cases and a large number of team members, it becomes hard
 
 
 ## How Kuiper Will Help Optimize the Investigation?
-- **Centralized server**: Using a single centralized server (**Kuiper**) that do all the processing on the server-side reduce the needed hardware resources (CPU, RAM, Hard-disk) for the analysts team, no need for powerful laptop any more. In addition, all evidences stored in single server instead of copying it on different machines during the investigation.
-- **Consistency**: Depending on different parsers by team members to parse same artifacts might provide inconsistency on the generated results, using tested and trusted parsers increases the accuracy.
+- **Centralized server**: Using a single centralized server (**Kuiper**) that does all the processing on the server-side reduce the needed hardware resources (CPU, RAM, Hard-disk) for the analysts team, no need for powerful laptop any more. In addition, all evidences stored in single server instead of copying it on different machines during the investigation.
+- **Consistency**: Depending on different parsers used by team members to parse same artifacts might provide inconsistency on the generated results, using tested and trusted parsers increases the accuracy.
 - **Predefined rules**: Define rules on Kuiper will save a lot of time by triggering alerts on past, current, and future cases, for example, creating rule to trigger suspicious encoded powershell commands on all parsed artifacts, or suspicous binary executed from temp folder, within **Kuiper** you can defined these rules and more.
 - **Collaboration**: Browsing the parsed artifacts on same web interface by team members boost the collaboration among them using **tagging** and **timeline** feature instead of every analyst working on his/her own machine.
 
@@ -169,7 +169,7 @@ chmod +x ./app/parsers/MFT_Parser/mft_dump
 
 # Issues Tracking and Contribution
 
-We are happy to receive any issues, contribution, and ideas.
+We are happy to receive any issues, contributions and ideas.
 
 we appreciate sharing any parsers you develop, please send a pull request to be able to add it to the parsers list.
 
