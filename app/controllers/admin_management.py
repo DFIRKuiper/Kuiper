@@ -211,7 +211,7 @@ def admin_create_case():
             return redirect(url_for('home_page', err_msg="Invalid HTTP request method" ))
 
         if request.method == 'POST':
-            casename_accepted_char = 'abcdefghijklmnopqrstuvwxy0123456789_'
+            casename_accepted_char = 'abcdefghijklmnopqrstuvwxyz0123456789_'
             casename = ''.join( [ e for e in request.form['casename'].lower() if e in casename_accepted_char ] )
             casename = casename.lstrip('_')
             #get paramters from the UI query
