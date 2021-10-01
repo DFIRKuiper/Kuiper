@@ -417,8 +417,11 @@ class ES_DB:
 
             try:
                 
+                if 'caused_by' in doc['index']['error']:
+                    doc_reason = doc['index']['error']['caused_by']['reason']
+                else:
+                    doc_reason = doc['index']['error']['reason']
 
-                doc_reason = doc['index']['error']['reason']
                 logger.logger(level=logger.WARNING , type="elasticsearch", message=record_msg_info + ": record failed" , reason=doc_reason)
                 
                 # === if the error is the limitation on the fields number, get the add 1000 to the limitation and try again
