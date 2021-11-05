@@ -145,6 +145,15 @@ sysctl -w vm.max_map_count=262144
 
 
 
+# Kuiper API
+
+Kuiper has a limited feature API, check the repo [DFIRKuiperAPI](https://github.com/DFIRKuiper/DFIRKuiperAPI). 
+
+- [GetFieldsScript](https://github.com/DFIRKuiper/DFIRKuiperAPI#GetFieldsScript): Retrieves parsed data from Kuiper.
+- [UploadMachines](https://github.com/DFIRKuiper/DFIRKuiperAPI#UploadMachines): Upload new machine (.zip file) to specific case.
+
+
+
 # Issues Tracking and Contribution
 
 We are happy to receive any issues, contribution, and ideas.
