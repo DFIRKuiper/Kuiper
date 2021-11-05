@@ -36,7 +36,7 @@ Digital Investigation Platform
 
 
 ## What is Kuiper?
-Kuiper is a digital investigation platform that provides a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast traige script like [Hoarder](https://github.com/muteb/Hoarder)). In additional, collaborate with other team members on the same platform by tagging artifacts and present it as a timeline, as well as setting rules for automating the detection. The main purpose of this project is to aid in streamlining digital investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
+Kuiper is a digital investigation platform that provides a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast triage script like [Hoarder](https://github.com/muteb/Hoarder)). In additional, collaborate with other team members on the same platform by tagging artifacts and present it as a timeline, as well as setting rules for automating the detection. The main purpose of this project is to aid in streamlining digital investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
 
 ![diagram.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/Diagram.png?raw=true)
 
@@ -54,7 +54,7 @@ With a large number of cases and a large number of team members, it becomes hard
 ## How Kuiper Will Help Optimize the Investigation?
 - **Centralized server**: Using a single centralized server (**Kuiper**) that do all the processing on the server-side reduce the needed hardware resources (CPU, RAM, Hard-disk) for the analysts team, no need for powerful laptop any more. In addition, all evidences stored in single server instead of copying it on different machines during the investigation.
 - **Consistency**: Depending on different parsers by team members to parse same artifacts might provide inconsistency on the generated results, using tested and trusted parsers increases the accuracy.
-- **Predefined rules**: Define rules on Kuiper will save a lot of time by triggering alerts on past, current, and future cases, for example, creating rule to trigger suspicious encoded powershell commands on all parsed artifacts, or suspicous binary executed from temp folder, within **Kuiper** you can defined these rules and more.
+- **Predefined rules**: Define rules on Kuiper will save a lot of time by triggering alerts on past, current, and future cases, for example, creating rule to trigger suspicious encoded PowerShell commands on all parsed artifacts, or suspicious binary executed from temp folder, within **Kuiper** you can defined these rules and more.
 - **Collaboration**: Browsing the parsed artifacts on same web interface by team members boost the collaboration among them using **tagging** and **timeline** feature instead of every analyst working on his/her own machine.
 
 
@@ -114,7 +114,7 @@ Kuiper use the following components:
 
 ## Installation 
 
-Starting from version 2.2.0, Kuiper now run over dockers, there are <> dockers:
+Starting from version 2.2.0, Kuiper now run over dockers, there are 7 dockers:
 
 - **Flask**: the main docker which host the web application.
 - **Mongodb**: stores the cases and machines metadata.
@@ -156,7 +156,7 @@ we appreciate sharing any parsers you develop, please send a pull request to be 
 
 # Licenses
 
-- Each parser has its own license, all parsers placed in the following folder  `parsers/`.
+- Each parser has its own license, all parsers placed in the following folder  `/kuiper/parsers/`.
 
 - All files in this project under GPL-3.0 license, unless mentioned otherwise.
 
