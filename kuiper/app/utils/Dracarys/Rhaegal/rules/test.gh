@@ -1,0 +1,11 @@
+public saleh
+{
+  metadata:
+    author: "saleh"
+    score: 60
+    description: "des"
+  Channel: "amcache"
+  include: 
+    path: "*welcome*"
+}
+

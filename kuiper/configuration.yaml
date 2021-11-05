@@ -1,0 +1,130 @@
+
+
+# ============ Kuiper Platform
+# NOTE: Kuiper IP and PORT will not be used anymore since gunicorn will handle the requests, see and change Gunicorn section instead 
+Kuiper:
+  Debug:          True            # enable debugging mode       # deprecated since gunicorn will handle the sessions 
+  RemoveRawFiles: True            # remove raw files uploaded to Kuiper, as consequences enable this will allow upload the file multiple times
+  installer:      ./kuiper_install.sh
+  logs_level:     DEBUG            # log level stored in the app logs (INFO, WARNING, DEBUG, and ERROR)
+  api_token:      API_TOKEN
+  secret_key:     SECRET_KEY
+  enable_Rhaegal: True
+
+
+# ============ LDAP authentication
+
+LDAP_auth:
+  enabled: false
+  LDAP_HOST: '10.10.10.10'
+  LDAP_PORT: '389' #'636' 
+  LDAP_SCHEMA: 'ldap' #'ldaps'
+  LDAP_USE_SSL: False  # True
+  LDAP_BASE_DN: 'BASE_DN'
+  LDAP_USERNAME: 'BIND_USERNAME'           # ldap bind username
+  LDAP_PASSWORD: 'BIND_PASSWORD'                                  # ldap bind password
+  LDAP_USER_OBJECT_FILTER: 'QUERY' # this query to confirm if user exists or not if correct
+  session_expiration: 60 # minutes 
+
+
+# ============ Gunicorn configuration
+# gunicorn used to support multi-request connections at the same time, gunicorn will run Flask platform and handle requests to it
+Gunicorn:
+  IP:           0.0.0.0           # gunicorn LISTEN IP address
+  PORT:         5000               # gunicorn LISTEN PORT number
+  Threads:      6                 # gunicorn number of thrads
+  worker_class: gevent            # gunicorn workder class
+  timeout:      3600              # gunicorn request timeout 1h 
+  workers:      4                 # gunicorn number of workers
+  cert_key:     cert/MyKey.key     # SSL key ptath 
+  cert_cert:    cert/MyCertificate.crt   # SSL certificate path 
+
+
+# ============ AdminLTE
+adminlte:
+  SIDEBAR_OPEN: False             # by default the left sidebar of platform closed
+
+
+# ============ configuration of celery
+CELERY:
+  CELERY_BROKER_URL:      redis://localhost:6379
+  CELERY_RESULT_BACKEND:  redis://localhost:6379
+  #CELERY_WORKER_NAME:     worker@kuiper
+  CELERY_TASK_ACKS_LATE:  True,
+  celery_task_name:       'task.parser.kuiper'
+
+# ============ Elasticsearch
+ElasticSearch:
+  IP    : 0.0.0.0
+  PORT  : 9200
+
+
+# ============ MongoDB
+MongoDB:
+  DB_NAME: 'Kuiper'         # MongoDB Database name
+  DB_IP: '127.0.0.1'        # MongoDB Database IP address 
+  DB_PORT: 27017            # MongoDB Database Port number
+
+
+# ============ Git
+Git:
+  git_url_release : 'https://api.github.com/repos/DFIRKuiper/Kuiper/releases/latest'                                     # link for git to pull new updates if exists
+  k_version       : "v2.2.0"                                                                          # current version of kuiper
+
+# ============ Logs
+Logs:
+  log_folder:   /app/logs/                     # store the logs folder 
+  install_log:  Kuiper-install.log
+  access_log:   Kuiper-access-gunicorn.log
+  app_log:      Kuiper-flask.log
+  celery_log:   Kuiper-celery.log
+  update_log:   Kuiper-update.log
+  gunicorn_pid: gunicorn.pid
+  kuiper_log:   Kuiper.log
+  
+
+# ============ configuration of directories on the platform
+# it is preferable to not change these settings (except platform_folder)  
+Directories:
+  platform_folder: &platform_folder   "./"                                 # main folder
+  app_folder: &app_folder             [*platform_folder, /app]          # application files folder
+  app_parsers:                        [*platform_folder, /app/parsers]  # parsers folder
+  artifacts_upload:                   ['/app/files','/files']           # uploaded artifacts folders  
+  artifacts_upload_raw:               ['/app/files','/raw']             # original uploaded compressed files
+  system_health:                      ['/app/logs' ,'/system_health' ]  # folder to store the system health information
+
+# ============ case_sidebar
+# Title content: [<title on sidebar>,<url path>,<icon>]
+# SubTitles: [ [ <title on sidebar>,<url path>,<icon>] , etc. ]
+case_sidebar:
+  - Title: ["Administrator" , "/admin/" , "fa fa-tv"]
+    SubTitles: Null
+  - Title: ["Dashboard","/case/<case_id>/dashboard","fa fa-pie-chart"]
+    SubTitles : Null
+  - Title: ["Machines","/case/<case_id>","fa fa-laptop"]
+    SubTitles : Null
+  - Title: ["Artifacts","/case/<case_id>/browse_artifacts","fa  fa-cubes"]
+    SubTitles : Null
+  - Title: ["Timeline","/case/<case_id>/timeline","fa fa-clock-o"]
+    SubTitles : Null
+  - Title: ["Alerts","/case/<case_id>/alerts","fa  fa-bell"]
+    SubTitles : Null
+  #- Title:      ['Logout' , '/logout' , 'fa fa-sign-out']
+  #  SubTitles : Null
+
+# ============ admin_sidebar
+# Title content: [<title on sidebar>,<url path>,<icon>]
+# SubTitles: [ [ <title on sidebar>,<url path>,<icon>] , etc. ]
+admin_sidebar:
+  - Title:      ["Cases","/admin/","fa  fa-globe"]
+    SubTitles : Null
+  - Title:      ['Rules' , '/admin/rules' , 'fa fa-list-alt']
+    SubTitles : Null
+  - Title:      ['Settings' , '#' , 'fa fa-gears' ]
+    SubTitles : [
+          ['Configuration' , '/admin/config' , 'fa fa-gears'],
+          ['Health' , '/admin/system_health/' , 'fa fa-gears'],
+          ['About' , '/admin/update' , 'fa fa-gears']
+      ]
+  #- Title:      ['Logout' , '/logout' , 'fa fa-sign-out']
+  #  SubTitles : Null

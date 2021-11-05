@@ -1,0 +1,15 @@
+FROM dfirkuiper/dfir_kuiper:2.2.0
+
+WORKDIR /app
+
+
+
+COPY ./system_health/ /system_health/
+
+COPY ./system_health/crontabs/crontab.celery /etc/cron.d/crontab
+RUN chmod 0644 /etc/cron.d/crontab
+RUN crontab /etc/cron.d/crontab
+RUN touch /var/log/cron_celery.log
+
+
+CMD cron && python -m celery worker -A app.celery_app --loglevel=info -n "kuiper@%h"

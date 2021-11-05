@@ -1,0 +1,240 @@
+public PSSession_Outgoing_Connection
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "New PSSesion connection from client side"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4648"
+      Event.EventData.ProcessName: "*powershell.exe*"
+}
+
+public PSSession_Outgoing_Connection_2
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "New PSSesion connection from client side"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-WinRM/Operational"
+      Event.System.EventID.#text: "6"
+}
+
+public PSSession_Outgoing_Connection_Started
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "PSSession session from client side started"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-PowerShell/Operational"
+      Event.System.EventID.#text: "8197"
+      Event.EventData.param1: "Opened"
+}
+
+public PSSession_Outgoing_Connection_Ended
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "PSSesion session from client side ended"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-PowerShell/Operational"
+      Event.System.EventID.#text: "8197"
+      Event.EventData.param1: "Closed"
+}
+
+public PSSession_Session_Started
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "New PSSesion Session Started"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Windows PowerShell"
+      Event.System.EventID.#text: "400"
+      Event.EventData.Data.#text: "$Available"
+      Event.EventData.Data.#text: "*HostName=ServerRemoteHost*"
+}
+
+public PSSession_Session_Ended
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "New PSSesion Session Ended"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Windows PowerShell"
+      Event.System.EventID.#text: "403"
+      EventID: ""
+      Event.EventData.Data.#text: "$Stopped"
+      Event.EventData.Data.#text: "*HostName=ServerRemoteHost*"
+}
+
+public PSSession_Incomming_Ended
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "New PSSesion Incomming Connection"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-WinRM/Operational"
+      Event.System.EventID.#text: "31"
+}
+
+public Inbound_RDP_Session
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "Successfull Inbound RDP Session"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational"
+      Event.System.EventID.#text:
+      - "21"
+      - "22"
+    exclude:
+      Event.UserData.EventXML.Address: "LOCAL"
+}
+
+public Outbound_RDP_Session
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "Successfull Outbound RDP Session"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational"
+      Event.System.EventID.#text: "1024"
+}
+
+public SMB_share_mounted
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "Share folder on this system has been mounted"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4776"
+    exclude:
+      Event.EventData.Workstation: $COMPUTERNAME
+}
+
+public DetectedRemoteExecutionService
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "Detect RemoteAccessTool Service Installed"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "7045"
+      Event.EventData.ImagePath: 
+      - "*PSEXE*"
+      - "*paexe*"
+      - "*anydesk*"
+      - "*__output*"
+      - "*execute.bat*"
+}
+
+private ATExecTaskCreated
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "Detected remote execution tool atexec.py"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-TaskScheduler/Operational"
+      Event.System.EventID.#text: "106"
+    modifiers:
+    - Event.EventData.TaskName $rex \\[a-zA-Z]{8}
+}
+
+private ATExecTaskDeleted
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "Detected remote execution tool atexec.py"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-TaskScheduler/Operational"
+      Event.System.EventID.#text: "141"
+    modifiers:
+    - Event.EventData.TaskName $rex \\[a-zA-Z]{8}
+}
+
+
+public Rare_Service_Installs 
+{
+    metadata:
+      author: Florian Roth
+      reference: ''
+      creationDate: '2019-10-22'
+      score: 40
+      description: Detects rare service installs that only appear a few times per time
+        frame and could reveal password dumpers, backdoor installs or other types of malicious
+        services
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "7045"
+    modifiers:
+     - Event.EventData.ServiceName <= 6
+}
+
+public WMI_Remote_Execution 
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 70
+      description: "Detected WMI remote execution tool"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-WMI-Activity/Operational"
+      Event.System.EventID.#text: 
+      - "5861"
+      - "5860"
+}

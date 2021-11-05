@@ -1,0 +1,779 @@
+public PowerShell_ShellCode 
+{
+    metadata:
+      author: David Ledbetter (shellcode), Florian Roth (rule)
+      reference: https://twitter.com/cyb3rops/status/1063072865992523776
+      creationDate: 2018/11/17
+      score: 100
+      description: Detects Base64 encoded Shellcode
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-PowerShell/Operational"
+      Event.System.EventID.#text: "4104"
+      Event.EventData.ScriptBlockText:
+      - '*AAAAYInlM*'
+      - '*OiCAAAAYInlM*'
+      - '*OiJAAAAYInlM*'
+}
+# ----------------------------------------------------------------------------------------------------
+public PowerShell_Downgrade_Attack 
+{
+    metadata:
+      author: Florian Roth (rule), Lee Holmes (idea)
+      reference: http://www.leeholmes.com/blog/2017/03/17/detecting-and-preventing-powershell-downgrade-attacks/
+      creationDate: '2019-10-22'
+      score: 60
+      description: Detects PowerShell downgrade attack by comparing the host versions
+        with the actually used engine version 2.0
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Windows PowerShell"
+      Event.System.EventID.#text: "400"
+      Event.EventData.Data.#text: '*EngineVersion=2.*'
+    exclude:
+      Event.EventData.Data.#text: '*HostVersion=2.*'
+}
+# ----------------------------------------------------------------------------------------------------
+public PowerShell_PSAttack 
+{
+    metadata:
+      author: Sean Metcalf (source), Florian Roth (rule)
+      reference: https://adsecurity.org/?p=2921
+      creationDate: '2019-10-22'
+      score: 80
+      description: Detects the use of PSAttack PowerShell hack tool
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-PowerShell/Operational"
+      Event.System.EventID.#text: "4103"
+      Event.EventData.Payload: '*PS ATTACK!!!*'
+}
+# ----------------------------------------------------------------------------------------------------
+public PowerShell_Credential_Prompt 
+{
+    metadata:
+      author: John Lambert (idea), Florian Roth (rule)
+      reference: https://twitter.com/JohnLaTwC/status/850381440629981184, https://t.co/ezOTGy1a1G
+      creationDate: '2019-10-22'
+      score: 80
+      description: Detects PowerShell calling a credential prompt
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-PowerShell/Operational"
+      Event.System.EventID.#text: "4104"
+      Event.EventData.ScriptBlockText: '*PromptForCredential*'
+}
+# ----------------------------------------------------------------------------------------------------
+public Remote_Service_Activity_Detected_via_SVCCTL_named_pipe 
+{
+    metadata:
+      author: Samir Bousseaden
+      reference: https://blog.menasec.net/2019/03/threat-hunting-26-remote-windows.html
+      creationDate: '2019-10-22'
+      score: 60
+      description: "Detects remote remote service activity via remote access to the svcctl named pipe"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "5145"
+      Event.EventData.ShareName: \\*\IPC$
+      Event.EventData.RelativeTargetName: svcctl
+      Event.EventData.Accesses: '*WriteData*'
+}
+# ----------------------------------------------------------------------------------------------------
+public SAM_Dump_to_AppData 
+{
+    metadata:
+      author: Florian Roth
+      reference: ''
+      creationDate: '2019-10-22'
+      score: 80
+      description: Detects suspicious SAM dump activity as cause by QuarksPwDump and other
+        password dumpers
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "16"
+      Event.EventData.HiveName: '*\AppData\Local\Temp\SAM-*.dmp *'
+}
+# ----------------------------------------------------------------------------------------------------
+public Secure_Deletion_with_SDelete 
+{
+    metadata:
+      author: Thomas Patzke
+      reference: https://jpcertcc.github.io/ToolAnalysisResultSheet, https://www.jpcert.or.jp/english/pub/sr/ir_research.html,
+        https://technet.microsoft.com/en-us/en-en/sysinternals/sdelete.aspx
+      creationDate: '2019-10-22'
+      score: 60
+      description: Detects renaming of file while deletion with SDelete tool
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text:
+      - '4656'
+      - '4663'
+      - '4658'
+      Event.EventData.ObjectName:
+      - '*.AAA'
+      - '*.ZZZ'
+}
+# ----------------------------------------------------------------------------------------------------
+public Suspicious_access_to_sensitive_file_extensions 
+{
+    metadata:
+      author: Samir Bousseaden
+      reference: ''
+      creationDate: '2019-10-22'
+      score: 80
+      description: Detects known sensitive file extensions
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text:
+      - '5145'
+      Event.EventData.RelativeTargetName:
+      - '*.pst'
+      - '*.ost'
+      - '*.msg'
+      - '*.nst'
+      - '*.oab'
+      - '*.edb'
+      - '*.nsf'
+      - '*.bak'
+      - '*.dmp'
+      - '*.kirbi'
+      - '*\ntds.dit'
+      - '*\groups.xml'
+      - '*.rdp'
+}
+# ----------------------------------------------------------------------------------------------------
+public Rare_Service_Installs_
+{
+    metadata:
+      author: Florian Roth
+      reference: ''
+      creationDate: '2019-10-22'
+      score: 40
+      description: Detects rare service installs that only appear a few times per time
+        frame and could reveal password dumpers, backdoor installs or other types of malicious
+        services
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "7045"
+    modifiers:
+      - Event.EventData.ServiceName <= 6
+}
+# ----------------------------------------------------------------------------------------------------
+public Suspicious_Kerberos_RC4_Ticket_Encryption 
+{
+    metadata:
+      author: null
+      reference: https://adsecurity.org/?p=3458, https://www.trimarcsecurity.com/single-post/TrimarcResearch/Detecting-Kerberoasting-Activity
+      creationDate: '2019-10-22'
+      score: 60
+      description: Detects service ticket requests using RC4 encryption type
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4769"
+      Event.EventData.TicketOptions: '0x40810000'
+      Event.EventData.TicketEncryptionType: '0x17'
+}
+# ----------------------------------------------------------------------------------------------------
+public Weak_Encryption_Enabled_and_Kerberoast 
+{
+    metadata:
+      author: '@neu5ron'
+      reference: https://adsecurity.org/?p=2053, https://www.harmj0y.net/blog/activedirectory/roasting-as-reps/
+      creationDate: '2019-10-22'
+      score: 80
+      description: "Detects scenario where weak encryption is enabled for a user profile which could be used for hash/password cracking."
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4738"
+}
+# ----------------------------------------------------------------------------------------------------
+public WCE_wceaux_dll_Access 
+{
+    metadata:
+      author: Thomas Patzke
+      reference: https://www.jpcert.or.jp/english/pub/sr/ir_research.html, https://jpcertcc.github.io/ToolAnalysisResultSheet
+      creationDate: '2019-10-22'
+      score: 100
+      description: Detects wceaux.dll access while WCE pass-the-hash remote command execution
+        on source host
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: 
+      - '4656'
+      - '4658'
+      - '4660'
+      - '4663'
+      Event.EventData.ObjectName: '*\wceaux.dll'
+}
+# ----------------------------------------------------------------------------------------------------
+public Password_Dumper_Activity_on_LSASS 
+{
+    metadata:
+      author: null
+      reference: https://twitter.com/jackcr/status/807385668833968128
+      creationDate: '2019-10-22'
+      score: 80
+      description: Detects process handle on LSASS process with certain access mask and
+        object type SAM_DOMAIN
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4656"
+      Event.EventData.ProcessName: C:\Windows\System32\lsass.exe
+      Event.EventData.AccessMask: '0x705'
+      Event.EventData.ObjectType: SAM_DOMAIN
+}
+# ----------------------------------------------------------------------------------------------------
+public Disabling_Windows_Event_Auditing 
+{
+    metadata:
+      author: '@neu5ron'
+      reference: https://bit.ly/WinLogsZero2Hero
+      creationDate: '2019-10-22'
+      score: 80
+      description: 'Detects scenarios where system auditing (ie: windows event log auditing)
+        is disabled. This may be used in a scenario where an entity would want to bypass
+        local logging to evade detection when windows event logging is enabled and reviewed.
+        Also, it is recommended to turn off "Local Group Policy Object Processing" via
+        GPO, which will make sure that Active Directory GPOs take precedence over local/edited
+        computer policies via something such as "gpedit.msc". Please note, that disabling
+        "Local Group Policy Object Processing" may cause an issue in scenarios of one
+        off specific GPO modifications -- however it is recommended to perform these modifications
+        in Active Directory anyways.'
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4719"
+      Event.EventData.AuditPolicyChanges: "removed"
+}
+# ----------------------------------------------------------------------------------------------------
+public Backup_Catalog_Deleted 
+{
+    metadata:
+      author: Florian Roth (rule), Tom U. @c_APT_ure (collection)
+      reference: https://technet.microsoft.com/en-us/library/cc742154(v=ws.11).aspx, https://www.hybrid-analysis.com/sample/ed01ebfbc9eb5bbea545af4d01bf5f1071661840480439c6e5babe8e080e41aa?environmentId=100
+      creationDate: '2019-10-22'
+      score: 60
+      description: Detects backup catalog deletions
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Application"
+      Event.System.EventID.#text: "524"
+      Event.EventData.Source: Backup
+}
+# ----------------------------------------------------------------------------------------------------
+public Successful_Overpass_the_Hash_Attempt 
+{
+    metadata:
+      author: Roberto Rodriguez (source), Dominik Schaudel (rule)
+      reference: https://cyberwardog.blogspot.de/2017/04/chronicles-of-threat-hunter-hunting-for.html
+      creationDate: 2018/02/12
+      score: 80
+      description: Detects successful logon with logon type 9 (NewCredentials) which matches
+        the Overpass the Hash behavior of e.g Mimikatz's sekurlsa::pth module.
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4624"
+      Event.EventData.LogonType: '9'
+      Event.EventData.LogonProcessName: seclogo
+      Event.EventData.AuthenticationPackageName: Negotiate
+}
+# ----------------------------------------------------------------------------------------------------
+public Enabled_User_Right_in_AD_to_Control_User_Objects 
+{
+    metadata:
+      author: '@neu5ron'
+      reference: https://www.harmj0y.net/blog/activedirectory/the-most-dangerous-user-right-you-probably-have-never-heard-of/
+      creationDate: '2019-10-22'
+      score: 80
+      description: Detects scenario where if a user is assigned the SeEnableDelegationPrivilege
+        right in Active Directory it would allow control of other AD user objects.
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4704"
+}
+# ----------------------------------------------------------------------------------------------------
+public Kerberos_Manipulation 
+{
+    metadata:
+      author: Florian Roth
+      reference: ''
+      creationDate: '2019-10-22'
+      score: 80
+      description: This method triggers on rare Kerberos Failure Codes caused by manipulations
+        of Kerberos messages
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text:
+      - '675'
+      - '4768'
+      - '4769'
+      - '4771'
+      Event.EventData.FailureCode:
+      - '0x9'
+      - '0xA'
+      - '0xB'
+      - '0xF'
+      - '0x10'
+      - '0x11'
+      - '0x13'
+      - '0x14'
+      - '0x1A'
+      - '0x1F'
+      - '0x21'
+      - '0x22'
+      - '0x23'
+      - '0x24'
+      - '0x26'
+      - '0x27'
+      - '0x28'
+      - '0x29'
+      - '0x2C'
+      - '0x2D'
+      - '0x2E'
+      - '0x2F'
+      - '0x31'
+      - '0x32'
+      - '0x3E'
+      - '0x3F'
+      - '0x40'
+      - '0x41'
+      - '0x43'
+      - '0x44'
+}
+# ----------------------------------------------------------------------------------------------------
+public Remote_Task_Creation_via_ATSVC_named_pipe 
+{
+    metadata:
+      author: Samir Bousseaden
+      reference: https://blog.menasec.net/2019/03/threat-hunting-25-scheduled-tasks-for.html
+      creationDate: '2019-10-22'
+      score: 60
+      description: Detects remote task creation via at.exe or API interacting with ATSVC
+        namedpipe
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "5145"
+      Event.EventData.ShareName: \\*\IPC$
+      Event.EventData.RelativeTargetName: atsvc
+      Event.EventData.Accesses: '*WriteData*'
+}
+# ----------------------------------------------------------------------------------------------------
+public Rare_Schtasks_Creations 
+{
+    metadata:
+      author: Florian Roth
+      reference: ''
+      creationDate: '2019-10-22'
+      score: 40
+      description: Detects rare scheduled tasks creations that only appear a few times
+        per time frame and could reveal password dumpers, backdoor installs or other types
+        of malicious code
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4698"
+}
+# ----------------------------------------------------------------------------------------------------
+public Security_Eventlog_Cleared 
+{
+    metadata:
+      author: Florian Roth
+      reference: ''
+      creationDate: '2019-10-22'
+      score: 80
+      description: Some threat groups tend to delete the local 'Security' Eventlog using
+        certain utitlities
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text:
+      - '517'
+      - '1102'
+}
+# ----------------------------------------------------------------------------------------------------
+public RDP_over_Reverse_SSH_Tunnel_WFP 
+{
+    metadata:
+      author: Samir Bousseaden
+      reference: https://twitter.com/SBousseaden/status/1096148422984384514
+      creationDate: 2019/02/16
+      score: 80
+      description: Detects svchost hosting RDP termsvcs communicating with the loopback
+        address and on TCP port 3389
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "5156"
+      Event.EventData.SourcePort: '3389'
+      Event.EventData.DestinationAddress:
+      - '127.*'
+      - '::1'
+      Event.EventData.DestinationPort: '3389'
+      Event.EventData.SourceAddress:
+      - '127.*'
+      - '::1'
+}
+# ----------------------------------------------------------------------------------------------------
+public User_Added_to_Local_Administrators 
+{
+    metadata:
+      author: Florian Roth
+      reference: ''
+      creationDate: '2019-10-22'
+      score: 60
+      description: This rule triggers on user accounts that are added to the local Administrators
+        group, which could be legitimate activity or a sign of privilege escalation activity
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4732"
+    exclude:
+      Event.EventData.SubjectUserName: '*$'
+}
+# ----------------------------------------------------------------------------------------------------
+public Password_Change_on_Directory_Service_Restore_Mode_(DSRM)_Account 
+{
+    metadata:
+      author: Thomas Patzke
+      reference: https://adsecurity.org/?p=1714
+      creationDate: '2019-10-22'
+      score: 80
+      description: The Directory Service Restore Mode (DSRM) account is a local administrator
+        account on Domain Controllers. Attackers may change the password to gain persistence.
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4794"
+}
+# ----------------------------------------------------------------------------------------------------
+public Powerview_Add_DomainObjectAcl_DCSync_AD_Extend_Right 
+{
+    metadata:
+      author: Samir Bousseaden
+      reference: https://twitter.com/menasec1/status/1111556090137903104, https://www.specterops.io/assets/resources/an_ace_up_the_sleeve.pdf
+      creationDate: 2019/04/03
+      score: 100
+      description: backdooring domain object to grant the rights associated with DCSync
+        to a regular user or machine account using Powerview\Add-DomainObjectAcl DCSync
+        Extended Right cmdlet, will allow to re-obtain the pwd hashes of any user/computer
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "5136"
+      Event.EventData.AttributeLDAPDisplayName: ntSecurityDescriptor
+      Event.EventData.AttributeValue:
+      - '*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*'
+      - '*1131f6aa-9c07-11d1-f79f-00c04fc2dcd2*'
+}
+# ----------------------------------------------------------------------------------------------------
+public Eventlog_Cleared 
+{
+    metadata:
+      author: Florian Roth
+      reference: https://twitter.com/deviouspolack/status/832535435960209408, https://www.hybrid-analysis.com/sample/027cc450ef5f8c5f653329641ec1fed91f694e0d229928963b30f6b0d7d3a745?environmentId=100
+      creationDate: '2019-10-22'
+      score: 60
+      description: One of the Windows Eventlogs has been cleared. e.g. caused by "wevtutil
+        cl" command execution
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "104"
+      Event.System.Provider.@Name: "Microsoft-Windows-Eventlog"
+}
+# ----------------------------------------------------------------------------------------------------
+public Account_Tampering___Suspicious_Failed_Logon_Reasons 
+{
+    metadata:
+      author: Florian Roth
+      reference: https://twitter.com/SBousseaden/status/1101431884540710913
+      creationDate: '2019-10-22'
+      score: 80
+      description: This method uses uncommon error codes on failed logons to determine
+        suspicious activity and tampering with accounts that have been disabled or somehow
+        restricted.
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: 
+      - '4625'
+      - '4776'
+      Event.EventData.Status:
+      - '0xC0000072'
+      - '0xC000006F'
+      - '0xC0000070'
+      - '0xC0000413'
+      - '0xC000018C'
+      - '0xC000015B'
+}
+# ----------------------------------------------------------------------------------------------------
+public Interactive_Logon_to_Server_Systems 
+{
+    metadata:
+      author: Florian Roth
+      reference: ''
+      creationDate: '2019-10-22'
+      score: 60
+      description: Detects interactive console logons to
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text:
+      - '528'
+      - '529'
+      - '4624'
+      - '4625'
+      Event.EventData.LogonType: '2'
+    exclude:
+      Event.EventData.LogonProcessName: Advapi
+}
+# ----------------------------------------------------------------------------------------------------
+public Admin_User_Remote_Logon 
+{
+    metadata:
+      author: juju4
+      reference: https://car.mitre.org/wiki/CAR-2016-04-005
+      creationDate: '2019-10-22'
+      score: 40
+      description: Detect remote login by Administrator user depending on internal pattern
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4624"
+      Event.EventData.LogonType: '10'
+      Event.EventData.AuthenticationPackageName: Negotiate
+}
+# ----------------------------------------------------------------------------------------------------
+public DHCP_Server_Error_Failed_Loading_the_CallOut_DLL 
+{
+    metadata:
+      author: Dimitrios Slamaris, @atc_project (fix)
+      reference: https://blog.3or.de/mimilib-dhcp-server-callout-dll-injection.html, https://technet.microsoft.com/en-us/library/cc726884(v=ws.10).aspx,
+        https://msdn.microsoft.com/de-de/library/windows/desktop/aa363389(v=vs.85).aspx
+      creationDate: 2017/05/15
+      score: 100
+      description: This rule detects a DHCP server error in which a specified Callout
+        DLL (in registry) could not be loaded
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: 
+      - '1031'
+      - '1032'
+      - '1034'
+      Event.System.Provider.@Name: Microsoft-Windows-DHCP-Server
+}
+# ----------------------------------------------------------------------------------------------------
+public Access_to_ADMIN$_Share 
+{
+    metadata:
+      author: Florian Roth
+      reference: ''
+      creationDate: '2019-10-22'
+      score: 40
+      description: Detects access to $ADMIN share
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "5140"
+      Event.EventData.ShareName: Admin$
+    exclude:
+      Event.EventData.SubjectUserName: '*$'
+}
+# ----------------------------------------------------------------------------------------------------
+public Detects_local_user_creation 
+{
+    metadata:
+      author: Patrick Bareiss
+      reference: https://patrick-bareiss.com/detecting-local-user-creation-in-ad-with-sigma/
+      creationDate: '2019-10-22'
+      score: 40
+      description: Detects local user creation on windows servers, which shouldn't happen
+        in an Active Directory environment. Apply this Sigma Use Case on your windows
+        server logs and not on your DC logs.
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4720"
+}
+# ----------------------------------------------------------------------------------------------------
+public Possible_Impacket_SecretDump_remote_activity 
+{
+    metadata:
+      author: Samir Bousseaden
+      reference: https://blog.menasec.net/2019/02/threat-huting-10-impacketsecretdump.html
+      creationDate: '2019-10-22'
+      score: 80
+      description: Detect AD credential dumping using impacket secretdump HKTL
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "5145"
+      Event.EventData.ShareName: \\*\ADMIN$
+      Event.EventData.RelativeTargetName: SYSTEM32\\*.tmp
+}
+# ----------------------------------------------------------------------------------------------------
+public RDP_Login_from_localhost 
+{
+    metadata:
+      author: Thomas Patzke
+      reference: https://www.fireeye.com/blog/threat-research/2019/01/bypassing-network-restrictions-through-rdp-tunneling.html
+      creationDate: 2019/01/28
+      score: 80
+      description: RDP login with localhost source address may be a tunnelled login
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4624"
+      Event.EventData.LogonType: '10'
+      Event.EventData.SourceNetworkAddress:
+      - ::1
+      - 127.0.0.1
+}
+# ----------------------------------------------------------------------------------------------------
+public DHCP_Server_Loaded_the_CallOut_DLL 
+{
+    metadata:
+      author: Dimitrios Slamaris
+      reference: https://blog.3or.de/mimilib-dhcp-server-callout-dll-injection.html, https://technet.microsoft.com/en-us/library/cc726884(v=ws.10).aspx,
+        https://msdn.microsoft.com/de-de/library/windows/desktop/aa363389(v=vs.85).aspx
+      creationDate: 2017/05/15
+      score: 100
+      description: This rule detects a DHCP server in which a specified Callout DLL (in
+        registry) was loaded
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "1033"
+}
+# ----------------------------------------------------------------------------------------------------
+public Persistence_and_Execution_at_scale_via_GPO_scheduled_task 
+{
+    metadata:
+      author: Samir Bousseaden
+      reference: https://twitter.com/menasec1/status/1106899890377052160
+      creationDate: '2019-10-22'
+      score: 80
+      description: Detect lateral movement using GPO scheduled task, ususally used to
+        deploy ransomware at scale
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "5145"
+      Event.EventData.ShareName: \\*\SYSVOL
+      Event.EventData.RelativeTargetName: '*ScheduledTasks.xml'
+}
+# ----------------------------------------------------------------------------------------------------
+public AD_Privileged_Users_or_Groups_Reconnaissance 
+{
+    metadata:
+      author: Samir Bousseaden
+      reference: https://blog.menasec.net/2019/02/threat-hunting-5-detecting-enumeration.html
+      creationDate: '2019-10-22'
+      score: 80
+      description: Detect priv users or groups recon based on 4661 eventid and known privileged
+        users or groups SIDs
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4661"
+      Event.EventData.ObjectType:
+      - SAM_USER
+      - SAM_GROUP
+      Event.EventData.ObjectName:
+      - '*-512'
+      - '*-502'
+      - '*-500'
+      - '*-505'
+      - '*-519'
+      - '*-520'
+      - '*-544'
+      - '*-551'
+      - '*-555'
+      - '*admin*'
+}
+# ----------------------------------------------------------------------------------------------------
+public Scanner_PoC_for_CVE_2019_0708_RDP_RCE_vuln 
+{
+    metadata:
+      author: Florian Roth (rule), Adam Bradbury (idea)
+      reference: https://twitter.com/AdamTheAnalyst/status/1134394070045003776, https://github.com/zerosum0x0/CVE-2019-0708
+      creationDate: 2019/06/02
+      score: 100
+      description: Detects the use of a scanner by zerosum0x0 that discovers targets vulnerable
+        to  CVE-2019-0708 RDP RCE aka BlueKeep
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4625"
+      Event.EventData.SubjectUserName: AAAAAAA
+}
+# ----------------------------------------------------------------------------------------------------
+public Mimikatz_DC_Sync 
+{
+    metadata:
+      author: Benjamin Delpy, Florian Roth
+      reference: https://twitter.com/gentilkiwi/status/1003236624925413376, https://gist.github.com/gentilkiwi/dcc132457408cf11ad2061340dcb53c2
+      creationDate: 2018/06/03
+      score: 80
+      description: Detects Mimikatz DC sync security events
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4662"
+      Event.EventData.Properties:
+      - '*Replicating Directory Changes All*'
+      - '*1131f6ad-9c07-11d1-f79f-00c04fc2dcd2*'
+}
+# ----------------------------------------------------------------------------------------------------
+public WMI_Persistence 
+{
+    metadata:
+      author: Florian Roth
+      reference: https://twitter.com/mattifestation/status/899646620148539397, https://www.eideon.com/2018-03-02-THL03-WMIBackdoors/
+      creationDate: '2019-10-22'
+      score: 80
+      description: Detects suspicious WMI event filter and command line event consumer
+        based on event id 5861 and 5859 (Windows 10, 2012 and higher)
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-WMI-Activity/Operational"
+      Event.System.EventID.#text: "5861"
+      Event.UserData.Operation_ESStoConsumerBinding.CONSUMER:
+      - "*ActiveScriptEventConsumer*"
+      - "*CommandLineEventConsumer*"
+      Event.UserData.Operation_ESStoConsumerBinding.PossibleCause:
+      - "*CommandLineTemplate*"
+
+}
+# ----------------------------------------------------------------------------------------------------
+public Rare_Scheduled_Task_Creations 
+{
+    metadata:
+      author: Florian Roth
+      reference: ''
+      creationDate: '2019-10-22'
+      score: 40
+      description: This rule detects rare scheduled task creations. Typically software
+        gets installed on multiple systems and not only on a few. The aggregation and
+        count function selects tasks with rare names.
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-TaskScheduler/Operational"
+      Event.System.EventID.#text: "106"
+}
+# ----------------------------------------------------------------------------------------------------

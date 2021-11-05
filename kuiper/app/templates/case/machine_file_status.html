@@ -1,0 +1,228 @@
+{% extends  "case/index.html" %}
+
+
+  <!-- DataTables -->
+  <link rel="stylesheet" href="{{url_for('static', filename='bower_components/datatables.net-bs/css/dataTables.bootstrap.min.css')}}">
+
+{% block content %}
+<style>
+table.dataTable tbody td {
+    word-break: break-word;
+    vertical-align: top;
+}
+</style>
+
+
+<div class="row">
+<div class="col-xs-12">
+	<div class="box">
+	<div class="box-header">
+		<h3 class="box-title"><i class="fa fa-file-text-o"></i> Machine Files Status <b ><span id="machine_name_title" class="label label-primary"></span> </b></h3>
+	</div>
+	<!-- /.box-header -->
+	<div class="box-body">
+		<!-- ================== Machine File Status Table =================== -->
+		<table id="machine_files_table" class="table table-bordered table-striped">
+		<thead>
+		<tr>
+			<th>Op.</th>
+			<th>File Path</th>
+			<th>Size</th>
+			<th>Parser Name</th>
+			<th>Status</th>
+			<th>Start Time</th>
+			<th>Message</th>
+		</tr>
+		</thead>
+		<tbody>
+		</tbody>
+		</table>
+		<!-- ================== Machine File Status Table =================== -->
+
+	</div>
+	<!-- /.box-body -->
+	</div>
+	<!-- /.box -->
+</div>
+
+
+
+<!-- jQuery 3 -->
+<script src="{{url_for('static', filename='bower_components/jquery/dist/jquery.min.js')}}"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="{{url_for('static', filename='bower_components/bootstrap/dist/js/bootstrap.min.js')}}"></script>
+<!-- DataTables -->
+<script src="{{url_for('static', filename='bower_components/datatables.net/js/jquery.dataTables.min.js')}}"></script>
+<script src="{{url_for('static', filename='bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js')}}"></script>
+<!-- SlimScroll -->
+<script src="{{url_for('static', filename='bower_components/jquery-slimscroll/jquery.slimscroll.min.js')}}"></script>
+<!-- FastClick -->
+<script src="{{url_for('static', filename='bower_components/fastclick/lib/fastclick.js')}}"></script>
+<!-- AdminLTE App -->
+<script src="{{url_for('static', filename='dist/js/adminlte.min.js')}}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{{url_for('static', filename='dist/js/demo.js')}}"></script>
+<script src="{{url_for('static', filename='dist/jquery_file_upload/js/vendor/tmpl.min.js')}}"></script>
+
+<script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+    
+<!-- toast notifications --> 
+<script src="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.js')}}"></script>
+<link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+
+<!-- page script -->
+<script>
+
+// ======================== Variables 
+
+var toast 		= $.toast;
+
+var case_id 	= "{{case_details['casename']}}"
+var machine_id 	= "{{machine_id}}"
+var db_files 	= ({{ db_files|tojson|safe }});
+
+
+// ======================== Functions 
+function get_datatable_list(files){
+	var list = []
+	badge_class = {
+		'pending'   : 'bg-gray',
+		'done'      : 'bg-green',
+		'parsing'   : 'bg-light-blue'
+	}
+	
+    var regex = /Pushed \[([0-9]+)\] \/ Failed \[([0-9]+)\]/;
+	for(var f in files){
+		for(var p in files[f]['parsers']){
+			var msg = (files[f]['parsers'][p]['message'] == undefined) ? '' : files[f]['parsers'][p]['message'];
+			var start_time = files[f]['parsers'][p]['start_time'].split('.')[0]
+			var file_path = files[f]['file_path'].split("{{machine_id}}")[1]
+			badge = (badge_class.hasOwnProperty(files[f]['parsers'][p]['status']) ) ? badge_class[ files[f]['parsers'][p]['status'] ] : 'bg-gray'
+			var status = '<span class="badge badge-pill '+badge+'" style="padding:5px">'+files[f]['parsers'][p]['status']+'</span>'
+			var chkbox = '<input class="files_checkbox" data-path="'+files[f]['file_path']+'" data-parser="'+files[f]['parsers'][p]['parser_name']+'" type="checkbox">'
+			var disabled_flag = ' <i class="fa fa-fw fa-chain'+( files[f]['parsers'][p].hasOwnProperty('disable') && files[f]['parsers'][p]['disable'] == 'True' ? '-broken' : '' )+'"></i> '
+			var disabled = ( files[f]['parsers'][p].hasOwnProperty('disable') && files[f]['parsers'][p]['disable'] == 'True' ? true : false )
+			var disable_enable_btn = '<button type="button" class="btn_disable_enable_files btn btn-'+(disabled?'warning' : 'success') +' btn-xs" data-action="'+(disabled?'enable' : 'disable') +'" title="File parsing is '+(disabled?'disabled' : 'enabled') +'" data-path="'+files[f]['file_path']+'" data-parser="'+files[f]['parsers'][p]['parser_name']+'"><i class="fa fa-fw fa-chain'+(disabled?'-broken' : '') +'"></i></button>'
+
+
+            // match the msg to display tags if results are "Pushed [<num>] / Failed [<num>]"
+            var msg_regex = msg.match(regex)
+            if( msg_regex != null){
+                var sucess = '<span class="badge badge-pill bg-green" style="padding:5px">' + msg_regex[1] + '</span>'
+                if(msg_regex[2] == "0")
+                    var failed = '<span class="badge badge-pill bg-gray" style="padding:5px">' + msg_regex[2] + '</span>'
+                else
+                    var failed = '<span class="badge badge-pill bg-red" style="padding:5px">' + msg_regex[2] + '</span>'
+                msg = 'Pushed '+sucess+' / Failed '+failed
+            }
+
+			list.push([ disable_enable_btn, file_path , files[f]['file_size'] , files[f]['parsers'][p]['parser_name'] , status , start_time , msg ])
+		}
+	}
+	return list
+}
+
+
+// ======================== Listeners 
+
+// send request to disable all selected files and parser
+$('#machine_files_table').on( 'click' , '.btn_disable_enable_files' , function(){
+	var btn = $(this)
+	var selected_files = {
+			'path' : $(this).data('path'),
+			'parser' : $(this).data('parser'),
+			'action' : $(this).data('action')
+		}
+
+	var url_page = '/case/'+case_id+'/disable_enable_selected_files/'+machine_id
+	$.ajax({
+		type: 'POST',
+		url: url_page,
+		contentType: 'application/json;charset=UTF-8',
+        data : JSON.stringify({'data': selected_files}),
+		success: function(data, status, request) {
+			// if success 
+			if(data['result']){
+				
+				// if request enable
+				if(data['action'] == 'enable'){
+					btn.data('action' , 'disable')
+					btn.attr('title' , 'File parsing is enabled')
+					btn.removeClass('btn-warning')
+					btn.addClass('btn-success' )
+					btn.find('i').removeClass('fa-chain-broken' )
+					btn.find('i').addClass('fa-chain')
+
+					toast_msg('Enabled parsing the file')
+				} 
+				// if request disable
+				else {
+					btn.data('action' , 'enable') 
+					btn.attr('title' , 'File parsing is disabled') 
+					btn.removeClass('btn-success') 
+					btn.addClass('btn-warning' )
+					btn.find('i').removeClass('fa-chain' )
+					btn.find('i').addClass('fa-chain-broken') 
+
+					toast_msg('Disabled parsing the file')
+				}
+				
+
+
+			} else{
+				toast_msg('Failed to submit the request' , type='error' , header='Error')
+			}
+			//
+		},
+		error: function() {
+			// if there was an error on the ajax
+			toast_msg('Failed to submit the request'  , type='error' , header = 'Error')
+		}
+	});
+})
+
+
+
+// ======================== Main Code 
+
+$('#machine_name_title').text(machine_id.substring(case_id.length + 1))
+var datatable_info_list = get_datatable_list(db_files)
+
+
+
+$(function () {
+    $('#machine_files_table').DataTable({
+		'data': datatable_info_list,
+		'autoWidth': false,
+		'columns' : [
+			{ width : '1%' },
+			{ width : '35%' },
+			{ width : '7%' },
+			{ width : '10%' },
+			{ width : '5%' },
+			{ width : '10%' },        
+			{ width : '33%' }        
+		] ,
+		'paging'      : false,
+		'lengthChange': false,
+		'searching'   : true,
+		'ordering'    : true,
+		'info'        : true,
+		'autoWidth'   : false,
+		"order": [[ 6, "desc" ]]
+    })
+  })
+
+// ================= START function build DataTable list
+
+
+// ================= END function build DataTable list
+
+
+
+
+</script>
+
+
+
+{% endblock %}

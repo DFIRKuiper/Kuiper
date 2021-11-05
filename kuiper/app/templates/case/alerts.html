@@ -1,0 +1,261 @@
+{% extends  "case/index.html" %}
+
+{% block content %}
+
+
+
+      <div class="row">
+        <div class="col-md-12">
+          <div class="box">
+            <div class="box-header">
+                <h3 class="box-title"><i class="fa fa-bell"></i> Alerts</h3>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body"  style="overflow:auto;" >
+              <table id="alerts_table" class="table table-striped dataTable nowrap ">
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Severity</th>
+                    <th>Description</th>
+                    <th>Rule</th>
+                    <th># Alerts</th>
+                  </tr>
+                </thead>
+                <tbody>
+
+                <!-- ============= List all alerts ===============-->
+                {% for rule in all_rules %}
+                <tr>
+                  <td>
+                      <a class="badge badge-pill rule_name bg-blue" href="{{ url_for('case_browse_artifacts', case_id=case_details['casename'] , rule=rule['rule_name'])}}">
+                        {{rule['rule_name']}} &raquo;	
+                      </a>
+                  </td>
+                  
+                  <td>
+                      {% if "Critical" == rule['rule_severity'] %}
+                          <span class="badge badge-pill bg-gray" >
+                      {% elif "High" == rule['rule_severity'] %}
+                          <span class="badge badge-pill bg-red" >
+                      {% elif "Medium" == rule['rule_severity'] %}
+                          <span class="badge badge-pill bg-yellow" >
+                      {% elif "Low" == rule['rule_severity'] %}
+                          <span class="badge badge-pill bg-green" >
+                      {% elif "Whitelist" == rule['rule_severity'] %}
+                          <span class="badge badge-pill bg-light-blue" >
+                      {% endif %}
+                      {{rule['rule_severity']}}</span>
+                  </td>
+                  <td><div id="{{rule['rule_description']}}" style="padding: 4px 9px;margin-bottom: 0px;">{{rule['rule_description']}}</div></td>
+                  <td><div id="{{rule['rule_name']}}" style="padding: 4px 9px;margin-bottom: 0px;">{{rule['rule']}}</div></td>
+                  <td><span class="label pull-right label-success">{{rule['hits']}}</span></td>
+                </tr>
+                {% endfor %}
+
+
+
+                </tbody>
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+          <!-- /.box -->
+        </div>
+
+        <!-- ========================= START rhaegal ============================= -->
+        <div class="col-md-12">
+            <div class="box">
+              <div class="box-header">
+                  <h3 class="box-title"><i class="fa"><img src="{{url_for('static', filename='dist/img/RhaegalLogo.png')}}" width="24" height="24" /></i> Rhaegal</h3>
+              </div>
+
+              <!-- /.box-header -->
+              <div class="box-body" style="overflow:auto;" >
+                <div id="scores"></div>
+
+
+
+                <table id="rhaegal_table" class="table table-striped dataTable nowrap"></table>
+              </div>
+              <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+          </div>
+        <!-- ========================= END rhaegal =============================== -->
+        
+
+<!-- jQuery 3 -->
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="../../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="../../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="../../static/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="../../static/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="../../static/dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../static/dist/js/demo.js"></script>
+
+
+
+
+<script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+    <!-- tag input -->
+    
+    <script src="../../static/dist/tagsinput/bootstrap-tagsinput.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput-typeahead.css')}}">
+
+    <!-- toast notifications --> 
+    <script src="../../static/dist/jquery_toast/jquery.toast.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+
+
+    <script src="../../static/dist/air-datepicker/dist/js/datepicker.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/air-datepicker/dist/css/datepicker.min.css')}}">
+    <script src="../../static/dist/air-datepicker/dist/js/i18n/datepicker.en.js"></script>
+
+
+<!-- This will take the AdminLTE input style and use it with the tags input style -->
+<style type="text/css">
+.bootstrap-tagsinput {
+    display: table-cell;
+    z-index: 2;
+    width: 100%;
+
+    height: 44px;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+.add_to_search_query{
+    float: right;
+}
+.jq-toast-single {
+    font-size: 12px;
+    width: fit-content;
+    white-space: nowrap;
+}
+.jq-toast-single h2{
+    font-size: 14px;
+        font-weight: bold;
+
+}
+
+
+/* ---------- rule name ------------- */
+.rule_name {
+  cursor: pointer;
+}
+
+
+td{
+  vertical-align: middle;
+}
+
+</style>
+
+
+
+<!-- page script -->
+<script>
+
+var rhaegal_hits 	= ({{ rhaegal_hits|tojson|safe }});
+
+// rhaegal severity based on the score
+score_severity = [
+    {"max": 100 , "min": 70 , "severity": "High"    , "color" : "bg-red"},
+    {"max": 69  , "min": 40 , "severity": "Medium"  , "color" : "bg-yellow"},
+    {"max": 39  , "min": 0  , "severity": "Low"     , "color" : "bg-green"},
+]
+
+
+
+$(function () {
+
+    // ================== set the table of rules
+    $('#alerts_table').DataTable({
+      'paging'      : false,
+      'lengthChange': false,
+      'searching'   : true,
+      'ordering'    : true,
+      'info'        : false,
+      'autoWidth'   : false,
+    })
+
+    // ================== set the table of rhaegal hits
+
+    $('#rhaegal_table').DataTable({
+
+
+        'data'        : rhaegal_hits["names"],
+        'columns'     : [
+            { title: "Type"         , data:"type"},
+            { title: "Name"         , data:"name" , render: function(data, type){
+                
+                var query = escapeHtml('?q=%7B"AND"%3A%5B%7B"%3D%3DData.rhaegal.name"%3A"'+data+'"%7D%5D%7D')
+                return '<a class="badge badge-pill rule_name bg-blue" href="{{ url_for("case_browse_artifacts", case_id=case_details["casename"])}}'+query+'">'+data+' &raquo;</a>'
+                
+            }},
+            { title: "Count"        , data:"count"},
+            { title: "Score"        , data:"score" , render: function(data, type){
+                    var score           = parseInt(data)
+                    var severity        = score_severity[score_severity.length -1]["severity"]
+                    var severity_color  = score_severity[score_severity.length -1]["color"]
+
+                    for(var i=0 ; i < score_severity.length; i++){
+                        if(score <= score_severity[i]["max"] && score >= score_severity[i]["min"]){
+                            severity        = score_severity[i]["severity"]
+                            severity_color  = score_severity[i]["color"]
+                        }
+                    }
+                    return '<span class="badge badge-pill '+severity_color+'" >'+severity+' - '+data+'</span>'
+                }
+            },
+            { title: "Description"  , data:"description"},
+            { title: "Creation Date", data:"creationDate"},
+        ],
+        'paging'      : false,
+        'lengthChange': false,
+        'searching'   : true,
+        'ordering'    : true,
+        'info'        : false,
+        'autoWidth'   : false,
+      })
+
+
+
+      // ================ set the statistics 
+      var total_scores_severity = {}
+      for(var score = 0 ; score < rhaegal_hits["scores"].length ; score++){
+        rhaegal_hits["scores"][score]["score"] = parseInt(rhaegal_hits["scores"][score]["score"])
+        for(var i=0 ; i < score_severity.length; i++){
+            if(rhaegal_hits["scores"][score]["score"] <= score_severity[i]["max"] && rhaegal_hits["scores"][score]["score"] >= score_severity[i]["min"]){
+                
+                if(!total_scores_severity.hasOwnProperty(score_severity[i]["severity"]) )  total_scores_severity[score_severity[i]["severity"]] = { "records": 0, "rules": 0 , 'color': score_severity[i]["color"]}
+
+
+                total_scores_severity[score_severity[i]["severity"]]["records"] += rhaegal_hits["scores"][score]["count"]
+                total_scores_severity[score_severity[i]["severity"]]["rules"] += 1
+
+
+            }
+        }
+      }
+      for (const [severity, value] of Object.entries(total_scores_severity)) {
+        $("#scores").append("<span class=\"badge badge-pill "+value["color"]+"\" >"+severity+"</span> <span class=\"text-red\">"+value["records"]+"</span> Records / <span class=\"text-red\">"+value["rules"]+"</span> Rules")
+      }
+      
+
+  })
+
+</script>
+
+
+
+{% endblock %}
