@@ -116,15 +116,13 @@ Kuiper use the following components:
 
 Starting from version 2.2.0, Kuiper now run over dockers, there are 7 dockers:
 
-- **Flask**: the main docker which host the web application.
+- **Flask**: the main docker which host the web application (check [docker image](https://hub.docker.com/r/dfirkuiper/dfir_kuiper)).
 - **Mongodb**: stores the cases and machines metadata.
 - **Elasticsearch (es01)**: stores the parsed artifacts data.
 - **Nginx**: reverse proxy for the flask container.
-- **Celery**: artifacts parser component.
+- **Celery**: artifacts parser component check [docker image](https://hub.docker.com/r/dfirkuiper/dfir_kuiper).
 - **Redis**: queue for celery workers
 - **NFS (Network File System)**: container that stores the shared files between Flask and Celery containers.
-
-
 
 To run the docker use the following command:
 
