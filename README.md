@@ -20,7 +20,7 @@
 - [4. Getting Started](#getting-started)
     - [4.1. Requirements](#requirements)
     - [4.2. Installation](#Installation)
-    - [4.3. Adding Custom Parser]
+    - [4.3. Adding Custom Parser](#addingParser)
 - [5. Issues Tracking and Contribution](#Issues-Tracking-and-Contribution)
 - [6. Licenses](#Licenses)
 - [7. Authors](#Authors)
