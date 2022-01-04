@@ -1,0 +1,813 @@
+{% extends  "case/index.html" %}
+
+{% block content %}
+
+
+
+    <div class="row">
+
+        <div class="col-md-12">
+            <div class="box collapsed-box">
+                <div class="box-header">
+                    <h3 class="box-title"><i class="fa fa-clock-o"></i> Timeline tags</h3>
+
+                    <!-- =============== start Buttons =============== -->
+                      <div class="btn-group box-tools pull-right">
+                        <button type="button" class="btn btn-sm btn-primary" id="show_as_table" ><i class="fa fa-table" title="Show tags as table"></i></button>
+                        <button type="button" class="btn btn-sm btn-default" id="show_as_timeline" ><i class="fa fa-reorder" title="show tags as timeline"></i></button>
+                        <button type="button" class="btn btn-sm btn-default" id="export_csv" ><i class="fa fa-download" title="Export timeline as .CSV"></i></button>
+                        <button type="button" class="btn btn-sm btn-default" data-widget="collapse"><i class="fa fa-plus" title="Create a time line message"></i></button>
+                      </div>
+                    <!-- =============== end Buttons =============== -->
+                    <br />
+                    <!-- /.box-tools -->
+                </div>
+                <!-- /.box-header -->
+                <div class="box-body no-padding" style="display: none;">
+
+                    <div class="form-group">
+
+                        <div class="input-group">
+                            <div class="input-group-addon">
+                                <i class="fa fa-clock-o"></i>
+                            </div>
+                            <input type="text" class='form-control pull-right' id="tag_add_form_datetime" placeholder="yyyy-mm-dd HH:ii:ss" autocomplete="off" />
+                        </div>
+                        <br />
+                        <textarea class="form-control" rows="2" placeholder="Message ..." id="tag_add_form_message"></textarea>
+                        <br />
+                        <!-- /.input group -->
+                        <button id="tag_add_form_submit" type="button" class="btn btn-success">
+                            <li class="fa fa-plus-circle"></li> Submit</button>
+                    </div>
+
+                </div>
+                <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+        </div>
+
+
+        <!-- =============== Timeline ===================-->
+        <div class="col-md-12">
+            <!-- The time line -->
+            <ul class="timeline"></ul>
+        </div>
+    
+
+
+<!-- Modal record details-->
+<div class="modal right fade" id="tag_details" tabindex="-1" role="dialog" aria-labelledby="record_details_modal">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="record_details_modal">Record Details</h4>
+      </div>
+
+      <div class="modal-body  no-padding">
+        <div id="record_details">  </div>
+      </div>
+
+    </div><!-- modal-content -->
+  </div><!-- modal-dialog -->
+</div><!-- modal -->
+
+
+
+
+
+
+
+
+
+
+<!-- jQuery 3 -->
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="../../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="../../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="../../static/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="../../static/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="../../static/dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../static/dist/js/demo.js"></script>
+
+
+
+
+<script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+
+    <!-- tag input -->
+    
+    <script src="../../static/dist/tagsinput/bootstrap-tagsinput.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput-typeahead.css')}}">
+
+    <!-- toast notifications --> 
+    <script src="../../static/dist/jquery_toast/jquery.toast.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+
+
+    <script src="../../static/dist/air-datepicker/dist/js/datepicker.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/air-datepicker/dist/css/datepicker.min.css')}}">
+    <script src="../../static/dist/air-datepicker/dist/js/i18n/datepicker.en.js"></script>
+
+
+<!-- This will take the AdminLTE input style and use it with the tags input style -->
+<style type="text/css">
+
+.jq-toast-single {
+    font-size: 12px;
+    width: fit-content;
+    white-space: nowrap;
+}
+.jq-toast-single h2{
+    font-size: 14px;
+        font-weight: bold;
+
+}
+
+.timeline>li>.timeline-item>.time {
+  float: left;
+  padding: 11px;
+}
+
+
+/*******************************
+* Used to make the dialog of record details on the right
+* MODAL AS LEFT/RIGHT SIDEBAR
+* Add "left" or "right" in modal parent div, after class="modal".
+* Get free snippets on bootpen.com
+*******************************/
+  .modal.left .modal-dialog,
+  .modal.right .modal-dialog {
+    position: fixed;
+    margin: auto;
+    width: 40%;
+    height: 100%;
+    -webkit-transform: translate3d(0%, 0, 0);
+        -ms-transform: translate3d(0%, 0, 0);
+         -o-transform: translate3d(0%, 0, 0);
+            transform: translate3d(0%, 0, 0);
+  }
+
+  .modal.left .modal-content,
+  .modal.right .modal-content {
+    height: 100%;
+    overflow-y: auto;
+  }
+  
+  .modal.left .modal-body,
+  .modal.right .modal-body {
+    padding: 15px 15px 80px;
+  }
+
+        
+/*Right*/
+  .modal.right.fade .modal-dialog {
+    right: -320px;
+    -webkit-transition: opacity 0.3s linear, right 0.3s ease-out;
+       -moz-transition: opacity 0.3s linear, right 0.3s ease-out;
+         -o-transition: opacity 0.3s linear, right 0.3s ease-out;
+            transition: opacity 0.3s linear, right 0.3s ease-out;
+  }
+  
+  .modal.right.fade.in .modal-dialog {
+    right: 0;
+  }
+
+/* ----- MODAL STYLE ----- */
+
+
+
+</style>
+
+
+
+<!-- page script -->
+<script>
+
+
+// ========================== Variables
+
+var toast                   = $.toast;
+var tags                    = []; 
+var record_important_fields = ({{ CASE_FIELDS|tojson|safe }});
+
+var listOfDates             = {}
+
+var view_type               = 'table'
+
+// ========================== Functions
+
+// convert json to csv
+function ConvertToCSV(objArray) {
+    var array = typeof objArray != 'object' ? JSON.parse(objArray) : objArray;
+    var str = '';
+
+    for (var i = 0; i < array.length; i++) {
+        var line = '';
+        for (var index in array[i]) {
+            if (line != '') line += ','
+            line += array[i][index];
+        }
+        str += line + '\r\n';
+    }
+    return str;
+}
+
+
+
+
+
+
+
+// delete a tag
+function del_tag(tag_id , record_id = null){
+    var is_deleted = false;
+
+    $.ajax({
+        type : 'POST',
+        url : "/case/{{case_details['casename']}}/timeline_delete_tag_ajax",
+        contentType: 'application/json;charset=UTF-8',
+        data : JSON.stringify({'data': {"tag_id":tag_id , 'record_id' : record_id } }),
+        success: function(result) {
+          var result = JSON.parse(result);
+          if(result['result'] == "failed")
+              toast_msg("Failed to delete tag"  , type = 'error' , header = 'Error')
+          else{
+
+              is_deleted = true;
+              
+              // remove the tag box from the time line
+              $('#' + tag_id).fadeOut(function(){
+                $(this).remove()
+              })
+              
+              // if there is no elements in the label, then remove it
+              var label = $('#' + tag_id).attr('data-label')
+              listOfDates[label]--;
+              if(listOfDates[label] < 1){
+                  delete listOfDates[label]
+                  $('#' + label).fadeOut(function(){ $(this).remove(); })
+              }
+
+              toast_msg("Tag ID ["+tag_id+"] deleted ")
+          }
+            
+              
+        },  
+        error: function(error){
+          toast_msg("Connection Failed" , icon = 'error' , heading = 'Error')
+        }
+    });
+}
+
+
+
+
+
+
+
+
+// add tag with message
+function add_msg_tag(tag_msg , timestamp ){
+  $.ajax({
+    type : 'POST',
+    url : "/case/{{case_details['casename']}}/add_tag_ajax",
+    contentType: 'application/json;charset=UTF-8',
+    data : JSON.stringify({'data': {"message":tag_msg , 'time': timestamp } }),
+    async: false,
+    timeout: 30000,
+    success: function(result) {
+      var result = JSON.parse(result);
+      if(result['result'] == "failed")
+          toast_msg("Failed to add tag"  , type = 'error' , header = 'Error')
+          
+      else{
+          
+          var tag_id = result['id']
+
+          var tag = {
+            "_id" : tag_id,
+            "_source" : {
+              "Data" : {
+                "message" : tag_msg,
+                "@timestamp" : timestamp,
+              }
+            } 
+          }
+
+          var label = timestamp.substring(0,10);
+          if(label in listOfDates) {
+              var element = get_tag_message(tag , label , false)  // if there is a label before, dont create new one
+              listOfDates[label]++; 
+          }
+          else {
+              var element = get_tag_message(tag , label , true) // if there is no label, create one
+              listOfDates[label] = 1;
+          }
+              
+
+          var time = timestamp.replace('T' , ' ')
+          var times = []
+
+          var boxs = $('.timeline').children('[date-time]').each(function () {
+              times.push($(this).attr('date-time'));
+          });
+
+
+          if(times.length == 0 )
+              $('.timeline').prepend(element);
+
+          else if( time < times[0]) // add at first
+              if( time.substring(0,10) == times[0].substring(0,10))
+                  $(element).insertBefore($('.timeline').children('[date-time]').first());
+              else
+                  $('.timeline').prepend(element);
+            
+          
+          else if(time > times[times.length-1])  // add at last 
+            $(element).insertAfter($('.timeline').children('[date-time]').last());
+
+          else // add between two times
+            for(var i = 0 ; i <times.length-1 ; i++)
+              if( time > times[i] && time < times[i+1]){
+                if( time.substring(0,10) == times[i+1].substring(0,10))
+                    $('.timeline').children('[date-time]').slice(i+1 , i+2).each(function(){ $(element).insertBefore( $(this) ); });
+                else
+                    $('.timeline').children('[date-time]').slice(i , i+1).each(function(){ $(element).insertAfter( $(this) ); });
+                break;
+                
+              }  
+          toast_msg("The tag has been added"  , type = 'info' , header = 'Information')
+
+      }
+    },  
+    error: function(error){
+      toast_msg("Connection Failed"  , type = 'error' , header = 'Error')
+    }
+  });
+
+
+}
+
+
+
+
+
+
+
+
+
+// return tag details by the tag id
+function get_tag_by_id(tag_id){
+    for(var i =0 ; i <tags.length ; i++)
+      if( tags[i]['_id'] == tag_id)
+        return tags[i]
+}
+
+
+
+
+
+// get the label html content 
+function get_label(date){
+    return '<li id="'+date+'" class="time-label">\
+                  <span class="bg-green">\
+                    '+date+'\
+                  </span>\
+            </li>';
+}
+
+
+
+
+
+
+
+// build the tag element box
+function get_tag_message(tag , label , with_label = false){
+    var message = ("message" in tag['_source']['Data'] && tag['_source']['Data']['message'] != "") ? tag['_source']['Data']['message'] : "No message" ;
+    var time = tag['_source']['Data']['@timestamp'].split('.')[0].replace('T' , ' ')
+    var record_id = ("record_id" in tag['_source']['Data']) ? tag['_source']['Data']['record_id'] : "" ;
+    var record_button = ""
+
+    if( record_id == ""){
+      var icon =  "fa fa-comments  bg-blue"
+      record_button = '';
+    } else
+      var icon                = "fa fa-tags  bg-red"
+    
+    var isRecord_tag          = tag['_source']['Data'].hasOwnProperty("record_details");
+    var record_details_button = ""
+    var important_fields      = ""
+
+
+    if( isRecord_tag ){
+        record_details_button = '<a data="'+tag['_id']+'"  data-target="#tag_details" class="record_details_button btn btn-primary btn-xs">Record Details <span class="fa fa-caret-square-o-right"></span> </a>';
+
+        var record = tag['_source']['Data']['record_details']
+        var date_type = record['_source']['data_type']
+        var imp_rec = record_important_fields[date_type];
+        for(var j = 0 ; j < imp_rec.length; j++){
+            var search_field_path = imp_rec[j][1].substring( imp_rec[j][1].indexOf('.') +1  );
+            var field_value = get_field_from_json_path(record , imp_rec[j][1]);
+            important_fields += ' <span class="badge bg-blue"> ' + imp_rec[j][0]+'</span> <span>' + field_value + '</span>';
+        }
+        important_fields = '<div class="timeline-body">' + important_fields + '</div>'
+    }
+    var label_html = "";
+    if(with_label){
+      label_html = get_label(label)
+    }
+
+    return label_html + '<li id="'+tag['_id']+'" data-label="'+label+'" date-time="'+time+'">\
+              <i class="'+icon+'"></i>\
+              <div class="timeline-item">\
+                <span class="time"><i class="fa fa-clock-o"></i> '+time+'</span>\
+                <h3 class="timeline-header">'+message+'</h3>\
+                  '+important_fields+'\
+                <div class="timeline-footer">\
+                    <div class="btn-group">\
+                        <a data="'+tag['_id']+'" class="tag_delete_button btn btn-danger btn-xs">Delete <span class="fa fa-remove"></span></a>\
+                        '+record_details_button+'\
+                    </div>\
+                </div>\
+              </div>\
+            </li>';
+
+
+}
+
+
+
+
+function get_tag_table(tag){
+    var tr                      = '<tr id="'+tag['_id']+'">'
+    var message                 = tag['_source']['Data'].hasOwnProperty("message") ? tag['_source']['Data']['message']: "" 
+    var timestamp               = tag['_source']['Data']['@timestamp'].split('.')[0].replace('T' , ' ')
+    var tag_id                  = tag['_id']
+    var machine                 = ""
+    var important_fields        = ""
+    var record_details_button   = ""
+
+    // build the important fields cell if exists
+    if(tag['_source']['Data'].hasOwnProperty("record_details")){
+        record_details_button = '<a data="'+tag_id+'"  data-target="#tag_details" class="record_details_button btn btn-primary btn-xs"><span class="fa fa-caret-square-o-right"></span> </a>';
+
+        var record = tag['_source']['Data']['record_details']
+        var date_type = record['_source']['data_type']
+        var imp_rec = record_important_fields[date_type];
+        for(var j = 0 ; j < imp_rec.length; j++){
+            var search_field_path = imp_rec[j][1].substring( imp_rec[j][1].indexOf('.') +1  );
+            var field_value = get_field_from_json_path(record , imp_rec[j][1]);
+            important_fields += ' <span class="badge bg-blue"> ' + imp_rec[j][0]+'</span> <span>' + field_value + '</span><br />';
+        }
+        important_fields = '<div class="timeline-body">' + important_fields + '</div>'
+
+        machine = tag['_source']['Data']['record_details']['_source']['machine'].substring(tag['_index'].length + 1)
+    }
+
+    var options = '<div class="btn-group-vertical">\
+                        <a data="'+tag_id+'" class="tag_delete_button btn btn-danger btn-xs"><span class="fa fa-remove"></span></a>\
+                        '+record_details_button+'\
+                    </div>'
+
+    tr += '<td style="white-space:nowrap;" >'+timestamp+'</td>'
+    tr += '<td style="white-space:nowrap;" >'+machine+'</td>'
+    tr += '<td>'+message+'</td>'
+    tr += '<td>'+important_fields+'</td>'
+    tr += '<td>'+options+'</td>'
+
+    tr += '</tr>'
+
+    return tr
+}
+
+
+
+
+// request all tags for the case
+function request_all_tags(){
+    $.ajax({
+      type : 'POST',
+      url : "/case/{{case_details['casename']}}/timeline_ajax",
+      contentType: 'application/json;charset=UTF-8',
+      data : JSON.stringify({'data': {} }),
+      async: false,
+      timeout: 30000,
+      success: function(result) {
+        var result = JSON.parse(result);
+        
+        if(result['result'] == 'failed'){
+          toast_msg(result['tags'] , 'error' , 'Error')
+          tags = []
+        } else {
+          tags = result['tags']  
+        }
+
+      },  
+      error: function(error){
+        toast_msg("Connection Failed"  , type = 'error' , header = 'Error')
+      }
+    })
+    
+}
+
+
+
+
+
+// print the tags timeline html 
+function print_tag(){
+
+    request_all_tags()
+    var timeline          = $('ul.timeline')
+    timeline.html("")
+
+    
+    if(view_type == 'timeline'){
+        var last_label        = "";
+        
+        var timeline_content  = "";
+        for( var i = 0 ; i < tags.length ; i++){
+            var d = tags[i]['_source']['Data']['@timestamp'].split(' ')[0].substring(0, 10);
+
+            var with_label = false;
+            if( d != last_label ){
+                last_label = d;
+                with_label = true;
+                listOfDates[last_label] = 1;
+            } else
+                listOfDates[last_label]++;
+            
+
+            timeline_content += get_tag_message(tags[i] , last_label , with_label) 
+        }
+        
+        timeline_content += '<li><i class="fa fa-clock-o bg-gray"></i></li>';
+        timeline.html(timeline_content)
+    } else if(view_type == 'table'){
+
+        var timeline_content = '<div class="box"><div class="box-body no-padding">\
+              <table class="table table-striped" id="timeline_table_view">\
+              <col width="1%" />\
+              <col width="1%" />\
+              <col width="30%" />\
+              <col width="30%" />\
+              <col width="1%" />\
+                <thead>\
+                    <tr>\
+                        <th>Timestamp</th>\
+                        <th>Machine</th>\
+                        <th>Message</th>\
+                        <th>Important Fields</th>\
+                        <th>Op.</th>\
+                    </tr>\
+                </thead>\
+                <tbody>';
+
+        for( var i = 0 ; i < tags.length ; i++){
+            timeline_content += get_tag_table(tags[i]) 
+        }
+
+        timeline_content += '</tbody></table></div></div>'
+        timeline.html(timeline_content)
+    }
+    
+}
+
+
+
+
+
+// ========================== Listeners
+
+
+
+
+// on clicked export time line as csv
+$('#export_csv').on('click' , function(){
+    var csv = [['tag_id' , 'datetime' , 'message' , 'details']]
+    if(view_type == 'timeline'){
+        var timeline = $('ul.timeline').children().not('.time-label').each( function(i , v){
+            var tag = []
+            console.log($(this))
+            tag.push( $(this).attr('id') )
+            tag.push( $.trim( $(this).find('.time').text() ) )
+            tag.push( $.trim( $(this).find('.timeline-header').text() ) )
+
+            var record_det = ""
+            if($(this).find('.timeline-body').length > 0)
+                $(this).find('.timeline-body').children().each(function(){
+                    if($(this).hasClass('badge'))
+                    record_det += $.trim( $(this).text() ) + " = " 
+                    else
+                    record_det += $.trim( $(this).text() ) + " | "
+                })
+
+            tag.push( record_det )
+
+            csv.push(tag)
+        })
+    } else if (view_type == 'table'){
+        csv = [['tag_id' , 'datetime' , 'message' , 'details']]
+        for(let i = 0  ; i < tags.length ; i++){
+            var message = (tags[i]['_source']['Data']['message'] === undefined) ? "No message" : tags[i]['_source']['Data']['message'];
+            console.log(tags[i])
+
+            if(tags[i]['_source']['Data']['record_details'] !== undefined){
+
+                important_fields = ""
+                var record = tags[i]['_source']['Data']['record_details']
+                var date_type = record['_source']['data_type']
+                var imp_rec = record_important_fields[date_type];
+                for(var j = 0 ; j < imp_rec.length; j++){
+                    var search_field_path = imp_rec[j][1].substring( imp_rec[j][1].indexOf('.') +1  );
+                    var field_value = get_field_from_json_path(record , imp_rec[j][1]);
+                    important_fields += imp_rec[j][0]+ ':' + field_value + '|';
+                }
+
+            } else {
+                important_fields = ""
+            }
+            
+
+
+            csv.push(
+                [tags[i]['_id'] , tags[i]['_source']['Data']['@timestamp'] , message , important_fields]
+            )
+        }
+
+    }else {
+        return;
+    }
+    
+    // download the time line as csv
+    let csvContent = "data:text/csv;charset=utf-8,";
+    for(var i = 0 ; i < csv.length ; i++){
+       let row = csv[i].join(',');
+       csvContent += row + "\r\n";
+    }
+
+    var encodedUri = encodeURI(csvContent);
+    var link = document.createElement("a");
+
+    encodedUri = encodedUri.replace(/#/g, '%23');
+    console.log(csvContent)
+
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "timeline.csv");
+    document.body.appendChild(link); // Required for FF
+
+    link.click(); // This will download the data file named "my_data.csv".
+
+
+})
+
+
+
+$("#show_as_table").on('click' , function(){
+    view_type = 'table'
+    print_tag()
+    $("#show_as_table").addClass("btn-primary")
+    $("#show_as_table").removeClass("btn-default")
+    $("#show_as_timeline").removeClass("btn-primary")
+    $("#show_as_timeline").addClass("btn-default")
+})
+
+
+$("#show_as_timeline").on('click' , function(){
+    view_type = 'timeline'
+    print_tag()
+    $("#show_as_timeline").addClass("btn-primary")
+    $("#show_as_timeline").removeClass("btn-default")
+    $("#show_as_table").removeClass("btn-primary")
+    $("#show_as_table").addClass("btn-default")
+
+})
+
+
+
+
+
+
+// on clicked to submet a tag message 
+$('#tag_add_form_submit').click(function(){
+    var date = $('#tag_add_form_datetime').val().replace(" " , "T");
+    var msg = $('#tag_add_form_message').val();
+
+    add_msg_tag(msg , date);
+
+    $('#tag_add_form_datetime').val('')
+    $('#tag_add_form_message').val('')
+})
+
+
+
+
+
+
+
+// if record details button clicked 
+$('.timeline').on( 'click' , 'a.record_details_button' , function(){
+    var tag = get_tag_by_id( $(this).attr('data') )
+    var record = tag['_source']['Data']['record_details']
+    
+    var data_type = record['_source']['data_type']
+      if( data_type == "windows_events" )
+        var html = build_windows_event_table(record , $('#record_details'));
+      else {
+        var html = build_simple_artifacts_table(record , $('#record_details') , false);
+      }
+
+    $('#tag_details').find('.modal-body').html(html)
+
+    $('#tag_details').modal('show')
+})
+
+
+
+
+
+
+
+
+
+// on clicked delete tag button
+$('.timeline').on( 'click' , 'a.tag_delete_button'  , function(){
+    var tag_id = $(this).attr('data');
+    var tag = get_tag_by_id( tag_id ) // get the tag information, which include the record_id
+    var rec_id = ('record_id' in tag['_source']['Data']) ? tag['_source']['Data']['record_id'] : null;
+    del_tag(tag_id , rec_id )
+})
+
+
+
+
+// ========================== Main code
+
+// prepare the time picker on add tags
+$('#tag_add_form_datetime').datepicker({
+    language: 'en',
+    timepicker: true,
+    timeFormat: 'hh:ii:00',
+    dateFormat: 'yyyy-mm-dd',
+    onShow: function(dp, animationCompleted){
+        if (!animationCompleted) {
+            $('.datepicker--content').show();
+            $('.datepicker--time').show();
+        }
+    },
+    
+}) 
+$('#tag_add_form_datetime').data('datepicker')
+
+
+
+// print the timeline html tags
+$(document).ready(function(){
+  print_tag()   
+})
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</script>
+
+
+
+{% endblock %}

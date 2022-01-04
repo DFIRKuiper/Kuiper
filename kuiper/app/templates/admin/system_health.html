@@ -1,0 +1,1240 @@
+{% extends	"admin/index.html" %}
+
+{% block content %}
+
+
+
+<!-- buttons for referesh the system healths-->
+<div class="btn-group">
+    <button type="button" class="btn btn-default btn-xs" title="Referesh system health" id="heath_refresh_btn"><i class="fa fa-fw fa-repeat"></i></button>
+    <button type="button" class="btn btn-default btn-xs" title="Disable / Enable auto-referesh" id="health-auto-referesh-btn">Auto-Refersh</button>
+</div>
+
+
+
+
+<section class="content">
+
+
+
+
+  <div class="row">
+
+        
+        <div class="col-md-6">
+
+
+            <!-- flask - START -->
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"> <img src="{{url_for('static', filename='dist/img/flask-icon.png')}}" hieght="20" width="20"> Flask</h3>
+                </div>
+                <div class="box-body">
+                    
+                    <table class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th width="8%"> </th>
+                                <th width="13%">Free</th>
+                                <th width="13%">Used</th>
+                                <th width="13%">Total</th>
+                                <th width="13%">%</th>
+                                <th> </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Disk -->
+                            <tr>
+                                <td><i class="glyphicon glyphicon-hdd" title="disk"></i> D:</td>
+                                <td><span id="flask_disk_free">N/A</span></td>
+                                <td><span id="flask_disk_used">N/A</span></td>
+                                <td><span id="flask_disk_total">N/A</span></td>
+                                <td><span id="flask_disk_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="flask_disk_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                            <!-- Memory -->
+                            <tr>
+                                <td><i class="fa fa-database" title="memory"></i> M:</td>
+                                <td><span id="flask_memory_free">N/A</span></td>
+                                <td><span id="flask_memory_used">N/A</span></td>
+                                <td><span id="flask_memory_total">N/A</span></td>
+                                <td><span id="flask_memory_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="flask_memory_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                            <!-- Swap -->
+                            <tr>
+                                <td><i class="fa fa-database" title="swap"></i> S:</td>
+                                <td><span id="flask_swap_free">N/A</span></td>
+                                <td><span id="flask_swap_used">N/A</span></td>
+                                <td><span id="flask_swap_total">N/A</span></td>
+                                <td><span id="flask_swap_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="flask_swap_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+
+                    <table class="table table-condensed">
+                        <col width="40%">
+                        <tbody id="flask-details">
+                            <tr><td>Last update</td><td><span class="text-success" id="flask_datetime">N/A</span></td></tr>
+                            <tr><td>CPU</td><td> cores: <b id="flask_cpu_cpus_num">N/A</b>, threads: <b id="flask_cpu_thrds_num">N/A</b>, utilization [<b id="flask_cpu_utiliz">N/A</b>] </td></tr>
+                        </tbody>
+                    </table>
+                    <br />
+
+                </div>
+
+
+                <!-- gunicorn -->
+                <div class="box-header">
+                    <h3 class="box-title"><img src="{{url_for('static', filename='dist/img/gunicorn-icon.png')}}" hieght="20" width="92"> Gunicorn</h3>
+                </div>
+
+                <div class="box-body">
+                    <table class="table table-condensed">
+                        <col width="40%">
+                        <tbody id="gunicorn-details">
+                            <tr><td>Gunicorn Status</td><td id="gunicorn_status"></td></tr>  
+                            <tr><td>Process Status</td><td id="gunicorn_proc_status"></td></tr>  
+                            <tr><td>CPU Num <i class="fa  fa-cubes"></i></td><td id="gunicorn_cpu_num"></td></tr>  
+                            <tr><td>CPU Percent <i class="fa  fa-cubes"></i> </td><td id="gunicorn_cpu_percent"></td></tr> 
+                            <tr><td>Memory Percent <i class="fa fa-database"></i> </td><td id="gunicorn_memory_percent"></td></tr>  
+                            <tr><td>Start Time</td><td id="gunicorn_create_time"></td></tr>  
+                            <tr><td>Username</td><td id="gunicorn_username"></td></tr>  
+                            <tr><td>Cmdline</td><td id="gunicorn_cmdline"></td></tr>  
+                            <tr><td>Name</td><td id="gunicorn_name"></td></tr>   
+                            <tr><td>Workers</td><td id="gunicorn_workers"></td></tr> 
+                            <tr><td>IP/Port</td><td id="gunicorn_ip_port"></td></tr>   
+                            <tr><td>Memory</td><td><a type="button" class="btn btn-transparent btn-xs details-arrow-toggle" data-target="gunicorn-memory-details-div"><i class="fa  fa-caret-down"></i></a></td></tr>
+                        </tbody>
+                    </table>
+
+
+                    <!-- gunicorn queue -->
+                    <div id="gunicorn-memory-details-div" style="display:none" >
+                        <table class="table table-condensed">
+                            <col width="300">
+                            <tbody id="gunicorn-memory-details-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+
+            </div>
+
+            <!-- flask - END -->
+
+
+            <!-- redis - START -->
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"> <img src="{{url_for('static', filename='dist/img/redis-icon.png')}}" hieght="20" width="60"> Redis</h3>
+                </div>
+                <div class="box-body">
+                    
+                    <table class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th width="8%"> </th>
+                                <th width="13%">Free</th>
+                                <th width="13%">Used</th>
+                                <th width="13%">Total</th>
+                                <th width="13%">%</th>
+                                <th> </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Disk -->
+                            <tr>
+                                <td><i class="glyphicon glyphicon-hdd" title="disk"></i> D:</td>
+                                <td><span id="redis_disk_free">N/A</span></td>
+                                <td><span id="redis_disk_used">N/A</span></td>
+                                <td><span id="redis_disk_total">N/A</span></td>
+                                <td><span id="redis_disk_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="redis_disk_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                            <!-- Memory -->
+                            <tr>
+                                <td><i class="fa fa-database" title="memory"></i> M:</td>
+                                <td><span id="redis_memory_free">N/A</span></td>
+                                <td><span id="redis_memory_used">N/A</span></td>
+                                <td><span id="redis_memory_total">N/A</span></td>
+                                <td><span id="redis_memory_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="redis_memory_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                            <!-- Swap -->
+                            <tr>
+                                <td><i class="fa fa-database" title="swap"></i> S:</td>
+                                <td><span id="redis_swap_free">N/A</span></td>
+                                <td><span id="redis_swap_used">N/A</span></td>
+                                <td><span id="redis_swap_total">N/A</span></td>
+                                <td><span id="redis_swap_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="redis_swap_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="table table-condensed">
+                        <col width="40%">
+                        <tbody id="redis-details">
+                            <tr><td>Last update</td><td><span class="text-success" id="redis_datetime">N/A</span></td></tr>
+                            <tr><td>CPU</td><td> cores: <b id="redis_cpu_cpus_num">N/A</b>, threads: <b id="redis_cpu_thrds_num">N/A</b>, utilization [<b id="redis_cpu_utiliz">N/A</b>] </td></tr>
+                            <tr><td>Redis Status</td><td id="redis_service_status"></td></tr>
+                            <tr><td>Redis URL</td><td id="redis_url"></td></tr>
+                            <tr><td>Redis Version</td><td id="redis_version"></td></tr>
+                            <tr><td>Queued Tasks</td><td><span id="redis_queued_tasks"></span> <a type="button" class="btn btn-transparent btn-xs details-arrow-toggle" data-target="redis-tasks-div"><i class="fa fa-caret-down"></i></a></td></tr>
+                        </tbody>
+                    </table>
+                    <!-- redis queue -->
+                    <div id="redis-tasks-div" style="display:none" >
+                        <table class="table">
+                            <col width="300">
+                            <tbody id="redis_tasks_details"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- redis - END -->
+
+        </div>
+        <div class="col-md-6">
+
+
+
+            <!-- celery - START -->
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"><img src="{{url_for('static', filename='dist/img/celery-icon.png')}}" hieght="20" width="20"> Celery 
+                        <button data-toggle="modal" data-target="#celery_details_dialog" id="celery_details_button" type="button" class="btn btn-default btn-xs" title="Show Celery details">Details</button>
+                  </h3>
+
+                </div>
+                <div class="box-body">
+                    
+                    <table class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th width="8%"> </th>
+                                <th width="13%">Free</th>
+                                <th width="13%">Used</th>
+                                <th width="13%">Total</th>
+                                <th width="13%">%</th>
+                                <th> </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Disk -->
+                            <tr>
+                                <td><i class="glyphicon glyphicon-hdd" title="disk"></i> D:</td>
+                                <td><span id="celery_disk_free">N/A</span></td>
+                                <td><span id="celery_disk_used">N/A</span></td>
+                                <td><span id="celery_disk_total">N/A</span></td>
+                                <td><span id="celery_disk_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="celery_disk_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                            <!-- Memory -->
+                            <tr>
+                                <td><i class="fa fa-database" title="memory"></i> M:</td>
+                                <td><span id="celery_memory_free">N/A</span></td>
+                                <td><span id="celery_memory_used">N/A</span></td>
+                                <td><span id="celery_memory_total">N/A</span></td>
+                                <td><span id="celery_memory_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="celery_memory_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                            <!-- Swap -->
+                            <tr>
+                                <td><i class="fa fa-database" title="swap"></i> S:</td>
+                                <td><span id="celery_swap_free">N/A</span></td>
+                                <td><span id="celery_swap_used">N/A</span></td>
+                                <td><span id="celery_swap_total">N/A</span></td>
+                                <td><span id="celery_swap_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="celery_swap_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="table table-condensed">
+                        <col width="40%">
+                        <tbody id="celery-details">
+                            <tr><td>Last update</td><td><span class="text-success" id="celery_datetime">N/A</span></td></tr>
+                            <tr><td>CPU</td><td> cores: <b id="celery_cpu_cpus_num">N/A</b>, threads: <b id="celery_cpu_thrds_num">N/A</b>, utilization [<b id="celery_cpu_utiliz">N/A</b>] </td></tr>
+                            <tr><td>Celery status</td><td id="celery_status"></td></tr>
+                            <tr><td>Total Tasks</td><td id="celery_total_tasks"></td></tr>
+                            <tr><td>Process Status</td><td id="celery_proc_status"></td></tr>
+                            <tr><td>CPU percent</td><td id="celery_cpu_percent"></td></tr>
+                            <tr><td>Workers</td><td id="celery_workers"></td></tr>
+                        </tbody>
+                    </table>
+                    
+                    
+
+                    <!-- celery details deialog -->
+                    <div class="modal fade" id="celery_details_dialog" role="dialog">
+                        <div class="modal-dialog modal-lg" style="width:70%;">
+                            <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Celery Details </h4>
+                            </div>
+                                <div class="modal-body box-body" style="padding:0px">
+                                    <div class="col-md-6" style="padding:0 10px">
+                                    
+                                        <table class="table table-condensed table_left_header">
+                                            <col width="30%">
+                                            <tbody id="celery-dialog-details-process">
+                                                <tr><th colspan="2">Celery Process</th></tr>
+                                                <tr><td>celery status</td><td id="celery_dialog_celery_status"></td></tr>
+                                                <tr><td>process status</td><td id="celery_dialog_process_status"></td></tr>
+                                                <tr><td>username</td><td id="celery_dialog_username"></td></tr>
+                                                <tr><td>process cmd</td><td id="celery_dialog_cmdline"></td></tr>
+                                                <tr><td>Start time</td><td id="celery_dialog_start_time"></td></tr>
+                                                <tr><td>celery workers</td><td id="celery_dialog_workers"></td></tr>
+                                                <tr><td>CPU numbers</td><td id="celery_dialog_cpu_num"></td></tr>
+                                                <tr><td>CPU Percent</td><td id="celery_dialog_cpu_percent"></td></tr>
+                                                <tr><td>memory percent</td><td id="celery_dialog_memory_percent"></td></tr>
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+
+
+                                    <div class="col-md-6" style="padding:0 10px">
+
+                                        <table class="table table-condensed table_left_header">
+                                            <col width="15%">
+                                            <tbody id="celery-dialog-details-tasks">
+                                                <tr><th colspan="4">Celery Tasks <span id="celery-dialog-details-tasks-num"></span></th></tr>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+
+                </div>
+            </div>
+
+            <!-- celery - END -->
+
+
+
+            <!-- redis - START -->
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"> <img src="{{url_for('static', filename='dist/img/mongodb-icon.png')}}" hieght="20" width="74"> MongoDB</h3>
+                </div>
+                <div class="box-body">
+                    
+                    <table class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th width="8%"> </th>
+                                <th width="13%">Free</th>
+                                <th width="13%">Used</th>
+                                <th width="13%">Total</th>
+                                <th width="13%">%</th>
+                                <th> </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Disk -->
+                            <tr>
+                                <td><i class="glyphicon glyphicon-hdd" title="disk"></i> D:</td>
+                                <td><span id="mongodb_disk_free">N/A</span></td>
+                                <td><span id="mongodb_disk_used">N/A</span></td>
+                                <td><span id="mongodb_disk_total">N/A</span></td>
+                                <td><span id="mongodb_disk_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="mongodb_disk_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                            <!-- Memory -->
+                            <tr>
+                                <td><i class="fa fa-database" title="memory"></i> M:</td>
+                                <td><span id="mongodb_memory_free">N/A</span></td>
+                                <td><span id="mongodb_memory_used">N/A</span></td>
+                                <td><span id="mongodb_memory_total">N/A</span></td>
+                                <td><span id="mongodb_memory_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="mongodb_memory_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                            <!-- Swap -->
+                            <tr>
+                                <td><i class="fa fa-database" title="swap"></i> S:</td>
+                                <td><span id="mongodb_swap_free">N/A</span></td>
+                                <td><span id="mongodb_swap_used">N/A</span></td>
+                                <td><span id="mongodb_swap_total">N/A</span></td>
+                                <td><span id="mongodb_swap_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="mongodb_swap_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="table table-condensed">
+                        <col width="40%">
+                        <tbody id="mongodb-details">                            
+                            <tr><td>Last update</td><td><span class="text-success" id="mongodb_datetime">N/A</span></td></tr>
+                            <tr><td>CPU</td><td> cores: <b id="mongodb_cpu_cpus_num">N/A</b>, threads: <b id="mongodb_cpu_thrds_num">N/A</b>, utilization [<b id="mongodb_cpu_utiliz">N/A</b>] </td></tr>
+                            <tr><td>Service Status</td><td id="mongodb_status"></td></tr>  
+                            <tr><td>Host</td><td><span id="mongodb_ip"></span>:<span id="mongodb_port"></span> <span id="mongodb_alive"></span></td></tr>  
+                            <tr><td>Connected</td><td id="mongodb_connected"></td></tr>  
+                            <tr><td>Database</td><td><span id="mongodb_db_name"></span> <span id="mongodb_db_exists"></span></td></tr>  
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- redis - END -->
+
+
+
+            <!-- es - START -->
+            <div class="box">
+                <div class="box-header">
+                    <h3 class="box-title"><img src="{{url_for('static', filename='dist/img/elasticsearch-icon.png')}}" hieght="20" width="23"> Elasticsearch 
+                  </h3>
+
+                </div>
+                <div class="box-body">
+                    
+                    <table class="table table-condensed">
+                        <thead>
+                            <tr>
+                                <th width="8%"> </th>
+                                <th width="13%">Free</th>
+                                <th width="13%">Used</th>
+                                <th width="13%">Total</th>
+                                <th width="13%">%</th>
+                                <th> </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Disk -->
+                            <tr>
+                                <td><i class="glyphicon glyphicon-hdd" title="disk"></i> D:</td>
+                                <td><span id="es_disk_free">N/A</span></td>
+                                <td><span id="es_disk_used">N/A</span></td>
+                                <td><span id="es_disk_total">N/A</span></td>
+                                <td><span id="es_disk_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="es_disk_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                            <!-- Memory -->
+                            <tr>
+                                <td><i class="fa fa-database" title="memory"></i> M:</td>
+                                <td><span id="es_memory_free">N/A</span></td>
+                                <td><span id="es_memory_used">N/A</span></td>
+                                <td><span id="es_memory_total">N/A</span></td>
+                                <td><span id="es_memory_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="es_memory_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                            <!-- Swap -->
+                            <tr>
+                                <td><i class="fa fa-database" title="swap"></i> S:</td>
+                                <td><span id="es_swap_free">N/A</span></td>
+                                <td><span id="es_swap_used">N/A</span></td>
+                                <td><span id="es_swap_total">N/A</span></td>
+                                <td><span id="es_swap_perc">N/A</span></td>
+                                <td>
+                                    <div class="progress sm"><div class="progress-bar progress-bar-aqua" id="es_swap_perc_bar" style="width: 0%"></div></div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table class="table table-condensed">
+                        <col width="40%">
+                        <tbody id="es-details">
+                            <tr><td>Last update</td><td><span class="text-success" id="es_datetime">N/A</span></td></tr>
+                            <tr><td>CPU</td><td> cores: <b id="es_cpu_cpus_num">N/A</b>, threads: <b id="es_cpu_thrds_num">N/A</b>, utilization [<b id="es_cpu_utiliz">N/A</b>] </td></tr>
+                            <tr><td>Elasticsearch Status</td><td id="elasticsearch_status"></td></tr>
+                            <tr><td>Nodes </td><td><span id="elasticsearch_nodes"></span> <button data-toggle="modal" data-target="#elasticsearch_details_dialog" id="elasticsearch_details_button" type="button" class="btn btn-default btn-xs" title="Show Elasticsearch Nodes details">Details</button></td></tr>
+                            <tr><td>Nodes Success</td><td id="elasticsearch_sucess"></td></tr>
+                            <tr><td>Nodes Failed</td><td id="elasticsearch_failed"></td></tr>
+                            <tr><td>No. Docs</td><td id="elasticsearch_total_docs"></td></tr>
+                            <tr><td>Total Size</td><td id="elasticsearch_total_size"></td></tr>
+                            <tr><td>Elasticsearch IP</td><td id="elasticsearch_ip"></td></tr>
+                            <tr><td>Elasticsearch Port</td><td id="elasticsearch_port"></td></tr>
+                        </tbody>
+                    </table>
+                    
+                    
+
+
+
+                    <!-- elasticsearch details deialog -->
+                    <div class="modal fade" id="elasticsearch_details_dialog" role="dialog">
+                        <div class="modal-dialog modal-lg" style="width:70%;">
+                            <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal">&times;</button>
+                                <h4 class="modal-title">Elasticsearch Details </h4>
+                            </div>
+                                <div class="modal-body box-body" style="padding:0px">
+                                    <div class="col-md-6" style="padding:0 10px">
+                                    
+                                        <table class="table table-condensed table_left_header">
+                                            <col width="30%">
+                                            <tbody id="elasticsearch-dialog-details-nodes">
+                                                <tr><th colspan="2">Elasticsearch Nodes</th></tr>
+                                            </tbody>
+                                        </table>
+
+                                    </div>
+
+
+                                    <div class="col-md-6" style="padding:0 10px">
+
+                                        <table class="table table-condensed table-striped">
+                                            <col width="15%">
+                                            <tbody id="elasticsearch-dialog-details-indices">
+                                                <tr><th colspan="4">Indices <span id="elasticsearch-dialog-details-indices"></span></th></tr>
+                                                <tr ><td><b>Index</b></td><td><b>Docs</b></td><td><b>Size</b></td><td><b>Creation Time</b></td></tr>
+
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+
+
+
+
+                </div>
+            </div>
+
+            <!-- es - END -->
+
+
+
+
+
+
+
+        </div>
+
+        
+
+
+
+       
+
+
+
+
+
+    </div>
+
+
+
+</section>
+
+
+<!-- jQuery 3 -->
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="../../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="../../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="../../static/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="../../static/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="../../static/dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../static/dist/js/demo.js"></script>
+
+
+
+
+
+    <!-- tag input -->
+    
+    <script src="../../static/dist/tagsinput/bootstrap-tagsinput.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput-typeahead.css')}}">
+
+    <!-- toast notifications --> 
+    <script src="../../static/dist/jquery_toast/jquery.toast.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+
+
+
+<script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+
+
+
+
+
+
+
+<script type="text/javascript">
+
+// ======================= Variables
+var sync_interval       = 1*1000
+var bEnableAutoRefersh  = false     // if True then auto referesh enabled
+var isSyncingNow        = false     // if True that means it is waiting response for sync now 
+var system_health_time  = 3000       // number of seconds to consider the system health old
+// ======================= Listeners
+
+
+// if referesh button clicked update the system health
+$('#heath_refresh_btn').on("click" , function(e){
+	sync_system_health()
+})
+
+
+$("#health-auto-referesh-btn").on('click' , function(e){
+    if($(this).hasClass('is-active')){
+        bEnableAutoRefersh = false;
+        $(this).removeClass('is-active')
+        $(this).removeClass('btn-success')
+    } else {
+        bEnableAutoRefersh = true;
+        $(this).addClass('is-active')
+        $(this).addClass('btn-success')
+    }
+    
+})
+
+
+// sync system heath when page opened
+$(document).ready(function(){
+    sync_system_health()
+
+    // if the auto referesh enabled, add class is-acitve
+    if(bEnableAutoRefersh){
+        $("#health-auto-referesh-btn").addClass('is-active')
+        $("#health-auto-referesh-btn").addClass('btn-success')
+    }
+})
+
+
+// this function will run every 5 seconds to update the parser status progress bar for all machines
+setInterval(function(){
+    if(bEnableAutoRefersh)
+        sync_system_health(auto_referesh=true)
+}, sync_interval);
+
+
+
+// this handle the arrow button to display/hide details 
+$(document).on('click' , '.details-arrow-toggle' , function(e){
+    var arrow = $(this)
+    var target = $("#" + arrow.data('target'))
+    var is_active = arrow.hasClass('is-active')
+
+    target.slideToggle({
+        duration: 200,
+        start: function(){
+            if(is_active){
+                arrow.removeClass("is-active")
+                arrow.html('<i class="fa  fa-caret-down"></i>')
+            } else {
+                arrow.addClass("is-active")
+                arrow.html('<i class="fa  fa-caret-up"></i>')
+            }
+        }
+    })
+})
+
+
+$(document).on('click' , '.restart_service' , function(e){
+    var button = $(this)
+    var service = button.data('service')
+    var url_page = '/admin/system_health/restart_service/' + service
+    $.ajax({
+		type: 'GET',
+		url: url_page,
+		success: function(data , status, request) {
+            data = JSON.parse(data)
+
+            if(data['result'] == 'failed')
+                toast_msg('Failed to restart the service, ' + data['message']  , type='error' , header = 'Error')
+            else
+                toast_msg('The service ' + service + ' has been restarted' , type = "info" , header = "Done")                
+            
+		},
+		error: function(e) {
+			// if there was an error on the ajax
+			toast_msg('Failed to restart the service, check network connectivity'  , type='error' , header = 'Error')
+		}
+	});
+
+})
+
+
+
+
+
+
+
+$(document).on('click' , '.download_logs_btn' , function(){
+    var log_type = $(this).data('type')
+})
+
+
+
+// ========================= Functions
+
+
+
+
+// pull system health
+function sync_system_health(auto_referesh=false){
+    if(isSyncingNow)
+        return false;
+    
+    isSyncingNow = true;
+    var i = $("#heath_refresh_btn > i")
+    i.addClass("fa-spin")
+    var url_page = '/admin/system_health_pull/'
+	$.ajax({
+		type: 'GET',
+		url: url_page,
+		success: function(data, status, request) {
+            // if the autoreferesh disabled then do not update the information
+            if(!bEnableAutoRefersh && auto_referesh)
+                return 0;
+            
+            data = JSON.parse(data)
+			console.log(data)
+
+
+            if(data['result'] == 'success'){
+                try{fill_redis(data['data']['redis'])} catch(err){console.log(err.message)}
+                try{fill_flask(data['data']['flask'])} catch(err){console.log(err.message)}
+                try{fill_celery(data['data']['celery'])} catch(err){console.log(err.message)}
+                try{fill_mongodb(data['data']['mongodb'])} catch(err){console.log(err.message)}
+                try{fill_elasticsearch(data['data']['es'])} catch(err){console.log(err.message)}
+            } else {
+                toast_msg('Failed to pull the system health information:' + data['msg']  , type='error' , header = 'Error')    
+            }
+            isSyncingNow = false 
+		},
+		error: function(request, status, error) {
+            isSyncingNow = false
+			// if there was an error on the ajax
+			toast_msg('Failed to pull the system health information, check network connectivity'  , type='error' , header = 'Error')
+		}
+	});
+
+    i.removeClass("fa-spin")
+}
+
+
+function bytes_human_readable(size) {
+    if(size == 0){
+        return "0 B"
+    }
+    var i = Math.floor( Math.log(size) / Math.log(1024) );
+    return ( size / Math.pow(1024, i) ).toFixed(2) * 1 + ' ' + ['B', 'KB', 'MB', 'GB', 'TB'][i];
+};
+
+
+function seconds_human_readable(seconds) {
+        var numyears = Math.floor(seconds / 31536000);
+        var numdays = Math.floor((seconds % 31536000) / 86400); 
+        var numhours = Math.floor(((seconds % 31536000) % 86400) / 3600);
+        var numminutes = Math.floor((((seconds % 31536000) % 86400) % 3600) / 60);
+        var numseconds = (((seconds % 31536000) % 86400) % 3600) % 60;
+        res = ""
+        if (numyears != 0){res += numyears + " y "}
+        if (numdays != 0){res += numdays + " d "}
+        if (numhours != 0){res += numhours + " h "}
+        if (numminutes != 0){res += numminutes + " m "}
+        if (Math.floor(numseconds) != 0){res += Math.floor(numseconds) + " s "}
+        return res
+        
+}       
+
+// ===== fill flask 
+function fill_flask(data){
+    system_health_date_color = (data['datetime_diff'] > system_health_time)? "text-danger" : "text-success";
+    var datetime_diff = seconds_human_readable(data['datetime_diff'])
+    $('#flask_datetime').html('<span class="'+system_health_date_color+'">'+data['datetime']+' ('+datetime_diff+')</span>')
+
+    $('#flask_cpu_cpus_num').html(data['health']['resources']['CPU']['cpus_num'])
+    $('#flask_cpu_thrds_num').html(data['health']['resources']['CPU']['thrds_num'])
+    $('#flask_cpu_utiliz').html(data['health']['resources']['CPU']['utilization'].join("%, ") + "%" )
+
+    // fill resources information - disk
+    $('#flask_disk_free').html(bytes_human_readable(data['health']['resources']['disk']['free']))
+    $('#flask_disk_used').html(bytes_human_readable(data['health']['resources']['disk']['used']))
+    $('#flask_disk_total').html(bytes_human_readable(data['health']['resources']['disk']['total']))
+    $('#flask_disk_perc').html(data['health']['resources']['disk']['percent'] + "%")
+    $('#flask_disk_perc_bar').width(data['health']['resources']['disk']['percent'] + "%")
+    // fill resources information - memory
+    $('#flask_memory_free').html(bytes_human_readable(data['health']['resources']['memory']['available']))
+    $('#flask_memory_used').html(bytes_human_readable(data['health']['resources']['memory']['used']))
+    $('#flask_memory_total').html(bytes_human_readable(data['health']['resources']['memory']['total']))
+    $('#flask_memory_perc').html(data['health']['resources']['memory']['percent'] + "%")
+    $('#flask_memory_perc_bar').width(data['health']['resources']['memory']['percent'] + "%")
+    // fill resources information - swap
+    $('#flask_swap_free').html(bytes_human_readable(data['health']['resources']['swap']['free']))
+    $('#flask_swap_used').html(bytes_human_readable(data['health']['resources']['swap']['used']))
+    $('#flask_swap_total').html(bytes_human_readable(data['health']['resources']['swap']['total']))
+    $('#flask_swap_perc').html(data['health']['resources']['swap']['percent'] + "%")
+    $('#flask_swap_perc_bar').width(data['health']['resources']['swap']['percent'] + "%")
+
+
+
+    // ============== gunicorn 
+
+    proc_status_color = {
+        'running'   : 'text-success',
+        'sleeping'  : 'text-warning',
+        'active'    : 'text-success',
+        'inactive'  : 'text-danger'
+    }
+
+
+    // gunicorn service status 
+    var html_gunicorn_status = $("#gunicorn_status")
+    html_gunicorn_status.css( 'class' , proc_status_color[data['health']['gunicorn']['status']])
+
+    var gunicorn_status         = data['health']['gunicorn']['status']
+    $("#gunicorn-memory-details-table").html("")
+
+    if(gunicorn_status == 'active'){
+        
+        html_gunicorn_status.html('<i class="'+proc_status_color[data['health']['gunicorn']['status']]+' fa fa-check"></i> ' + data['health']['gunicorn']['status'])
+        $("#gunicorn_proc_status").css( 'class' , proc_status_color[data['health']['gunicorn']['details']['status']])
+
+
+        $("#gunicorn_proc_status").html(data['health']['gunicorn']['details']['status'])
+        $("#gunicorn_username").html(data['health']['gunicorn']['details']['username'])
+        $("#gunicorn_cpu_num").html(data['health']['gunicorn']['details']['cpu_num'])
+        $("#gunicorn_cmdline").html(data['health']['gunicorn']['details']['cmdline'])
+        $("#gunicorn_create_time").html(data['health']['gunicorn']['details']['create_time'])
+        $("#gunicorn_name").html(data['health']['gunicorn']['details']['name'])
+        $("#gunicorn_cpu_percent").html(data['health']['gunicorn']['details']['cpu_percent'].toFixed(2) + "%")
+        $("#gunicorn_memory_percent").html(data['health']['gunicorn']['details']['memory_percent'].toFixed(2) + "%")
+        $("#gunicorn_ip_port").html(data['health']['gunicorn']['details']['connection']['status'] + " - " + data['health']['gunicorn']['details']['connection']['IP'] + ":" + data['health']['gunicorn']['details']['connection']['Port'])
+
+        var html_workers = ''
+        for(w in data['health']['gunicorn']['details']['workers']){
+            html_workers += '<span>W: '+w+'</span> > <span class="'+proc_status_color[data['health']['gunicorn']['details']['workers'][w]['status']]+'">' +data['health']['gunicorn']['details']['workers'][w]['status']+'</span> - CPU: ' + data['health']['gunicorn']['details']['workers'][w]['cpu_percent'].toFixed(2) + '% - Conn.: '+data['health']['gunicorn']['details']['workers'][w]['connections']+'<br />'
+        }
+        $("#gunicorn_workers").html(html_workers)
+        
+        // print the memory details table
+        for(var m in data['health']['gunicorn']['details']['memory']){
+            $("#gunicorn-memory-details-table").append('<tr><th>'+m+'</th><td>'+bytes_human_readable(data['health']['gunicorn']['details']['memory'][m])+'</td></tr>')
+        }
+
+
+    } else {
+        html_gunicorn_status.html('<i class="'+proc_status_color[data['health']['gunicorn']['status']]+' fa fa-exclamation"></i> ' + data['health']['gunicorn']['status'])
+        $("#gunicorn_proc_status").html("N/A")
+        $("#gunicorn_username").html("N/A")
+        $("#gunicorn_cpu_num").html("N/A")
+        $("#gunicorn_cmdline").html("N/A")
+        $("#gunicorn_create_time").html("N/A")
+        $("#gunicorn_name").html("N/A")
+        $("#gunicorn_cpu_percent").html("N/A")
+        $("#gunicorn_memory_percent").html("N/A")
+        $("#gunicorn_ip_port").html("N/A")
+        $("#gunicorn_workers").html("N/A")
+    }
+    
+
+}
+
+
+// ===== Fill Redis
+function fill_redis(data){
+    // url 
+    $("#redis_url").html(data['health']['info']['url'])
+    
+    system_health_date_color = (data['datetime_diff'] > system_health_time)? "text-danger" : "text-success";
+    var datetime_diff = seconds_human_readable(data['datetime_diff'])
+    $('#redis_datetime').html('<span class="'+system_health_date_color+'">'+data['datetime']+' ('+datetime_diff+')</span>')
+
+    $('#redis_cpu_cpus_num').html(data['health']['resources']['CPU']['cpus_num'])
+    $('#redis_cpu_thrds_num').html(data['health']['resources']['CPU']['thrds_num'])
+    $('#redis_cpu_utiliz').html(data['health']['resources']['CPU']['utilization'].join("%, ") + "%" )
+    // fill resources information - disk
+    $('#redis_disk_free').html(bytes_human_readable(data['health']['resources']['disk']['free']))
+    $('#redis_disk_used').html(bytes_human_readable(data['health']['resources']['disk']['used']))
+    $('#redis_disk_total').html(bytes_human_readable(data['health']['resources']['disk']['total']))
+    $('#redis_disk_perc').html(data['health']['resources']['disk']['percent'] + "%")
+    $('#redis_disk_perc_bar').width(data['health']['resources']['disk']['percent'] + "%")
+    // fill resources information - memory
+    $('#redis_memory_free').html(bytes_human_readable(data['health']['resources']['memory']['available']))
+    $('#redis_memory_used').html(bytes_human_readable(data['health']['resources']['memory']['used']))
+    $('#redis_memory_total').html(bytes_human_readable(data['health']['resources']['memory']['total']))
+    $('#redis_memory_perc').html(data['health']['resources']['memory']['percent'] + "%")
+    $('#redis_memory_perc_bar').width(data['health']['resources']['memory']['percent'] + "%")
+    // fill resources information - swap
+    $('#redis_swap_free').html(bytes_human_readable(data['health']['resources']['swap']['free']))
+    $('#redis_swap_used').html(bytes_human_readable(data['health']['resources']['swap']['used']))
+    $('#redis_swap_total').html(bytes_human_readable(data['health']['resources']['swap']['total']))
+    $('#redis_swap_perc').html(data['health']['resources']['swap']['percent'] + "%")
+    $('#redis_swap_perc_bar').width(data['health']['resources']['swap']['percent'] + "%")
+
+    
+    
+    // redis service status 
+    var redis_service_status = $("#redis_service_status")
+    if(data['health']['info']['service_status'] == 'active'){
+        redis_service_status.html('<i class="text-success fa fa-check"></i> ' + data['health']['info']['service_status'])
+    } else {
+        redis_service_status.html('<i class="text-danger fa fa-exclamation"></i> ' + data['health']['info']['service_status'])
+    }
+    
+
+    // redis version
+    $("#redis_version").html((data['health']['info'].hasOwnProperty('redis_version')) ? data['health']['info']['redis_version'] : "")
+
+    // tasks queue 
+    $("#redis_tasks_details").html("")
+    if(data['health']['info'].hasOwnProperty('tasks')){
+        $("#redis_queued_tasks").html(data['health']['info']['tasks'].length)
+        for(var i = 0 ; i < data['health']['info']['tasks'].length ; i++){
+            var parsers = "Parsers: " + data['health']['info']['tasks'][i]['task_arguments'][2].join(", ")
+            
+            var tr = '<tr>\
+                <td>'+data['health']['info']['tasks'][i]['task_id']+'</td>\
+                <td>'+data['health']['info']['tasks'][i]['task_arguments'][0]+'</td>\
+                <td>'+data['health']['info']['tasks'][i]['task_arguments'][1]+'</td>\
+                <td><a data-toggle="tooltip" data-placement="bottom" title="'+parsers+'"><i class="fa fa-info-circle"></i></a></td>\
+            </tr>'
+            
+            $("#redis_tasks_details").append(tr)
+        }
+        
+
+    } else {
+        $("#redis_queued_tasks").html("N/A")
+    }
+
+    
+}
+
+
+// ===== Fill celery
+function fill_celery(data){
+    
+    system_health_date_color = (data['datetime_diff'] > system_health_time)? "text-danger" : "text-success";
+    var datetime_diff = seconds_human_readable(data['datetime_diff'])
+    $('#celery_datetime').html('<span class="'+system_health_date_color+'">'+data['datetime']+' ('+datetime_diff+')</span>')
+
+    $('#celery_cpu_cpus_num').html(data['health']['resources']['CPU']['cpus_num'])
+    $('#celery_cpu_thrds_num').html(data['health']['resources']['CPU']['thrds_num'])
+    $('#celery_cpu_utiliz').html(data['health']['resources']['CPU']['utilization'].join("%, ") + "%" )
+    // fill resources information - disk
+    $('#celery_disk_free').html(bytes_human_readable(data['health']['resources']['disk']['free']))
+    $('#celery_disk_used').html(bytes_human_readable(data['health']['resources']['disk']['used']))
+    $('#celery_disk_total').html(bytes_human_readable(data['health']['resources']['disk']['total']))
+    $('#celery_disk_perc').html(data['health']['resources']['disk']['percent'] + "%")
+    $('#celery_disk_perc_bar').width(data['health']['resources']['disk']['percent'] + "%")
+    // fill resources information - memory
+    $('#celery_memory_free').html(bytes_human_readable(data['health']['resources']['memory']['available']))
+    $('#celery_memory_used').html(bytes_human_readable(data['health']['resources']['memory']['used']))
+    $('#celery_memory_total').html(bytes_human_readable(data['health']['resources']['memory']['total']))
+    $('#celery_memory_perc').html(data['health']['resources']['memory']['percent'] + "%")
+    $('#celery_memory_perc_bar').width(data['health']['resources']['memory']['percent'] + "%")
+    // fill resources information - swap
+    $('#celery_swap_free').html(bytes_human_readable(data['health']['resources']['swap']['free']))
+    $('#celery_swap_used').html(bytes_human_readable(data['health']['resources']['swap']['used']))
+    $('#celery_swap_total').html(bytes_human_readable(data['health']['resources']['swap']['total']))
+    $('#celery_swap_perc').html(data['health']['resources']['swap']['percent'] + "%")
+    $('#celery_swap_perc_bar').width(data['health']['resources']['swap']['percent'] + "%")
+
+    
+    // ------------------ celery details
+
+    proc_status_color = {
+        'running'   : 'text-success',
+        'sleeping'  : 'text-warning',
+        'active'    : 'text-success',
+        'inactive'  : 'text-danger'
+    }
+    // celery status 
+    var celery_status = $("#celery_status")
+    
+    if(data['health']['info']['status'] == 'active'){
+        
+        var tasks_details = data['health']['info']['tasks']['tasks_details']
+        var celery_tasks_count = tasks_details['active'].length + tasks_details['scheduled'].length + tasks_details['reserved'].length
+
+
+        // === fill the system health in page
+        celery_status.html('<i class="text-success fa fa-check"></i> ' + data['health']['info']['status'])
+
+        $("#celery_total_tasks").html(celery_tasks_count)
+        $("#celery_proc_status").html('<span class="'+proc_status_color[data['health']['info']['process']['status']]+'">' + data['health']['info']['process']['status'] + '</span>')
+        $("#celery_cpu_percent").html(data['health']['info']['process']['cpu_percent'] + "%")
+
+        var html_workers = ''
+        for(w in data['health']['info']['process']['workers']){
+            html_workers += '<span>Worker '+w+'</span> > <span class="'+proc_status_color[data['health']['info']['process']['workers'][w]['status']]+'">' +data['health']['info']['process']['workers'][w]['status']+'</span> > CPU: ' + data['health']['info']['process']['workers'][w]['cpu_percent'] +'%<br />'
+        }
+        $("#celery_workers").html(html_workers)
+
+
+
+
+        // fill celery process table
+        // check if the dialog is open dont modifiy its content
+        if(!$('#celery_details_dialog').is(':visible')){
+            var html_workers = ''
+            for(w in data['health']['info']['process']['workers']){
+                html_workers += '<span>'+w+'</span> > <span class="'+proc_status_color[data['health']['info']['process']['workers'][w]['status']]+'">' +data['health']['info']['process']['workers'][w]['status']+'</span> - CPU: ' + data['health']['info']['process']['workers'][w]['cpu_percent'] +'% - Mem.: '+data['health']['info']['process']['workers'][w]['memory_percent'].toFixed(2)+'%<br />'
+            }
+
+
+            $("#celery_dialog_celery_status").html('<span class="'+proc_status_color[data['health']['info']['status']]+'">' + data['health']['info']['status'] + '</span>')
+            $("#celery_dialog_process_status").html('<span class="'+proc_status_color[data['health']['info']['process']['status']]+'">' +data['health']['info']['process']['status'] + '</span>')
+            $("#celery_dialog_username").html(data['health']['info']['process']['username'])
+            $("#celery_dialog_workers").html(html_workers)
+            $("#celery_dialog_cpu_num").html(data['health']['info']['process']['cpu_num'])
+            $("#celery_dialog_cpu_percent").html(data['health']['info']['process']['cpu_percent'] + "%")
+            $("#celery_dialog_start_time").html(data['health']['info']['process']['create_time'])
+            $("#celery_dialog_memory_percent").html( data['health']['info']['process']['memory_percent'].toFixed(2) + "%" )
+            $("#celery_dialog_cmdline").html(data['health']['info']['process']['cmdline'])
+
+
+            // fill tasks tables 
+            $('.celery_details_dialog_task_info').remove() // remove all old task info 
+
+            var tasks_table     = $("#celery-dialog-details-tasks")
+            var html_tasks_table= ''
+            console.log(tasks_details)
+            // for each task type (active, scheduled, reserved)
+            for(t_type in tasks_details){
+                for(var t = 0 ; t < tasks_details[t_type].length ; t++){
+                    var queue = tasks_details[t_type]
+                    var task_details_table = '<table class="table_left_header table" style="margin-bottom: 0px;"><tbody>';
+
+                    for(var k in queue[t]){
+                        task_details_table += '<tr><td><b>'+k+'</b></td><td>'+queue[t][k]+'</td></tr>'
+                    }
+                    task_details_table += '</tbody></table>'
+
+                    html_tasks_table += '<tr class="celery_details_dialog_task_info"><td>'+t_type+'</td><td>'+queue[t]['task_machine']+'</td><td>'+queue[t]['task_start_time']+'</td><td><a type="button" class="btn btn-transparent btn-xs details-arrow-toggle" data-target="celery-task-details-'+queue[t]['task_id']+'"><i class="fa  fa-caret-down"></i></a></td></tr>\
+                        <tr class="celery_details_dialog_task_info" style="display:none" id="celery-task-details-'+queue[t]['task_id']+'"><td colspan="4" style="padding: 0px;">'+task_details_table+'</td></tr>'
+                }
+            }
+            $("#celery-dialog-details-tasks-num").html(celery_tasks_count)
+            tasks_table.append(html_tasks_table)
+        }
+        
+
+
+
+    } else {
+        celery_status.html('<i class="text-danger fa fa-exclamation"></i> ' + data['health']['info']['status'])
+
+        $("#celery_total_tasks").html("")
+        $("#celery_proc_status").html('')
+        $("#celery_cpu_percent").html('')
+        $("#celery_workers").html('')
+        
+    }
+    
+}
+
+
+
+
+// ===== Fill mongodb
+function fill_mongodb(data){
+    system_health_date_color = (data['datetime_diff'] > system_health_time)? "text-danger" : "text-success";
+    var datetime_diff = seconds_human_readable(data['datetime_diff'])
+    $('#mongodb_datetime').html('<span class="'+system_health_date_color+'">'+data['datetime']+' ('+datetime_diff+')</span>')
+
+    $('#mongodb_cpu_cpus_num').html(data['health']['resources']['CPU']['cpus_num'])
+    $('#mongodb_cpu_thrds_num').html(data['health']['resources']['CPU']['thrds_num'])
+    $('#mongodb_cpu_utiliz').html(data['health']['resources']['CPU']['utilization'].join("%, ") + "%" )
+    // fill resources information - disk
+    $('#mongodb_disk_free').html(bytes_human_readable(data['health']['resources']['disk']['free']))
+    $('#mongodb_disk_used').html(bytes_human_readable(data['health']['resources']['disk']['used']))
+    $('#mongodb_disk_total').html(bytes_human_readable(data['health']['resources']['disk']['total']))
+    $('#mongodb_disk_perc').html(data['health']['resources']['disk']['percent'] + "%")
+    $('#mongodb_disk_perc_bar').width(data['health']['resources']['disk']['percent'] + "%")
+    // fill resources information - memory
+    $('#mongodb_memory_free').html(bytes_human_readable(data['health']['resources']['memory']['available']))
+    $('#mongodb_memory_used').html(bytes_human_readable(data['health']['resources']['memory']['used']))
+    $('#mongodb_memory_total').html(bytes_human_readable(data['health']['resources']['memory']['total']))
+    $('#mongodb_memory_perc').html(data['health']['resources']['memory']['percent'] + "%")
+    $('#mongodb_memory_perc_bar').width(data['health']['resources']['memory']['percent'] + "%")
+    // fill resources information - swap
+    $('#mongodb_swap_free').html(bytes_human_readable(data['health']['resources']['swap']['free']))
+    $('#mongodb_swap_used').html(bytes_human_readable(data['health']['resources']['swap']['used']))
+    $('#mongodb_swap_total').html(bytes_human_readable(data['health']['resources']['swap']['total']))
+    $('#mongodb_swap_perc').html(data['health']['resources']['swap']['percent'] + "%")
+    $('#mongodb_swap_perc_bar').width(data['health']['resources']['swap']['percent'] + "%")
+
+    
+    
+    // mongodb service status 
+    
+    proc_status_color = {
+        'running'   : 'text-success',
+        'sleeping'  : 'text-warning',
+        'active'    : 'text-success',
+        'inactive'  : 'text-danger'
+    }
+
+    var html_mongodb_status = $("#mongodb_status")
+
+    if(data['health']['info']['service_status'] == 'active'){
+        $('#mongodb_status').html(data['health']['info']['service_status'])
+        html_mongodb_status.html('<i class="'+proc_status_color[data['health']['info']['service_status']]+' fa fa-check"></i> ' + data['health']['info']['service_status'])
+    } else {
+        html_mongodb_status.html('<i  class="'+proc_status_color[data['health']['info']['service_status']]+' fa fa-exclamation"></i> ' + data['health']['info']['service_status'])
+    }
+
+    $('#mongodb_ip').html(data['health']['info']['mongodb_db_IP'])
+    $('#mongodb_port').html(data['health']['info']['mongodb_db_port'])
+    $('#mongodb_db_name').html(data['health']['info']['mongodb_db_name'])
+    $('#mongodb_alive').html(" >> " + (data['health']['info']['mongo_health']['alive'] ? '<span class="text-success">Alive' : '<span class="text-danger">Not Alive') + "</span>")
+    if(data['health']['info']['mongo_health']['alive']){
+        $('#mongodb_connected').html((data['health']['info']['mongo_health']['connected'] ? '<span class="text-success">' : '<span class="text-danger">' ) + data['health']['info']['mongo_health']['connected'] + "</span>")
+        $('#mongodb_db_exists').html(" >> " + (data['health']['info']['mongo_health']['databases_exists'] ? '<span class="text-success">Exists' : '<span class="text-danger">Not Exists') + "</span>")
+    }
+    
+}
+
+
+
+// ===== Fill Elasticsearch
+function fill_elasticsearch(data){
+    
+    system_health_date_color = (data['datetime_diff'] > system_health_time)? "text-danger" : "text-success";
+    var datetime_diff = seconds_human_readable(data['datetime_diff'])
+    $('#es_datetime').html('<span class="'+system_health_date_color+'">'+data['datetime']+' ('+datetime_diff+')</span>')
+
+
+    $('#es_cpu_cpus_num').html(data['health']['resources']['CPU']['cpus_num'])
+    $('#es_cpu_thrds_num').html(data['health']['resources']['CPU']['thrds_num'])
+    $('#es_cpu_utiliz').html(data['health']['resources']['CPU']['utilization'].join("%, ") + "%" )
+    // fill resources information - disk
+    $('#es_disk_free').html(bytes_human_readable(data['health']['resources']['disk']['free']))
+    $('#es_disk_used').html(bytes_human_readable(data['health']['resources']['disk']['used']))
+    $('#es_disk_total').html(bytes_human_readable(data['health']['resources']['disk']['total']))
+    $('#es_disk_perc').html(data['health']['resources']['disk']['percent'] + "%")
+    $('#es_disk_perc_bar').width(data['health']['resources']['disk']['percent'] + "%")
+    // fill resources information - memory
+    $('#es_memory_free').html(bytes_human_readable(data['health']['resources']['memory']['available']))
+    $('#es_memory_used').html(bytes_human_readable(data['health']['resources']['memory']['used']))
+    $('#es_memory_total').html(bytes_human_readable(data['health']['resources']['memory']['total']))
+    $('#es_memory_perc').html(data['health']['resources']['memory']['percent'] + "%")
+    $('#es_memory_perc_bar').width(data['health']['resources']['memory']['percent'] + "%")
+    // fill resources information - swap
+    $('#es_swap_free').html(bytes_human_readable(data['health']['resources']['swap']['free']))
+    $('#es_swap_used').html(bytes_human_readable(data['health']['resources']['swap']['used']))
+    $('#es_swap_total').html(bytes_human_readable(data['health']['resources']['swap']['total']))
+    $('#es_swap_perc').html(data['health']['resources']['swap']['percent'] + "%")
+    $('#es_swap_perc_bar').width(data['health']['resources']['swap']['percent'] + "%")
+
+    // ------------- es details 
+
+    proc_status_color = {
+        'running'   : 'text-success',
+        'sleeping'  : 'text-warning',
+        'active'    : 'text-success',
+        'inactive'  : 'text-danger'
+    }
+
+    var html_elasticsearch_status = $("#elasticsearch_status")
+
+    $("#elasticsearch-dialog-details-nodes .elasticsearch-dialog-details-nodes-details").remove()
+    $("#elasticsearch-dialog-details-indices .elasticsearch-dialog-details-nodes-index").remove()
+    if(data['health']['info']['service_status'] == 'active'){
+        html_elasticsearch_status.html('<i class="'+proc_status_color[data['health']['info']['service_status']]+' fa fa-check"></i> ' + data['health']['info']['service_status'])
+
+        $("#elasticsearch_nodes").html(data['health']['info']['nodes']['nodes_total'])
+        $("#elasticsearch_sucess").html(data['health']['info']['nodes']['nodes_successful'])
+        $("#elasticsearch_failed").html(data['health']['info']['nodes']['nodes_failed'])
+        $("#elasticsearch_total_docs").html(data['health']['info']['stats']['total_docs'])
+        $("#elasticsearch_total_size").html(bytes_human_readable(data['health']['info']['stats']['disk_size']))
+        $("#elasticsearch_ip").html(data['health']['info']["elasticsearch_ip"])
+        $("#elasticsearch_port").html(data['health']['info']["elasticsearch_port"])
+
+        // fill the nodes details in elasticsearch dialog
+        for(var i in data['health']['info']['nodes']['nodes_details']){
+            var paths = ""
+            for(var k in data['health']['info']['nodes']['nodes_details'][i]['paths']){
+                paths += "<b>" + k +"</b>:" + data['health']['info']['nodes']['nodes_details'][i]['paths'][k] + "<br />"
+            }
+            $("#elasticsearch-dialog-details-nodes").append('<tr class="elasticsearch-dialog-details-nodes-details"><td>Node Number</td><td>'+i+'</td></tr>\
+                          <tr class="elasticsearch-dialog-details-nodes-details"><td>Paths</td><td>'+paths+'</td></tr>\
+                          <tr class="elasticsearch-dialog-details-nodes-details"><td>Name</td><td>'+data['health']['info']['nodes']['nodes_details'][i]['name']+'</td></tr>\
+                          <tr class="elasticsearch-dialog-details-nodes-details"><td>PID</td><td>'+data['health']['info']['nodes']['nodes_details'][i]['pid']+'</td></tr>\
+                          <tr class="elasticsearch-dialog-details-nodes-details"><td>Host</td><td>'+data['health']['info']['nodes']['nodes_details'][i]['host']+'</td></tr>\
+                          <tr class="elasticsearch-dialog-details-nodes-details"><td>Version</td><td>'+data['health']['info']['nodes']['nodes_details'][i]['version']+'</td></tr>\
+                          <tr class="elasticsearch-dialog-details-nodes-details"><td>Processors</td><td>Allocated: '+data['health']['info']['nodes']['nodes_details'][i]['processors']['allocated']+', Avaliable: '+data['health']['info']['nodes']['nodes_details'][i]['processors']['avaliable']+'</td></tr>')
+        }
+
+
+        // fill indices details in elasticsearch dialog
+        for(var i in data['health']['info']['indices']){
+            $("#elasticsearch-dialog-details-indices").append('<tr class="elasticsearch-dialog-details-nodes-index">\
+                            <td>'+i+'</td>\
+                          <td>'+data['health']['info']['indices'][i]['total_docs']+'</td>\
+                          <td>'+bytes_human_readable(data['health']['info']['indices'][i]['disk_size'])+'</td>\
+                          <td>'+data['health']['info']['indices'][i]['creation_date']+'</td>')
+        }
+
+    } else {
+        html_elasticsearch_status.html('<i class="'+proc_status_color[data['health']['info']['service_status']]+' fa fa-exclamation"></i> ' + data['health']['info']['service_status'])
+
+        $("#elasticsearch_nodes").html("N/A")
+        $("#elasticsearch_sucess").html("N/A")
+        $("#elasticsearch_failed").html("N/A")
+        $("#elasticsearch_total_docs").html("N/A")
+        $("#elasticsearch_total_size").html("N/A")
+        $("#elasticsearch_ip").html("N/A")
+        $("#elasticsearch_port").html("N/A")
+
+    }
+    
+}
+
+
+
+
+</script>
+
+
+
+{% endblock %}

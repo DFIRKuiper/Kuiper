@@ -1,0 +1,165 @@
+
+{% extends  "admin/index.html" %}
+
+{% block content %}
+
+<!-- ==================== Rules table ==================== -->
+      <div class="row">
+
+        <div class="col-xs-12" id="rhaegal_form">
+            <div class="box">
+              <div class="box-header">
+                <h3 class="box-title"><i class="fa fa-list-alt"></i> Edit Rhaegal 
+                    <div class="btn-group pull-right" >
+                        <a class="btn btn-default btn-sm" href="../../admin/rules" role="button" id="rhaegal_form_back">Back</a>
+                        <button type="button" data="{{rulePath}}" class="btn btn-info btn-sm" id="rhaegal_form_save">Save</button>
+                    </div>
+                </h3>
+                
+              </div>
+              <br />
+              <!-- /.box-header -->
+              <div id="rhaegal_table" class="box-body no-padding">
+                  
+                    <table class="table">
+                        {% if rulePath != undefined %}
+                            <tr><td width="5%">Path</td><td>{{rulePath}}</td></tr>
+                            <tr><td width="5%">Name</td><td>{{ruleName}}</td></tr>
+                        {% else %}
+                            <tr><td width="5%">File</td><td><input type="text" id="rhaegal_path" class="form-control"  placeholder="Rhaegal file name" /></td></tr>
+                        {% endif %}
+                        <tr><td width="5%">Rules</td><td><textarea  rows="30" type="text" id="rhaegal_ruleStr" class="form-control">{{ruleStr}}</textarea></td></tr>
+                    </table>
+
+              </div>
+              <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+          </div>
+
+
+
+      </div>
+
+
+
+
+
+
+
+
+
+<!-- jQuery 3 -->
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- prograsbar  -->
+<script src="../../static/dist/js/nanobar.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="../../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="../../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="../../static/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="../../static/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="../../static/dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../static/dist/js/demo.js"></script>
+
+
+<script src="../../static/codeMirror/lib/codemirror.js"></script>
+<link rel="stylesheet" href="../../static/codeMirror/lib/codemirror.css">
+<script src="../../static/codeMirror/mode/yaml/yaml.js"></script>
+<link rel="stylesheet" href="../../static/codeMirror/theme/lucario.css">
+
+
+<script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+    <!-- tag input -->
+    
+    <script src="../../static/dist/tagsinput/bootstrap-tagsinput.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput-typeahead.css')}}">
+
+    <!-- toast notifications --> 
+    <script type="text/javascript" src="../../static/dist/jquery_toast/jquery.toast.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+
+<style type="text/css">
+
+.jq-toast-single {
+    font-size: 12px;
+    width: fit-content;
+    white-space: nowrap;
+}
+.jq-toast-single h2{
+    font-size: 14px;
+        font-weight: bold;
+
+}
+
+
+</style>
+
+
+<script>
+
+// ============================ Variables
+var toast = $.toast;
+
+var ruleName = ("{{ ruleName|safe }}"); 
+var rulePath = ("{{ rulePath|safe }}"); 
+
+// editor
+var EditorTextArea = document.getElementById("rhaegal_ruleStr")
+var myCodeMirror = CodeMirror.fromTextArea(EditorTextArea , {
+    mode: "yaml",
+    theme: "lucario",
+    lineNumbers: true,
+    viewportMargin: Infinity,
+    extraKeys: {Tab: false}
+});
+
+// "save" button save the rule in mongoDB 
+$('#rhaegal_form').on('click' , '#rhaegal_form_save' , function(){
+    ruleName = ruleName
+    rulePath = rulePath
+    var ruleStr = $('#rhaegal_ruleStr').val()
+    var data = {'data': {
+        'ruleName'    : ruleName , 
+        'rulePath'    : (rulePath == "") ? $("#rhaegal_path").val() : rulePath , 
+        'ruleStr'     : myCodeMirror.getValue()
+      } }
+    $.ajax({
+        type : 'POST',
+        url : "/admin/rules_rhaegal/edit",
+        contentType: 'application/json;charset=UTF-8',
+
+        data : JSON.stringify(data),
+        success: function(result) {
+            var result = JSON.parse(result);
+            
+            // if failed 
+            if(result['result'] == "failed")
+                toast_msg(result['message'] , type='error' , header='Update rule failed')
+            // if success
+            else{
+                toast_msg( ruleName , type='info' , header='Rule updated')
+            }
+            
+        },  
+        error: function(error){
+            console.log(error)
+            toast_msg('Connection failed, check connection' , type='error' , header = "Error")
+        }
+    });
+
+})
+
+
+
+
+</script>
+
+</aside>
+{% endblock %}
