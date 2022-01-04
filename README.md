@@ -158,9 +158,9 @@ Creating kuiper_nfs     ... done
 Creating kuiper_celery  ... 
 
 ERROR: for kuiper_flask  Cannot start service flask: error while mounting volume '/var/lib/docker/volumes/kuiper_kuiper_nfs/_data': failed to mount local volume: mount :/:/var/lib/docker/vCreating kuiper_celery  ... done
-=======
+```
 
-To run the docker use the following command:
+To solve the issue, run the docker again:
 
 ```shell
 docker-compose up -d
