@@ -166,21 +166,6 @@ To solve the issue, run the docker again:
 docker-compose up -d
 ```
 
-### Issues
-
-1 - **Note**: when you first run the dockers, Elasticsearch will fail to run and give the following error
-```
-ERROR: for flask  Cannot start service flask: error while mounting volume '/var/lib/docker/volumes/kuiper_kuiper_nfs/_data': failed to mount local volume: mount :/:/var/lib/docker/volumes/kuiper_kuiper_nfs/_data, data: addr=172.30.250.10: permission denied
-ERROR: Encountered errors while bringing up the project.
-```
-
-To solve the issue, run the command again 
-
-```shell
-docker-compose up -d
-ERROR: [1] bootstrap checks failed
-[1]: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
-```
 # Add Custom Parser
 
 ## Overview
