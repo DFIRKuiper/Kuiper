@@ -281,45 +281,6 @@ Kuiper has a limited feature API, check the repo [DFIRKuiperAPI](https://github.
 - [UploadMachines](https://github.com/DFIRKuiper/DFIRKuiperAPI#UploadMachines): Upload new machine (.zip file) to specific case.
 
 
-=======
-To solve the issue run the command
-
-```shell
-sysctl -w vm.max_map_count=262144
-```
-
-2- Note: if you faced the following issue
-
-```shell
-Creating network "kuiper_kuiper" with driver "bridge"
-Creating kuiper_es01    ... done
-Creating kuiper_mongodb ... done
-Creating kuiper_redis   ... done
-Creating kuiper_flask   ... error
-Creating kuiper_nfs     ... done
-Creating kuiper_celery  ... 
-
-ERROR: for kuiper_flask  Cannot start service flask: error while mounting volume '/var/lib/docker/volumes/kuiper_kuiper_nfs/_data': failed to mount local volume: mount :/:/var/lib/docker/vCreating kuiper_celery  ... done
-
-ERROR: for flask  Cannot start service flask: error while mounting volume '/var/lib/docker/volumes/kuiper_kuiper_nfs/_data': failed to mount local volume: mount :/:/var/lib/docker/volumes/kuiper_kuiper_nfs/_data, data: addr=172.30.250.10: permission denied
-ERROR: Encountered errors while bringing up the project.
-```
-
-To solve the issue, run the command again 
-
-```shell
-docker-compose up -d
-```
-
-# Kuiper API
-
-Kuiper has a limited feature API, check the repo [DFIRKuiperAPI](https://github.com/DFIRKuiper/DFIRKuiperAPI). 
-
-- [GetFieldsScript](https://github.com/DFIRKuiper/DFIRKuiperAPI#GetFieldsScript): Retrieves parsed data from Kuiper.
-- [UploadMachines](https://github.com/DFIRKuiper/DFIRKuiperAPI#UploadMachines): Upload new machine (.zip file) to specific case.
-
-
-
 # Issues Tracking and Contribution
 
 We are happy to receive any issues, contribution, and ideas.
