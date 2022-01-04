@@ -19,7 +19,8 @@
     - [3.2. Parsers](#Parsers)
 - [4. Getting Started](#getting-started)
     - [4.1. Requirements](#requirements)
-    - [4.1. Installation](#Installation)
+    - [4.2. Installation](#Installation)
+    - [4.3. Adding Custom Parser](#addingParser)
 - [5. Issues Tracking and Contribution](#Issues-Tracking-and-Contribution)
 - [6. Licenses](#Licenses)
 - [7. Authors](#Authors)
@@ -139,6 +140,164 @@ ERROR: [1] bootstrap checks failed
 [1]: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
 ```
 
+To solve the issue run the command
+
+```shell
+sysctl -w vm.max_map_count=262144
+```
+
+2- Note: if you faced the following issue
+
+```shell
+Creating network "kuiper_kuiper" with driver "bridge"
+Creating kuiper_es01    ... done
+Creating kuiper_mongodb ... done
+Creating kuiper_redis   ... done
+Creating kuiper_flask   ... error
+Creating kuiper_nfs     ... done
+Creating kuiper_celery  ... 
+
+ERROR: for kuiper_flask  Cannot start service flask: error while mounting volume '/var/lib/docker/volumes/kuiper_kuiper_nfs/_data': failed to mount local volume: mount :/:/var/lib/docker/vCreating kuiper_celery  ... done
+=======
+
+To run the docker use the following command:
+
+```shell
+docker-compose up -d
+```
+
+### Issues
+
+1 - **Note**: when you first run the dockers, Elasticsearch will fail to run and give the following error
+
+ERROR: for flask  Cannot start service flask: error while mounting volume '/var/lib/docker/volumes/kuiper_kuiper_nfs/_data': failed to mount local volume: mount :/:/var/lib/docker/volumes/kuiper_kuiper_nfs/_data, data: addr=172.30.250.10: permission denied
+ERROR: Encountered errors while bringing up the project.
+```
+
+To solve the issue, run the command again 
+
+```shell
+docker-compose up -d
+=======
+ERROR: [1] bootstrap checks failed
+[1]: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
+```
+# Add Custom Parser
+
+## Overview
+A parser is a script used to read a row data (artifacts) to parse it and return the results on a structured format that are understandable by Kuiper, such as reading the Windows Events row files (.evtx) and return the result on a readable and understandable format for Kuiper to present it on the case. Kuiper store all parsed data in Elasticsearch, so it will be stored as JSON format. 
+
+## Instructions
+
+### 1. List All parsers
+
+To list all parsers, go to (Administrator Panel -> Configuration) then click the (Parsers) tab.
+
+![parsers.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/parsers_list.png?raw=true)
+
+
+### 2. Add New Parser
+In parser page, click on the (+) button.
+
+![addparser.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/add_parser.png?raw=true)
+
+Fill the input fields as following:
+1.	**Parser Name**: make sure it does not contain spaces or special characters, only (letters, numbers, _)
+2.	**Parser Description**
+3.	**Parser File**: select the list of files and compress it in a zip file and upload it, make sure the files on the zip file directly not inside a folder.
+
+![addparser.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/parser_zip_content.png?raw=true)
+
+4.	**Parser Important Fields**: here you can select multiple fields that will show on the (browser artifacts) page.
+
+![addparser.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/browser_artifacts_important_fields.png?raw=true)
+
+The field path contains the data json path, example of Windows Events
+
+![addparser.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/add_parser_importants_fields.png?raw=true)
+
+5.	**Parser Interface**
+* 	The parser should have a python file **Interface File** that contains the **interface function** that Kuiper will call it at the very beginning to start the parsing process. 
+* 	The interface function is the one responsible for returning the list of JSON to Kuiper. Each JSON represents a record on the database in the form of `[{"Field A": "value 1", "Field B": "Value 2", "@timestamp": "2021-08-12T11:27:42.836598"},{"Field A": "Value 1", "Field B": "Value 2", "@timestamp": "2021-08-12T11:27:42.836598"}]` 
+* 	If there are no records, the parser should return an empty list [].
+* 	If parser failed, return (None).
+
+* 	The function should have two parameters (file: the file's path to be parsed, parser: is the parser name).
+* 	The interface function should be called inside the interface file, passing the file name to be parsed with the parser name.
+* 	If the file name is not constant, no need to call the interface function; just use `def auto_interface (file, parser):` and the Kuiper parser manager will call this function and pass both values.
+* 	Each JSON record on the returned list should include a field named (@timestamp) used on the timeline artifact browser pages. (@timestamp) is picked to best represent each parser (e.g., @timestamp for MFT is equivalent to FNCreated).
+
+
+![addparser.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/add_parser_interface_function.png?raw=true)
+
+6.	**Parser Type**: OS General, Web Browser, Program Execution, Logging Information, User Activities, etc.
+
+7.	**File Categorization (comma separated)**: this is how the parser engine will identify if the files exist should be parsed by this parser or not, such as extension (.evtx), file_name (\$MFT), startswith (\$I), magic_number (file content start with provided hex value)
+
+## Testing environment
+* 	Download Kuiper VM and test it on your machine https://github.com/DFIRKuiper/Kuiper/tree/master/VirualMachine
+* 	Use the command `ip addr` to check what is the assigned IP address for Kuiper and then on your browser enter https://[ip-address]:8000/admin
+    *  	If it does not work, 
+        * 	Make sure your network IP and Kuiper IP are in the same network.
+        * 	Check the assigned port number for Kuiper.
+        * 	Try https://0.0.0.0:8000/admin/ 
+
+* 	While testing, if you wish to edit the parser, the new changes will not be applied unless the service is stopped then started again. Run the following commands in Kuiper VM to reflect the changes:
+
+
+```
+./kuiper_install.sh -stop
+./kuiper_install.sh -run
+```
+
+* 	If you want to run the same parser again on a file that has been already parsed using the same parser, Kuiper will not do it. (parsed files cannot be parsed again using the same parser)
+    * 	Solution;
+        * 	Upload the file using a different name.
+        * 	Or, make a new machine and upload the desired file, then run the parser.
+## Writing a parser using python3
+Kuiper can understand only Python 2.6, when writing a parser using python 3, some modification should be added to the code so that Kuiper can process it. Code below shows an example of interface function for a parser written using Python 3 
+
+![image](https://user-images.githubusercontent.com/54886091/130059100-55957549-6634-4744-8c8e-f92ce0ca215e.png)
+
+```
+def auto_interface(file,parser):
+    try:
+        CurrentPath=os.path.dirname(os.path.abspath(__file__))
+        cmd = 'python3 '+ CurrentPath + parser + ' -f "' + file.replace("$" , '\$') + '"'
+        proc = subprocess.Popen(cmd, shell=True ,stdin=None , stdout=subprocess.PIPE , stderr=subprocess.PIPE)
+        res , err = proc.communicate()
+        if err != "":
+            raise Exception(err.split("\n"))
+
+        res = res.split("\n")
+        for line in res:
+            if line.startswith("["):
+                res = line
+
+        if res == "":
+            return []
+        
+        data = json.loads(res)
+            
+        return data
+        
+    except Exception as exc:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        msg = parser + " Parser: " + str(exc_obj) + " - Line No. " + str(exc_tb.tb_lineno)
+        return (None , msg)
+
+ ```
+***
+
+# Kuiper API
+
+Kuiper has a limited feature API, check the repo [DFIRKuiperAPI](https://github.com/DFIRKuiper/DFIRKuiperAPI). 
+
+- [GetFieldsScript](https://github.com/DFIRKuiper/DFIRKuiperAPI#GetFieldsScript): Retrieves parsed data from Kuiper.
+- [UploadMachines](https://github.com/DFIRKuiper/DFIRKuiperAPI#UploadMachines): Upload new machine (.zip file) to specific case.
+
+
+=======
 To solve the issue run the command
 
 ```shell
