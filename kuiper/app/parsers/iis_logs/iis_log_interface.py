@@ -1,4 +1,7 @@
+import json
+import os
 import sys
+import uuid
 
 #Software: Microsoft Internet Information Services 8.5
 #Version: 1.0
@@ -55,16 +58,35 @@ def iis_log_interface(file, parser):
 
         fields = sanitize_field_names(fields)
 
-        res = []
+        current_path = os.path.dirname(os.path.abspath(__file__))
+        output_path = os.path.join(current_path, str(uuid.uuid4()))
+        output_fp = open(output_path, 'w')
         with open(file, 'r') as logfile:
             for line in logfile:
                 record = log_line_to_json(line, fields)
                 if record is not None:
-                    res.append(record)
+                    output_fp.write(json.dumps(record))
+                    output_fp.write('\n')
 
-        return res
+        return open(output_path, 'r')
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         msg = "[-] [Error] " + parser + " Parser: " + str(exc_obj) + " - Line No. " + str(exc_tb.tb_lineno)
         print(msg)
         return (None, msg)
+
+
+def iis_log_interface_pull(file, num_lines):
+    try:
+        res = []
+        for i in range(num_lines):
+            l = file.readline().rstrip()
+            if l != '':
+                rec = json.loads(l)
+                res.append(rec)
+        return res
+
+    except Exception as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        msg = "Failed " + str(exc_obj) + " - Line No. " + str(exc_tb.tb_lineno)
+        return (None , msg)
