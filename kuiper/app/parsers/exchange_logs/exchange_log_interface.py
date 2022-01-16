@@ -85,7 +85,7 @@ def exchange_log_interface(file, parser):
         
         fields = get_fields(lines)
         if fields is None:
-            raise Exception("Unable to find fields in file header")
+            return (None, "Unable to find fields in file header")
 
         res = []
         i = 0
