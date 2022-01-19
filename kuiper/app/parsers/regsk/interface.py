@@ -43,7 +43,3 @@ def auto_interface(file,parser):
         msg = "[-] [Error] " + str(parser) + " Parser: " + str(exc_obj) + " - Line No. " + str(exc_tb.tb_lineno)
         return (None , msg)
 
-
-if __name__ == "__main__":
-    path = '/opt/kuiper/files/sr2108005/sr2108005_FAISALITD/2021-08-15T15:37:22-FAISALITD.zip/PhysicalDrive0_2/Ntuser/Users/srca70006/NTUSER.DAT'
-    auto_interface(path , 'REGTimeLine')
