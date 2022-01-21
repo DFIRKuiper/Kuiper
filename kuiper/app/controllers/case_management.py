@@ -927,10 +927,10 @@ def case_browse_artifacts(case_id):
 
     # check if the channel exists add it to the query
     if 'machine' in request.args:
-        query["AND"].append({'machine' : request.args['machine']})
+        query["AND"].append({'==machine' : request.args['machine']})
 
     if 'rule' in request.args:
-        query['AND'].append({'rule' : request.args['rule']})
+        query['AND'].append({'==rule' : request.args['rule']})
 
     # get all rules
     all_rules = db_rules.get_rules()
