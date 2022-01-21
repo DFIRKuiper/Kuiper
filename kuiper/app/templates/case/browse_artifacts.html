@@ -526,13 +526,16 @@ var query_builder_v = $('#builder') // contain the query builder html (place to 
 var datetime_range_search   = null; // contain the selected value from date range
 
 
-var search_query            = JSON.parse( decodeHtml('{{search_query}}').split('\\"').join('"') );  // get predefined search query from the request
-console.log(search_query)
 var urlParams = new URLSearchParams(window.location.search);
-
 console.log(JSON.parse(urlParams.get('q')))
-search_query = JSON.parse(urlParams.get('q'))
-var search                  = convert_json_to_list(search_query);                                   // convert the predefined search query to json query 
+var search_query = JSON.parse(urlParams.get('q'))
+
+if (!search_query) {
+    search_query = JSON.parse( decodeHtml('{{search_query}}').split('\\"').join('"') );  // get predefined search query from the request
+    console.log(search_query)
+}
+
+var search                  = convert_json_to_list(search_query);                                   // convert the predefined search query to json query
 console.log(search)
 var search_query_tagsinput  = $('#search_query');                                                   // element of the search query input tags
 
