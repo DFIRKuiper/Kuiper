@@ -169,6 +169,24 @@ To solve the issue, run the command again
 docker-compose up -d
 ```
 
+3- Note: if you faced issue with es01
+
+(output of `docker-compose ps -a`)
+```shell
+kuiper_es01      /bin/tini -- /usr/local/bi ...   Exit 1                               
+```
+
+Check the logs for the elasticsearch `docker-compose -f --tail=100 es01`
+if the logs shows 
+```shell
+es01_1     | "stacktrace": ["org.elasticsearch.bootstrap.StartupException: ElasticsearchException[failed to bind service]; nested: AccessDeniedException[/usr/share/elasticsearch/data/nodes];",
+```
+Then to solve the issue, change the owner of `./elasticsearch/` folder to the host user account (non-root account)
+```shell
+sudo chown <user>:<user> -R ./elasticsearch/
+```
+
+
 # Kuiper API
 
 Kuiper has a limited feature API, check the repo [DFIRKuiperAPI](https://github.com/DFIRKuiper/DFIRKuiperAPI). 
