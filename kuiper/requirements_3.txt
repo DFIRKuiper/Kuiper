@@ -13,3 +13,4 @@ psutil==5.8.0
 requests==2.26.0
 celery==4.3.0
 PyYAML==5.1.2
+libesedb-python==20210424

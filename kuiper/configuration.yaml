@@ -69,11 +69,11 @@ MongoDB:
 # ============ Git
 Git:
   git_url_release : 'https://api.github.com/repos/DFIRKuiper/Kuiper/releases/latest'                                     # link for git to pull new updates if exists
-  k_version       : "v2.2.0"                                                                          # current version of kuiper
+  k_version       : "2.3.0"                                                                          # current version of kuiper
 
 # ============ Logs
 Logs:
-  log_folder:   /app/logs/                     # store the logs folder 
+  log_folder:   /app/files/logs/                     # store the logs folder 
   install_log:  Kuiper-install.log
   access_log:   Kuiper-access-gunicorn.log
   app_log:      Kuiper-flask.log
@@ -91,7 +91,10 @@ Directories:
   app_parsers:                        [*platform_folder, /app/parsers]  # parsers folder
   artifacts_upload:                   ['/app/files','/files']           # uploaded artifacts folders  
   artifacts_upload_raw:               ['/app/files','/raw']             # original uploaded compressed files
-  system_health:                      ['/app/logs' ,'/system_health' ]  # folder to store the system health information
+  artifacts_timeline:                 ['/app/files','/timeline']        # path of generated time line per case
+  artifacts_timeline_views:           ['/app/files','/timeline_views']  # path of timeline views used to build the timeline
+  system_health:                      ['/app/files/logs' ,'/system_health' ]  # folder to store the system health information
+  docs_folder:                        ['/app/docs' ,'/build/html']        # path of documentation html
 
 # ============ case_sidebar
 # Title content: [<title on sidebar>,<url path>,<icon>]
@@ -126,5 +129,5 @@ admin_sidebar:
           ['Health' , '/admin/system_health/' , 'fa fa-gears'],
           ['About' , '/admin/update' , 'fa fa-gears']
       ]
-  #- Title:      ['Logout' , '/logout' , 'fa fa-sign-out']
-  #  SubTitles : Null
+  - Title:      ['Logout' , '/logout' , 'fa fa-sign-out']
+    SubTitles : Null

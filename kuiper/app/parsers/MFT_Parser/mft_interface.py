@@ -17,7 +17,7 @@ def MFT_interface(file , parser):
     file = file.replace("$" , "\$")
     try:
         CurrentPath     = os.path.dirname(os.path.abspath(__file__))
-        output_path     = CurrentPath + "/" + str(uuid.uuid4())
+        output_path     = CurrentPath + "/temp/" + str(uuid.uuid4())
         cmd = CurrentPath + '/mft_dump "'+file+'" --output-format csv --no-confirm-overwrite --output ' + output_path
         proc = subprocess.Popen(cmd, shell=True ,stdin=None , stdout=subprocess.PIPE , stderr=subprocess.PIPE)
         dd , err = proc.communicate()

@@ -87,7 +87,7 @@
           {% endfor %}
           <!-- end side bar elements -->
 
-          
+          <li   class="treeview" style="position: absolute; bottom:48px;"><a id="window_info" href="#"><i class="fa fa-info-circle"></i></a></li>
           <li   class="treeview" style="position: absolute; bottom:0;"><a href="#" class="sidebar-toggle" data-toggle="push-menu"><i class="fa fa-bars"></i></a></li>
         </ul>
 
@@ -110,6 +110,11 @@ var Current_version         = "{{SIDEBAR['current_version']}}"
 var check_update_interval   = 5000
 var new_release             = ""
 
+// documentation window
+$('a#window_info').click(function(){
+    window.open('/docs/', 'Kuiper Documentation', "width=800, height=600");
+    return false;
+  });
 
 
   // whne click sidebar open/close button, store the information on session storage

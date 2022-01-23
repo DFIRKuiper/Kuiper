@@ -133,7 +133,23 @@ class ES_DB:
         except Exception as e:
             return [False , "Error: " + str(e)]
 
+    # ================================ Close index
+    def close_index(self, index_name):
+        try:
+            self.es_db.indices.close(index_name , ignore_unavailable=True)
+        
+            return [ True, index_name]
+        except Exception as e:
+            return [False , "Error: " + str(e)]
 
+    # ================================ Open index
+    def open_index(self, index_name):
+        try:
+            self.es_db.indices.open(index_name , ignore_unavailable=True)
+        
+            return [ True, index_name]
+        except Exception as e:
+            return [False , "Error: " + str(e)]
     # ================================ Delete Index
     # delete index (case) 
     def delete_index(self , index_name):
@@ -187,8 +203,8 @@ class ES_DB:
     # ================================ query
     # query the elasticsearch db, index is the index name of the case, and body is the query body
     # count: number of times the function recursive
-    def query(self, indexname , body , count=3):
-        count -=1
+    def query(self, indexname , body , count=3 , scroll=None):  
+        count -=1 
         
         indexname = indexname.lower()
         body["track_total_hits"] = True
@@ -196,7 +212,7 @@ class ES_DB:
         filter_path=['hits.hits._source.Data' , 'hits.total.value' , 'aggregations.*.buckets']
         try:
             #search_res = self.es_db.search(index=indexname,body=body , filter_path=filter_path)
-            search_res = self.es_db.search(index=indexname , body=body)
+            search_res = self.es_db.search(index=indexname , body=body , scroll=scroll)
             return [True, search_res]
         except elasticsearch.RequestError as e:
             reason = e.info['error']['reason']
@@ -286,6 +302,21 @@ class ES_DB:
 
             
         return res
+
+
+    # ================================ scroll
+    # this query the ES based on scroll id
+    def query_scroll(self, scroll_id , scroll="5m"):
+        logger.logger(level=logger.DEBUG , type="elasticsearch", message="Scroll Query to index", reason=scroll_id)
+        try:            
+            search_res = self.es_db.scroll(scroll_id=scroll_id , scroll=scroll)
+            return [True, search_res]
+        except Exception as e:
+            print str(e)
+            res = [False, str(e)] 
+            logger.logger(level=logger.ERROR , type="elasticsearch", message="Scroll Query ID ["+scroll_id+"] failed [Exception]" , reason=str(e))
+
+
 
     # ================================ get max fields limit
     # get the total_fields.limit from settings
@@ -426,7 +457,11 @@ class ES_DB:
             try:
                 
 
-                doc_reason = doc['index']['error']['reason']
+                if 'caused_by' in doc['index']['error']:
+                    doc_reason = doc['index']['error']['caused_by']['reason']
+                else:
+                    doc_reason = doc['index']['error']['reason']
+
                 logger.logger(level=logger.WARNING , type="elasticsearch", message=record_msg_info + ": record failed" , reason=doc_reason)
                 
                 # === if the error is the limitation on the fields number, get the add 1000 to the limitation and try again

@@ -30,7 +30,7 @@
             {% endif %}
             </li>
             {% endfor %}
-
+        <li   class="treeview" style="position: absolute ; bottom:48px;"><a id="window_info" href="#"><i class="fa fa-info-circle"></i></a></li>
         <li   class="treeview" style="position: absolute; bottom:0;"><a href="#" class="sidebar-toggle" data-toggle="push-menu"><i class="fa fa-bars"></i></a></li>
     </ul>
 </section>
@@ -38,10 +38,18 @@
 </aside>
 {% endblock %}
 
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
 
 <script>
 
 
+// documentation window
+
+    $('a#window_info').click(function(){
+        window.open('/docs/', 'Kuiper Documentation', "width=800, height=600");
+        return false;
+      });
+    
 
   // whne click sidebar open/close button, store the information on session storage
   $('.sidebar-toggle').click(function() {

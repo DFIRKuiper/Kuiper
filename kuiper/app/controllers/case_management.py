@@ -10,10 +10,12 @@ import zipfile
 import hashlib
 import base64 
 
+from datetime import datetime
 
 from flask import Flask
 from flask import request, redirect, render_template, url_for, flash
 from flask import jsonify
+from flask import send_file
 
 from app import app
 
@@ -314,6 +316,60 @@ def upload_file(file , case_id , machine=None , base64_name=None):
         else:
             logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed uploading the artifacts for machine ["+machine_id+"]", reason=str(e))
         return [False, {'result' : False , 'filename' : source_filename , 'message' : "Failed uploading the artifacts for machine ["+machine_id+"]: " + str(e)}]
+
+
+
+
+
+
+
+
+
+
+
+# export list of results as a response based on the case_id and body, 
+# if fields specified the output will be a csv file, if not specified it will be a json file
+def export_stream_es(case_id , body, chunk_size , fields = None):
+    body['size'] = chunk_size
+    body["from"] = 0  
+    scroll_id = None
+    while True:
+        # request the data from elasticsearch
+        try:
+            if scroll_id is None: 
+                res = db_es.query( case_id, body , scroll="5m") 
+            else:
+                res = db_es.query_scroll( scroll_id=scroll_id, scroll="5m" ) 
+ 
+
+            if res[0] == False: 
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed export query artifacts from dataabase", reason=res[1])
+                yield json.dumps({'success' : False  , 'message' : res[1]} )
+ 
+            buff        = ','.join(fields) if fields is not None and scroll_id is None else ''
+            scroll_id   = res[1]['_scroll_id'] 
+            results     = res[1]['hits']['hits']
+            if len(results):     
+                # print the csv header if there is a fields specified
+                for rec in results: 
+                    if fields is not None:   
+                        # if the fields specified, export csv files
+                        vals = []   
+                        for f in fields:
+                            v = json_get_val_by_path(rec['_source'] , f)
+                            val = v[1] if v[0] else ""
+                            vals.append( val )
+                        buff += '\n' + ','.join(vals)
+                    else:
+                        # if fields not specified, export it is a json
+                        buff += json.dumps(rec['_source'])
+                    
+                yield buff
+            else:
+                break
+
+        except Exception as e:
+            yield json.dumps({'success' : False  , 'message' : str(e)} )
 
 
 # =================================================
@@ -792,58 +848,19 @@ def browse_artifacts_list_ajax(case_id):
         try:
             ajax_str    =  urllib.unquote(request.data).decode('utf8')
             ajax_data   = json.loads(ajax_str)['data']
-
             body = {
-                "query":{
-                    "query_string":{
-                        "query" : ajax_data['query'],
-                        "default_field" : "catch_all"
-                        
-                    }
-                },
-                "size":0
-            }
-            logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Query artifacts list", reason=json.dumps(body))
-            res = db_es.query( case_id, body )
-            if res[0] == False:
-                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed query artifacts list from dataabase", reason=res[1])
-                return json.dumps( {'res' : res[1]} )
-
-            res = res[1]["aggregations"]["data_type"]["buckets"]
-
-            return json.dumps({'res' : res})
-        except Exception as e:
-            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed query artifacts list from dataabase", reason=str(e))
-            return json.dumps({'res' : 'Failed query artifacts list: ' + str(e)})
-    else:
-        return redirect(url_for('home_page'))
-
-# ================================ get artifacts records ajax
-# retrive all artifacts records using ajax
-@app.route('/case/<case_id>/browse_artifacts_ajax', methods=["POST"])
-def case_browse_artifacts_ajax(case_id):
-    if request.method == "POST":
-        try:
-            ajax_str =  urllib.unquote(request.data).decode('utf8')
-            ajax_data = json.loads(ajax_str)['data']
-            body = {
-                "from": int(ajax_data["wanted_page"]) * 30,
                 "size":30,
-
+ 
             }
-            if ajax_data['query'] != "None":
-                body["query"] = {
+            body = {
+                "query": {
                     "query_string" : {
                         "query" : ajax_data['query'],
                         "default_field" : "catch_all"
                     }
-                }
-
-            if ajax_data['sort_by'] != "None":
-                order = "asc" if ajax_data['sort_by']['order'] == 0 else "desc"
-                body["sort"] = {
-                    ajax_data['sort_by']['name'] : {"order" : order}
-                }
+                } ,
+                "size":0
+            }
             
             body["aggs"] = {
                     "data_type": {
@@ -854,36 +871,166 @@ def case_browse_artifacts_ajax(case_id):
                                 "_key": "asc"
                             }
                         }
-
                     }
                 }
+            logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Query artifacts list", reason=json.dumps(body))
+            res = db_es.query( case_id, body )
+            if res[0] == False:
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed query artifacts list from dataabase", reason=res[1])
+                return json.dumps({'res_total' : 0 , 'res_records' : [] , 'aggs' : []})
+
+            aggs_records = res[1]["aggregations"]["data_type"]["buckets"]
+            res_records = res[1]['hits']['hits']
+            res_total   = res[1]['hits']['total']['value']
+             
+            return json.dumps({"res_total" : res_total , "res_records" : res_records , 'aggs' : aggs_records})
+  
+        except Exception as e:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed query artifacts list from dataabase", reason=str(e))
+            return json.dumps({'res_total' : 0 , 'res_records' : [] , 'aggs' : []})
+    else:
+        return redirect(url_for('home_page'))
+
+# ================================ get artifacts records ajax
+# retrive all artifacts records using ajax
+@app.route('/case/<case_id>/browse_artifacts_ajax', methods=["POST"])
+def case_browse_artifacts_ajax(case_id):
+    if request.method == "POST": 
+        try:
+            records_per_page = 30
+            ajax_str =  urllib.unquote(request.data).decode('utf8')
+            ajax_data = json.loads(ajax_str)['data']
+            body = {
+                "from": int(ajax_data["wanted_page"]) * records_per_page,
+                "size":records_per_page,
+            }
+            if "query" in ajax_data.keys() and ajax_data['query'] != "None":
+                body["query"] = {
+                    "query_string" : {
+                        "query" : ajax_data['query'],
+                        "default_field" : "catch_all"
+                    }
+                } 
+
+            if "sort_by" in ajax_data.keys() and ajax_data['sort_by'] != "None":
+                order = "asc" if ajax_data['sort_by']['order'] == 0 else "desc"
+                body["sort"] = {
+                    ajax_data['sort_by']['name'] : {"order" : order}
+                } 
+               
+            if "group_by" in ajax_data.keys() and ajax_data['group_by'] != "None" and "fields" in ajax_data['group_by'].keys() and len(ajax_data['group_by']['fields']):
+                body['size'] = 0 # if the data came from aggs, then no need for the actual data
+                  
+                # specifiy whether it is multi fields or single field 
+                isSingleField = len(ajax_data['group_by']["fields"]) == 1
+                
+                # sort buckets
+                sort_by_order = "asc" if "sort_count" in ajax_data['group_by'].keys() and ajax_data['group_by']["sort_count"] == "asc" else "desc"
+
+                # agg terms
+                aggs_dict = {
+                    "size"                      : 1000 ,    
+                    "show_term_doc_count_error" : True , 
+                    "order"                     : {"_count" : sort_by_order}
+                }
+                if isSingleField:
+                    terms                   = ajax_data['group_by']["fields"][0] + ".keyword"
+                    aggs_type               = "terms"
+                    aggs_dict["field"]      = terms
+                    aggs_dict["missing"]    = ""
+                else: 
+                    terms                   = []
+                    for t in ajax_data['group_by']["fields"]:
+                        terms.append( { "field" : t + ".keyword" , "missing" : ""} )     
+                    aggs_type               = "multi_terms" 
+                    aggs_dict["terms"]      = terms
+                  
+                body["aggs"] = {     
+                    "group_by" : {
+                        aggs_type : aggs_dict,  
+                        "aggs" : {
+                            "my_buckets" : { 
+                                "bucket_sort" : {   
+                                    "from" : int(ajax_data["wanted_page"]) * records_per_page,
+                                    "size" : records_per_page,
+                                }, 
+                            }, 
+                            "group_by_top_hits": {
+                                "top_hits" : {
+                                    "size" : ajax_data['group_by']['size'],     
+                                },       
+                            }, 
+                        },  
+                    },      
+                    "get_total": {
+                        aggs_type : aggs_dict
+                    },   
+                    "get_total_stats": {
+                        "stats_bucket": {
+                            "buckets_path": "get_total._count" 
+                        } 
+                    }
+                } 
             logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Query artifacts", reason=json.dumps(body))
             res = db_es.query( case_id, body )
             if res[0] == False:
+                print res[1]   
                 logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed query artifacts from dataabase", reason=res[1])
                 return json.dumps({'res_total' : 0 , 'res_records' : [] , 'aggs' : []})
 
             res_records = res[1]['hits']['hits']
             res_total   = res[1]['hits']['total']['value']
-            aggs_records= res[1]["aggregations"]["data_type"]["buckets"]
-
-            for i in range( 0  , len(res_records) ):
-                if "machine" in res_records[i]['_source'].keys():
-                    machine = db_cases.get_machine_by_id(res_records[i]['_source']['machine'])
+            aggs_records= res[1]["aggregations"]["group_by"]["buckets"] if "aggregations" in res[1].keys() else []
+    
+            # this function get the record and retrive the machine name from the database and enrich it
+            def get_machine_by_id(record):
+                if "machine" in record['_source'].keys():
+                    machine = db_cases.get_machine_by_id(record['_source']['machine'])
                     if machine[0] == True and machine[1] is not None:
-                        res_records[i]['_source']['machinename'] = machine[1]['machinename']
+                        record['_source']['machinename'] = machine[1]['machinename']
                     else:
-                        res_records[i]['_source']['machinename'] = res_records[i]['_source']['machine']
+                        record['_source']['machinename'] = record['_source']['machine']
                         logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed getting the machine name", reason=machine[1])
+
+
+            for i in range( 0  , len(res_records) ):    
+                get_machine_by_id(res_records[i])
+            
+            if len(aggs_records):   
+                res_total = res[1]["aggregations"]["get_total_stats"]['count']
+                """
+                res_records = []
+                for i in range(0 , len(aggs_records)):
+                    res_records.append( aggs_records[i]["key"] )
+                """    
+                res_records = []
+                 
+                for i in range(0 , len(aggs_records)):
+                    for r in range(0 , len(aggs_records[i]['group_by_top_hits']['hits']['hits'])):
+                        get_machine_by_id(aggs_records[i]['group_by_top_hits']['hits']['hits'][r])
                     
-            ajax_res = {"res_total" : res_total , "res_records" : res_records , 'aggs' : aggs_records}
+                    rec = aggs_records[i]['group_by_top_hits']['hits']['hits'][0]
+                    rec['group_by'] = {
+                        'key'       : aggs_records[i]['key'],
+                        'doc_count' : aggs_records[i]['doc_count']
+                    } 
+ 
+                    # if used a single field, then include it on a list to match the multi-fields group by
+                    if isSingleField:
+                        rec['group_by']['key'] = [rec['group_by']['key']]
+                    res_records.append( rec )
+                
+
+
+            ajax_res = {"res_total" : res_total , "res_records" : res_records , 'aggs' : ajax_data['group_by']["fields"]}
 
             return json.dumps(ajax_res)
-
-
+   
+ 
         except Exception as e:
+            print str(e)
             logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting the browser artifacts", reason=str(e))
-            return json.dumps({"res_total" : 0 , "res_records" : []})
+            return json.dumps({"res_total" : 0 , "res_records" : [], 'aggs' : None})
 
     else:
         return redirect(url_for('home_page'))
@@ -892,9 +1039,8 @@ def case_browse_artifacts_ajax(case_id):
 # ================================ get artifacts data types
 # get all artifacts for case
 @app.route('/case/<case_id>/browse_artifacts', methods=['GET'])
-def case_browse_artifacts(case_id):
-
-    
+def case_browse_artifacts(case_id):  
+   
     CASE_FIELDS = get_CASE_FIELDS()
     if CASE_FIELDS[0] == False:
         logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting parsers important fields", reason=CASE_FIELDS[1])
@@ -903,7 +1049,6 @@ def case_browse_artifacts(case_id):
 
 
     case = db_cases.get_case_by_id(case_id)
-
     if case[0] == False:
         logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case information" , reason=case[1])
         return render_template('case/error_page.html',case_details=case[1] ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting case information, <br />"+case[1])
@@ -925,26 +1070,116 @@ def case_browse_artifacts(case_id):
             "AND" : []
             }
 
-    # check if the channel exists add it to the query
+    if 'q' in request.args:
+        try:
+            query = json.loads(urllib.unquote(request.args['q']).decode('utf-8'))
+        except Exception as e:
+            pass
+   
     if 'machine' in request.args:
-        query["AND"].append({'machine' : request.args['machine']})
+        query["AND"].append({'==machine' : request.args['machine']})
 
     if 'rule' in request.args:
-        query['AND'].append({'rule' : request.args['rule']})
+        query['AND'].append({'==rule' : request.args['rule']})
 
+ 
+
+    group = None 
+    if 'group' in request.args:
+        try:
+            machines        = db_cases.get_machines(case_id , request.args['group'])
+            if machines[0] == False:    
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case machines" , reason=machines[1])
+            else:  
+                group = {
+                    'group' : request.args['group'],
+                    'machines' : []
+                }
+                for m in machines[1]:  
+                    group['machines'].append(case_id + "_" + m['machinename'])
+                      
+                    
+        except Exception as e:  
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case machines" , reason=machines[1])
+
+  
     # get all rules
     all_rules = db_rules.get_rules()
     if all_rules[0] == False:
         logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting the rules information" , reason=all_rules[1])
         return render_template('case/error_page.html',case_details=case[1] ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed getting the rules information, <br />" + all_rules[1])
-
-
-    q = json.dumps(query)
-    return render_template('case/browse_artifacts.html',case_details=case[1] ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , search_query = q , fields_mapping=fields_mapping[1] , rules = all_rules[1])
-
+ 
+    q = json.dumps(query)   
+    return render_template('case/browse_artifacts.html',case_details=case[1] ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , search_query = q , fields_mapping=fields_mapping[1] , rules = all_rules[1] , group=group)
 
 
 
+  
+@app.route('/case/<case_id>/browse_artifacts_export' , methods=['POST'])
+def browse_artifacts_export(case_id):
+    if request.method == "POST":
+        try:
+            
+            request_str =  urllib.unquote(request.data).decode('utf8')
+            request_json = json.loads(request_str)['data']
+                
+            logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Browse artifacts export", reason=json.dumps(request_json))
+
+            # == from - to
+            body = {}
+            # == query   
+            query = '*' 
+            if 'query' in request_json.keys() and request_json['query'] != None:
+                request_json['query'] = request_json['query'].strip()
+                query = '*' if request_json['query'] == "" or request_json['query'] is None else request_json['query']
+                body["query"] = {
+                    "query_string" : {
+                        "query" : '!(data_type:\"tag\") AND ' + query,
+                        "default_field" : "catch_all"
+                    }
+                }
+            # == sort  
+            if 'sort_by' in request_json.keys() and request_json['sort_by'] != None:
+                order = "asc" if request_json['sort_by']['order'] == 0 else "desc"
+                body["sort"] = {request_json['sort_by']['name'] : {"order" : order}}
+            else:
+                body["sort"] = {'Data.@timestamp' : {"order" : 'asc'}}
+            
+
+            # == fields
+            fields = None
+            if 'fields' in request_json.keys() and request_json['fields'] != None :
+                fields = request_json['fields']
+                body['_source'] = {}
+                body['_source']['includes'] = fields 
+  
+   
+            logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Export Query artifacts", reason=json.dumps(body))
+
+            from flask import Response  
+
+            # get total number of records
+            body['size'] = 0
+            res = db_es.query( case_id, body) 
+
+            if res[0] == False: 
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed export query artifacts from dataabase", reason=res[1])
+                return json.dumps({"res_total" : 0 , "res_records" : []})
+            total_records = res[1]['hits']['total']['value']
+
+            return Response( 
+                        export_stream_es(case_id=case_id, body=body , chunk_size=30 , fields=fields),
+                        mimetype='text/csv',
+                        headers= {"total" : str(total_records)}
+                    )
+                      
+   
+        except Exception as e:
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed exporting the artifacts", reason=str(e))
+            return json.dumps({"res_total" : 0 , "res_records" : []})
+
+    else:
+        return redirect(url_for('home_page'))
 
 
 # =================== Timeline =======================
@@ -1046,7 +1281,7 @@ def case_timeline_delete_tag(case_id ):
         # if the tag associated with artifact record
         if record_id is not None:
             # delete the tag record from record
-            update_field = db_es.update_field( {"script": "ctx._source.remove(\"tag_id\")"}  , record_id , case_id)
+            update_field = db_es.update_field( {"script": "ctx._source.remove(\"tag_id\");ctx._source.remove(\"tag_type\")"}  , record_id , case_id)
             if update_field[1] == False:
                 logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed adding tag_id to artifact record", reason=update_field[1])
                 return json.dumps({'result' : 'failed' , 'data': 'Failed deleting tag_id from artifact record: ' + update_field[1]})
@@ -1068,8 +1303,9 @@ def case_add_tag_ajax(case_id):
         ajax_data = json.loads(ajax_str)['data']
 
         Data = {
-            "tag" : ajax_data['time'] ,
-            "@timestamp" : ajax_data['time']
+            "tag"           : ajax_data['tag'] ,
+            "@timestamp"    : ajax_data['time'],
+            'tag_type'      : ajax_data['tag_type']
         }
 
         if 'doc_id' in ajax_data.keys():
@@ -1086,7 +1322,7 @@ def case_add_tag_ajax(case_id):
             "data_source"   :None, 
             "data_type"     :'tag', 
         }
-        up = db_es.bulk_queue_push( [record] , case_id , chunk_size=500)
+        up = db_es.bulk_queue_push( [record] , case_id , chunk_size=500) 
         #db_es.es_add_tag(data = { "Data" : Data  , "data_type" : 'tag' } , case_id = case_id )
         if up[0] == False:
             logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed adding tag", reason=up[1])
@@ -1094,19 +1330,151 @@ def case_add_tag_ajax(case_id):
 
         # update the tag_id to artifact record
         else:
+            
             if record_id is not None and len(up[3]) != 0:
-
+ 
                 # for each successful tag added
-                for tag_id in up[3]:
-                    update_field = db_es.update_field( {'doc': {'tag_id' : tag_id }}  , record_id , case_id)
+                for tag_id in up[3]: 
+                    update_field = db_es.update_field( {'doc': {'tag_id' : tag_id , 'tag_type' : record['Data']['tag_type'] }}  , record_id , case_id)
+                    
                     if update_field[0] == False:
                         logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed adding tag_id to artifact record", reason=update_field[1])
                         return json.dumps({'result' : 'failed' , 'data': 'Failed adding tag_id to artifact record: ' + update_field[1]})
 
                 logger.logger(level=logger.INFO , type="case", message="Case["+case_id+"]: Tag created")
-                return json.dumps({"result" : 'successful' , 'tag_id' : up[3][0]})
-            return json.dumps({"result" : 'successful' , 'tag_id' : up[3][0]})
+                return json.dumps({"result" : 'successful' , 'tag_id' : up[3][0] , 'tag_type' : record['Data']['tag_type']})
+            return json.dumps({"result" : 'successful' , 'tag_id' : up[3][0] , 'tag_type' : record['Data']['tag_type']})
 
+ 
+
+# ================================ generate timeline
+# get all tags for the case via ajax
+@app.route('/case/<case_id>/timeline_build_ajax', methods=['GET'])
+def case_timeline_build_ajax(case_id):
+    if request.method == "GET":
+        try:
+            # create case timeline folder if not exists  
+            dest_timeline_folder = os.path.join( app.config['TIMELINE_FOLDER'] , case_id)
+            if not os.path.isdir(dest_timeline_folder):
+                create_folders(dest_timeline_folder)
+
+            # get if there is a previous version already exists for the case
+            src_filename        = 'timeline.xlsx'
+            dest_filename       = src_filename.rstrip(".xlsx") + "_v0.xlsx"
+
+            # get the latest timetime version
+            latest_version = 0
+            for previous_file in os.listdir(dest_timeline_folder): 
+                try:
+                    if os.path.isfile(os.path.join(dest_timeline_folder, previous_file)) and previous_file.endswith(".xlsx"):    
+                        latest_version      = int(previous_file.split("_v")[1].rstrip(".xlsx")) if int(previous_file.split("_v")[1].rstrip(".xlsx")) > latest_version else latest_version
+                except Exception as e:
+                    pass 
+
+            
+
+            # create instance for timeline builder          
+            views_folder        = app.config['TIMELINE_VIEWS_FOLDER']   
+            new_version         = latest_version + 1
+            dest_filename       = src_filename.rstrip(".xlsx") + "_v"+str(new_version)+".xlsx"
+            src_filename        = src_filename.rstrip(".xlsx") + "_v"+str(latest_version)+".xlsx" if latest_version > 0 else src_filename
+            dest_timeline       = os.path.join( dest_timeline_folder , dest_filename )
+            src_timeline        = os.path.join(dest_timeline_folder , src_filename) if latest_version > 0 else os.path.join( app.config['Timeline_Templates'] , src_filename)
+            t                   = buildTimeline.BuildTimeline(views_folder=views_folder , fname= src_timeline)
+            export_date         = str(datetime.now())
+
+
+            # get all yaml views from timeline views
+            all_rules           = t.get_views(views_folder)
+            requests            = []
+            sheet_timeline      ="Timeline"  
+            sheet_kuiper_id_col ="KuiperID"
+
+
+            all_active_rules    = []
+            default_rule        = None 
+
+            for rule in range( 0 , len(all_rules)):
+                if 'default' in all_rules[rule]['condition'].keys() and all_rules[rule]['condition']['default'] == True:
+                    default_rule = all_rules[rule]
+                    continue
+                if 'active' in all_rules[rule]['condition'].keys() and all_rules[rule]['condition']['active'] == False:
+                    continue
+                all_active_rules.append(all_rules[rule])  
+
+
+            for rule in range( 0 , len(all_active_rules)):
+                requests.append({
+                        "query":{
+                            "query_string":{
+                                "query" : "tag_id:* AND (" + all_active_rules[rule]["condition"]["query"] + ")",
+                                "default_field": "catch_all"
+                            }
+                        },
+                        "size": 2000
+                })
+            
+            requests.append({
+                "query":{
+                    "query_string":{
+                        "query" : "tag_id:*",
+                        "default_field": "catch_all"
+                    }
+                },
+                "size": 2000 
+            })
+            if len(requests):
+                res = db_es.multiqueries(case_id, requests)
+            else:
+                res = [True, []] # if there is no rules
+
+            if res[0] == False:
+                logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting timeline generator search", reason=res[1])
+                return json.dumps({ 'result' : 'failed' , "message" : res[1]})
+
+            # this list contains the ID of already added records to the sheet, so in the default records will not be added
+            added_records = []
+            added_records += t.get_values_by_column(sheet_timeline , sheet_kuiper_id_col)
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting timeline generator search", reason=added_records)
+            for r in range(0 , len(res[1])):
+                if r < len(res[1])-1:
+                    # if the results belongs to a search query
+                    for data in res[1][r]['hits']['hits']:           
+                        if data['_id'] in added_records: continue 
+                        # add extra data related to the record itself
+                        data['_source']['_id']              = data['_id']
+                        data['_source']['_Export_Version']  = "V_" + str(new_version)
+                        data['_source']['_Export_Date']     = export_date
+
+
+                        fields_data = t.merge_data_and_fields(fields = all_active_rules[r]['fields'].copy(), data= data['_source'])
+                        t.add_data_to_sheet(sheet_timeline, fields_data)
+                        added_records.append(data['_id'])
+                elif default_rule is not None:
+                    # if the results does not belongs to a search query
+                    for data in res[1][r]['hits']['hits']:
+                        if data['_id'] in added_records: continue
+                        
+                        # add extra data related to the record itself
+                        data['_source']['_id'] = data['_id']
+                        data['_source']['_Export_Version']  = "V_" + str(new_version)
+                        data['_source']['_Export_Date']     = export_date
+                        
+                        fields_data = t.merge_data_and_fields(fields = default_rule['fields'].copy(), data= data['_source'])
+                        t.add_data_to_sheet(sheet_timeline, fields_data)
+            t.save(dest_timeline)
+             
+            return send_file(dest_timeline, as_attachment=True) 
+
+        except Exception as e:
+            print str(e)
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed retriving timeline", reason=str(e))
+            return json.dumps( {'result': 'failed' , 'tags' : "Failed retriving timeline: " + str(e)} )
+
+    else:
+        return redirect(url_for('home_page'))
+
+ 
 
 # =================== Alerts =======================
 
@@ -1327,64 +1695,3 @@ def graph_expand(case_id):
         return json.dumps(ajax_res)
     else:
         return redirect(url_for('home_page'))
-
-
-
-# case_id = "test3"
-# Rhaegal_query = {
-#             "query":{
-#                 "query_string":{
-#                     "query" : "Data.rhaegal.name:*",
-#                     "default_field": "catch_all"
-#                 }
-#             },
-#             "size":0,
-#             "aggs" : {
-#                     "rhaegal": {
-#                         "terms" : {
-#                             "field" : "Data.rhaegal.score.keyword",
-#                             "size" : 100,
-#                             "order": {
-#                                 "_key": "asc"
-#                             }
-#                         },
-#                         "aggs" :{
-#                             "names" : {
-#                                 "terms" : {
-#                                     "field" : "Data.rhaegal.name.keyword",
-#                                     "size" : 2000,
-#                                 },
-#                                 "aggs" : {
-#                                     "first_record" : {
-#                                         "top_hits" : {
-#                                             "size" : 1
-#                                         },
-#                                     }
-#                                 }
-#                             }
-#                         }
-#                     }
-#                 }
-#     }
-
-# res = db_es.query(case_id , Rhaegal_query)
-# #if res[0] == False:
-# #    logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting the Rhaegal hits", reason=res[1])
-# #    return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message=res[1])
-
-# Rhaegal_hits = {
-#     "names" : [] , 
-#     "scores" : []
-# }
-# for score in res[1]["aggregations"]["rhaegal"]["buckets"]:
-#     Rhaegal_hits["scores"].append({
-#         "score" : score["key"],
-#         "count" : score["doc_count"]
-#     })
-    
-#     for name in score["names"]["buckets"]:
-#         tmp_meta = name["first_record"]["hits"]["hits"][0]["_source"]["Data"]["rhaegal"]
-#         tmp_meta["count"] = name["doc_count"]
-#         Rhaegal_hits["names"].append(tmp_meta)
-
-# print json_beautifier(Rhaegal_hits)

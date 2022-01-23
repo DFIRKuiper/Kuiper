@@ -4,28 +4,29 @@ import yaml
 import inspect
 from datetime import datetime, timedelta
 
-from flask import Flask, g , session, render_template
+from flask import Flask, g , session, render_template, Blueprint, send_from_directory, send_file
 from flask import request, redirect, url_for
  
 import urllib, json
 from celery import Celery
 from celery.bin import worker
-
+from jinja2 import TemplateNotFound
+ 
 #from flask.ext.celery import Celery
 
 # ldap authentication
 from utils.flask_simpleldap import LDAP, LDAPException
-
-
+from utils.build_timeline import buildTimeline
+ 
 app = Flask(__name__)
-
-
+  
 y = yaml.load( open( 'configuration.yaml' , 'r' ) , Loader=yaml.FullLoader )
 
 
-app.config['APP_FOLDER']				= os.path.abspath( ''.join(y['Directories']['app_folder']) )				# app folder
+app.config['APP_FOLDER']				= os.path.abspath( ''.join(y['Directories']['app_folder']) )			# app folder
 app.config['UPLOADED_FILES_DEST'] 		= os.path.abspath( ''.join(y['Directories']['artifacts_upload']) )		# uploaded artifacts files
 app.config['UPLOADED_FILES_DEST_RAW'] 	= os.path.abspath( ''.join(y['Directories']['artifacts_upload_raw']) )	# uploaded artifacts raw files
+
 app.config['PARSER_PATH'] 				= os.path.abspath( ''.join(y['Directories']['app_parsers']) )			# parser folder
 app.config['SYSTEM_HEALTH_PATH']    	= os.path.abspath( ''.join(y['Directories']['system_health']) )			# system health folder
 
@@ -83,12 +84,20 @@ app.config['FLASK_REMOVE_RAW_FILES']    = os.getenv('FLASK_REMOVE_RAW_FILES', y[
 app.config['FLASK_CASE_SIDEBAR']        = y['case_sidebar']
 
 app.config['RHAEGAL_RULES_PATH']        = "./app/utils/Dracarys/Rhaegal/rules/"
+app.config['Timeline_Templates']        = "./app/utils/build_timeline/"
+app.config['TIMELINE_FOLDER'] 	        = os.path.abspath( ''.join(y['Directories']['artifacts_timeline']) )	    # folder contains the timeline results
+app.config['TIMELINE_VIEWS_FOLDER']     = os.path.abspath( ''.join(y['Directories']['artifacts_timeline_views']) )	# folder contains the timeline views
 
 
+app.config['DOCS_FOLDER'] 	            = os.path.abspath( ''.join(y['Directories']['docs_folder']) )	# doc folder
+
+
+  
+ 
 app.secret_key = os.getenv('FLASK_SECRET_KEY', y['Kuiper']['secret_key']) 
 
+ 
 
-print app.config
 # ===================== Logger - START ===================== # 
 # class Logger to handle all Kuiper logs
 class Logger:
@@ -147,12 +156,13 @@ logger = Logger(os.path.join(y['Logs']['log_folder'] , y['Logs']['kuiper_log']) 
 
 
 from controllers import case_management,admin_management,API_management
-
-
+   
 # redirector to the actual home page 
 @app.route('/')
 def home():
     return redirect(url_for('home_page'))
+ 
+
 
 
 # ================= ldap authentication 
@@ -260,3 +270,14 @@ def logout():
 def error_api():
     error = request.args.get('error' , None)
     return {'API_ERROR' : error}
+
+
+# ================== docs page
+@app.route('/docs/', defaults={'filename': 'index.html'})
+@app.route('/docs/<path:filename>')
+def documentation(filename):
+    return send_from_directory(
+        app.config['DOCS_FOLDER'],
+        filename
+    )
+  

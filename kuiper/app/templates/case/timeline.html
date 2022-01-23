@@ -15,7 +15,7 @@
                       <div class="btn-group box-tools pull-right">
                         <button type="button" class="btn btn-sm btn-primary" id="show_as_table" ><i class="fa fa-table" title="Show tags as table"></i></button>
                         <button type="button" class="btn btn-sm btn-default" id="show_as_timeline" ><i class="fa fa-reorder" title="show tags as timeline"></i></button>
-                        <button type="button" class="btn btn-sm btn-default" id="export_csv" ><i class="fa fa-download" title="Export timeline as .CSV"></i></button>
+                        <a type="button" class="btn btn-sm btn-default" id="export_csv" href="{{ url_for('case_timeline_build_ajax' , case_id=case_id) }}"><i class="fa fa-download" title="Export timeline as .CSV"></i></a>
                         <button type="button" class="btn btn-sm btn-default" data-widget="collapse"><i class="fa fa-plus" title="Create a time line message"></i></button>
                       </div>
                     <!-- =============== end Buttons =============== -->
@@ -200,7 +200,6 @@
 var toast                   = $.toast;
 var tags                    = []; 
 var record_important_fields = ({{ CASE_FIELDS|tojson|safe }});
-
 var listOfDates             = {}
 
 var view_type               = 'table'
@@ -222,10 +221,6 @@ function ConvertToCSV(objArray) {
     }
     return str;
 }
-
-
-
-
 
 
 
@@ -590,88 +585,6 @@ function print_tag(){
 
 
 // ========================== Listeners
-
-
-
-
-// on clicked export time line as csv
-$('#export_csv').on('click' , function(){
-    var csv = [['tag_id' , 'datetime' , 'message' , 'details']]
-    if(view_type == 'timeline'){
-        var timeline = $('ul.timeline').children().not('.time-label').each( function(i , v){
-            var tag = []
-            console.log($(this))
-            tag.push( $(this).attr('id') )
-            tag.push( $.trim( $(this).find('.time').text() ) )
-            tag.push( $.trim( $(this).find('.timeline-header').text() ) )
-
-            var record_det = ""
-            if($(this).find('.timeline-body').length > 0)
-                $(this).find('.timeline-body').children().each(function(){
-                    if($(this).hasClass('badge'))
-                    record_det += $.trim( $(this).text() ) + " = " 
-                    else
-                    record_det += $.trim( $(this).text() ) + " | "
-                })
-
-            tag.push( record_det )
-
-            csv.push(tag)
-        })
-    } else if (view_type == 'table'){
-        csv = [['tag_id' , 'datetime' , 'message' , 'details']]
-        for(let i = 0  ; i < tags.length ; i++){
-            var message = (tags[i]['_source']['Data']['message'] === undefined) ? "No message" : tags[i]['_source']['Data']['message'];
-            console.log(tags[i])
-
-            if(tags[i]['_source']['Data']['record_details'] !== undefined){
-
-                important_fields = ""
-                var record = tags[i]['_source']['Data']['record_details']
-                var date_type = record['_source']['data_type']
-                var imp_rec = record_important_fields[date_type];
-                for(var j = 0 ; j < imp_rec.length; j++){
-                    var search_field_path = imp_rec[j][1].substring( imp_rec[j][1].indexOf('.') +1  );
-                    var field_value = get_field_from_json_path(record , imp_rec[j][1]);
-                    important_fields += imp_rec[j][0]+ ':' + field_value + '|';
-                }
-
-            } else {
-                important_fields = ""
-            }
-            
-
-
-            csv.push(
-                [tags[i]['_id'] , tags[i]['_source']['Data']['@timestamp'] , message , important_fields]
-            )
-        }
-
-    }else {
-        return;
-    }
-    
-    // download the time line as csv
-    let csvContent = "data:text/csv;charset=utf-8,";
-    for(var i = 0 ; i < csv.length ; i++){
-       let row = csv[i].join(',');
-       csvContent += row + "\r\n";
-    }
-
-    var encodedUri = encodeURI(csvContent);
-    var link = document.createElement("a");
-
-    encodedUri = encodedUri.replace(/#/g, '%23');
-    console.log(csvContent)
-
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", "timeline.csv");
-    document.body.appendChild(link); // Required for FF
-
-    link.click(); // This will download the data file named "my_data.csv".
-
-
-})
 
 
 

@@ -766,4 +766,3 @@ class SRUM_Parser():
 				f.write( json.dumps(data) )
 				f.close()
 				print("[+] output [ "+str(len(data))+" records ] written to file ["+file + "-" + i + ".json], SRUM type ["+i+"]")
-

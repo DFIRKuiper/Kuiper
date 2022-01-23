@@ -17,7 +17,3 @@ def json_beautifier(js):
     return json.dumps(js, indent=4, sort_keys=True)
 
 
-
-if __name__ == "__main__":
-    pass
-    

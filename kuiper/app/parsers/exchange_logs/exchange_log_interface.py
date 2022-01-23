@@ -19,7 +19,7 @@ def get_fields(lines):
 
         if not line.startswith("#") and i > 1:
             break
-
+    
     return None
 
 
@@ -100,5 +100,4 @@ def exchange_log_interface(file, parser):
     except Exception as e:
         exc_type, exc_obj, exc_tb = sys.exc_info()
         msg = "[-] [Error] " + parser + " Parser: " + str(exc_obj) + " - Line No. " + str(exc_tb.tb_lineno)
-        print(msg)
         return (None, msg)

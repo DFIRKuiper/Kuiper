@@ -21,8 +21,6 @@
 
 
 
-
-
 <div id="content_body_row" >
 
 
@@ -138,24 +136,37 @@
         	<!-- START box Header -->
             
         	<div class="box-header">
+                <div class="btn-group " id="artifacts_list_container">
+                    <a type="button" class="artifacts_list_button btn bg-blue btn-xs  dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="List artifacts types" > <i class="fa caret"></i></a>
+                    <a type="button" class="btn btn-default btn-xs" id="disable_enable_details_table" title="disable/enable record details"><i class="clickable fa fa-clone"></i></a>
+                    <a type="button" action="contains" class="btn bg-navy btn-xs add_rhaegal_search_on_searchbar" title="Add search for only records hit Rhaegal rules in search bar"><i class="clickable fa"><img src="{{url_for('static', filename='dist/img/RhaegalLogo.png')}}" width="16" height="16" /></i></a>
+                    <ul id="artifacts_list" class="dropdown-menu artifacts-list-dropdown-toggle" role="menu"></ul>        
+                </div>
+                
+                <div class="btn-group " style="margin-left: 5px;">
+                    <button type="button" class="btn bg-light-blue btn-xs add_tag_search_on_searchbar"  tag_type="all" title="Add search for all tagged records in search bar"><i class="clickable fa fa-tag"></i> all</button>
+                    <button type="button" class="btn bg-red btn-xs add_tag_search_on_searchbar"  tag_type="malicious" title="Add search for only malicious tagged records in search bar"><i class="clickable fa fa-tag"></i></button>
+                    <button type="button" class="btn bg-yellow btn-xs add_tag_search_on_searchbar" tag_type="suspicious" title="Add search for only suspicious tagged records in search bar"><i class="clickable fa fa-tag"></i></button>
+                    <button type="button" class="btn bg-green btn-xs add_tag_search_on_searchbar"  tag_type="legit" title="Add search for only legit tagged records in search bar"><i class="clickable fa fa-tag"></i></button>
+                </div>
+                
+                <button style="margin-left: 5px;" type="button" id="export_search_results" class="btn bg-purple btn-xs"  title="Export results"><i class="clickable fa fa-download"></i></button>
 
-            <div class="btn-group pull-left" id="artifacts_list_container">
-                <a type="button" class="artifacts_list_button btn bg-blue btn-xs btn-flat dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="List artifacts types" > <i class="fa caret"></i></a>
-                <a type="button" class="btn btn-default btn-xs" id="disable_enable_details_table" title="disable/enable record details"><i class="clickable fa fa-clone"></i></a>
-                <a type="button" class="btn bg-red btn-xs btn-flat" id="add_tag_search_on_searchbar" title="Add search for only tagged records in search bar"><i class="clickable fa fa-tag"></i></a>
-                <a type="button" class="btn bg-navy btn-xs btn-flat" id="add_rhaegal_search_on_searchbar" title="Add search for only records hit Rhaegal rules in search bar"><i class="clickable fa"><img src="{{url_for('static', filename='dist/img/RhaegalLogo.png')}}" width="16" height="16" /></i></a>
-                <ul id="artifacts_list" class="dropdown-menu artifacts-list-dropdown-toggle" role="menu"></ul>        
-            </div>
-            
-
-            <span style="margin-left: 5px;">Total </span><span id="total_records" class="text-red"> </span>
-             
-            
-
+                <span style="margin-left: 5px;">Total </span><span id="total_records" class="text-red"> </span>
+                
+                <div id="export_record_progress_container_main" style="display: inline-flex;">
+                    <div id="export_record_progress_container" style="position: absolute; width:150px; display:none; top: 5px;">
+                        <div id="export_record_progress_div" class="progress progress-sm active">
+                            <div id="export_record_progress_bar" class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100" style="width: 0%">
+                                <span >...</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div class="input-group float_right" style="width: 400px">
-                  <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
-                  <input data="Data.@timestamp" type="text" class="form-control" id="query_pick_date_range" placeholder="yyyy-mm-dd HH:ii:ss,yyyy-mm-dd HH:ii:ss" autocomplete="off">
+                    <span class="input-group-addon"><i class="fa fa-calendar"></i></span>
+                    <input data="Data.@timestamp" type="text" class="form-control" id="query_pick_date_range" placeholder="yyyy-mm-dd HH:ii:ss,yyyy-mm-dd HH:ii:ss" autocomplete="off">
                 </div>
 
             </div>
@@ -165,7 +176,7 @@
 
             <!-- table content  -->
             <div class="box-body no-padding" id="table_events_container" style="padding:10px">
-              <table class="table table-bordered" id="table_events"><tbody ></tbody></table>
+              <table class="table table-bordered" id="table_events" style="table-layout: auto;"><tbody ></tbody></table>
             </div>
         </div>
 
@@ -269,6 +280,9 @@
     <script src="../../static/dist/air-datepicker/dist/js/datepicker.min.js"></script>
     <link rel="stylesheet" href="{{url_for('static', filename='dist/air-datepicker/dist/css/datepicker.min.css')}}">
     <script src="../../static/dist/air-datepicker/dist/js/i18n/datepicker.en.js"></script>
+
+
+
 
 <!-- This will take the AdminLTE input style and use it with the tags input style -->
 <style type="text/css">
@@ -474,6 +488,8 @@
   margin-right: 0px;
 }
 
+
+
 </style>
 
 
@@ -505,8 +521,6 @@ var lock_adding_tag           = false; // locker for adding input tags (used to 
 var search_type               = 'tagsinput' // type of search (tagsinput|simple|advance)
 
 
-
-
 // store the current sort by values
 var query_sort_by = {
   "name" : "Data.@timestamp", // default sort by
@@ -519,6 +533,7 @@ var search_query_obj = $('#search_query')
 
 // Advanced search
 var fields_mapping  = ({{ fields_mapping|tojson|safe }}); // this will contain all the fields in the index
+
 var query_builder_v = $('#builder') // contain the query builder html (place to select query terms on advanced search)
 
 
@@ -526,21 +541,92 @@ var query_builder_v = $('#builder') // contain the query builder html (place to 
 var datetime_range_search   = null; // contain the selected value from date range
 
 
-var search_query            = JSON.parse( decodeHtml('{{search_query}}').split('\\"').join('"') );  // get predefined search query from the request
-console.log(search_query)
-var urlParams = new URLSearchParams(window.location.search);
+// get the search query from url and build the new search
+var machine_group   = ({{ group|tojson|safe }}); // this will contains the group and its machine
 
-console.log(JSON.parse(urlParams.get('q')))
-search_query = JSON.parse(urlParams.get('q'))
+var urlParams       = new URLSearchParams(window.location.search);
+search_query        = (urlParams.get('q'))      ? JSON.parse(urlParams.get('q'))    : {"AND" : []}
+search_query_rule   = (urlParams.get('rule'))   ? urlParams.get('rule') : null
+
+// build the query for the machine group
+for(var i = 0 ; i < search_query['AND'].length ; i++)
+    if("==group" in search_query['AND'][i])
+        search_query['AND'].splice(i, 1); 
+if(machine_group)
+    search_query['AND'].push({"==group" : machine_group['group']})
+
+// if rule specifieid add it to the search
+if(search_query_rule)
+    search_query['AND'].push({"==rule" : search_query_rule})
+
+// convert the default search to query
 var search                  = convert_json_to_list(search_query);                                   // convert the predefined search query to json query 
-console.log(search)
 var search_query_tagsinput  = $('#search_query');                                                   // element of the search query input tags
 
+// list of fields need to be added to the column 
+var extra_fields_in_table   = (urlParams.get('fields')) ? urlParams.get('fields').split(",") : [];
 
-
+// list of fields to use in group by
+var group_by_fields = (urlParams.get('group_by')) ? urlParams.get('group_by').split(",") : [];
+var group_by_fields_sort = "desc"
 // ====================================== Functions
 
 
+
+
+function ExportResults(url , query, fields) {
+    //Set the File URL.
+    filename = "{{case_details['casename']}}.csv"
+    $.ajax({
+        type: "POST",
+        data: JSON.stringify({"data" : {"query" : query, "fields": fields}}),
+        url: url,
+        contentType: "text/csv",
+        cache: false,
+        xhr: function(){
+            var xhr = new window.XMLHttpRequest();
+            //Download progress
+            xhr.addEventListener("progress", function(evt){
+                var total_rec = xhr.getResponseHeader("total")
+                var loaded_rec = xhr.responseText.split("\n").length -1
+                $("#export_record_progress_div").addClass("active")
+                $("#export_search_results").addClass("disabled")
+                $("#export_record_progress_container").show()
+                $("#export_record_progress_bar").width((loaded_rec / total_rec) * 100 + "%")
+                $("#export_record_progress_bar").addClass("progress-bar-striped")
+                
+                if (evt.lengthComputable) {
+                    var percentComplete = evt.loaded / evt.total;
+                    //Do something with download progress
+                    console.log(percentComplete);
+                }
+            }, false);
+            return xhr;
+        },
+        success: function (data) {
+            $("#export_record_progress_div").removeClass("active")
+            $("#export_record_progress_bar").removeClass("progress-bar-striped")
+            $("#export_search_results").removeClass("disabled")
+            
+            //Convert the Byte Data to BLOB object.
+            var blob = new Blob([data], { type: "text/csv" });
+            //Check the Browser type and download the File.
+            var isIE = false || !!document.documentMode;
+            if (isIE) {
+                window.navigator.msSaveBlob(blob, filename);
+            } else {
+                var url = window.URL || window.webkitURL;
+                link = url.createObjectURL(blob);
+                var a = $("<a />");
+                a.attr("download", filename);
+                a.attr("href", link);
+                $("body").append(a);
+                a[0].click();
+                //$("body").remove(a);
+            }
+        }
+    });
+};
 
 
 
@@ -629,7 +715,7 @@ function query_builder_fun() {
                     label: fields_mapping[i]['field_path'],
                     type: 'string',
                     size: 40,
-                    operators: ['equal', 'not_equal', 'contains', 'not_contains']
+                    operators: ['equal', 'not_equal', 'contains', 'not_contains' , 'reg']
                 })
                 break;
         }
@@ -731,6 +817,7 @@ function get_es_json_query(adv_search){
 				case "not_equal": 	f += "!="; break;
 				case "contains": 	f += "=~"; break;
 				case "not_contains":f += "!~"; break;
+				case "reg": 	    f += "=r"; break;
 			}
 			f += adv_search['rules'][i]['field']
 			var pushed = {}
@@ -754,12 +841,22 @@ function get_es_json_query(adv_search){
 
 
 // this function take the field path, and check what is the icon to use (disabled, asc, or desc)
-function get_sort_icon(field){
-    if(query_sort_by["name"] != field)
+function get_sort_icon(field , is_group_by_col = false){
+    // if group by enabled
+    if(group_by_fields.length && is_group_by_col == true){
+        switch(group_by_fields_sort){
+            case "desc": return sort_desc_icon_class; break;
+            default: return sort_asc_icon_class; break;
+        }
         return sort_disabled_icon_class
-    if(query_sort_by["order"] == 0)
-        return sort_asc_icon_class
-    return sort_desc_icon_class
+    }
+    if(query_sort_by['name'] == field)
+        switch(query_sort_by['order']){
+            case "desc": return sort_desc_icon_class;
+            default: return sort_asc_icon_class;
+        }
+    else
+        return sort_disabled_icon_class
 }
 
 
@@ -847,8 +944,6 @@ function update_search_query_input_tag(tag , id, option="contains"){
 
 // used to add a tag to the search query tags
 function add_search_query_input_tag(tag , option="contains"){
-    console.log("---------- tag")
-    console.log(tag)
     if(tag.split('|').length == 1 && lock_adding_tag == false && (search_type == 'tagsinput' || search_type == 'simple' )){
         lock_adding_tag = true; // lock adding new item tags input
 
@@ -872,8 +967,9 @@ function add_search_query_input_tag(tag , option="contains"){
                 case "contains"     : colmn_name = '=~' + colmn_name; break;
                 case "equal"        : colmn_name = '==' + colmn_name; break;
                 case "not_equal"    : colmn_name = '!=' + colmn_name; break;
+                case "reg"          : colmn_name = '=r' + colmn_name; break;
             }
-
+            console.log(colmn_name)
             v[colmn_name] = column_value;
             search_json["AND"].push( {"string": old_search_query_simple} );
             search_json["AND"].push( v );
@@ -964,35 +1060,98 @@ function rebuild_paging(wanted_page , total_records){
 
 // this will rebuild the table content of the records when loading the records
 function rebuild_records(records){
-
+    console.log(records)
     var new_tr = '';
 
     new_tr += "<tr>";
+
+
+    // add columns for group by group_by_fields
+    if(group_by_fields.length){
+        for(var field in group_by_fields){
+            var close_html = '<a data="'+group_by_fields[field]+'" class="clickable fa fa-remove clicked_group_by_close" style="margin: 3px;"></a>'
+            new_tr +=  '<th style="background-color: rgb(99, 103, 119); min-width: 150px"><div class="float_right">'+ " " + close_html +'</div><span style="margin-right: 20px;">'+group_by_fields[field]+'</span> </th>';
+        }
+        var sort_html = '<a data="_count" class="clickable fa ' + get_sort_icon("_count" , true) + ' clicked_sort_group_by"></a>'
+        new_tr +=  '<th style="background-color: rgb(99, 103, 119); min-width: 50px"><div class="float_right">'+sort_html + '</div><span style="margin-right: 20px;">_count</span> </th>';
+
+    }
+
+
     new_tr +=  "<th style=\"width: 50px\">Op.</th>";
 
-    new_tr +=  '<th style="width: 150px">Time Stamp \
+    new_tr +=  '<th style="min-width: 150px">Time Stamp \
       <a data="Data.@timestamp" class="clickable float_right fa ' + get_sort_icon("Data.@timestamp") + ' clicked_sort" style="margin: 3px;"></a></th>';
 
-    new_tr +=  '<th style="width: 150px">Data Type <a data="data_type" class="clickable float_right fa ' + get_sort_icon("data_type") + ' clicked_sort"></a></th>';
-    new_tr +=  '<th style="width: 150px">Machine <a data="machine" class="clickable float_right fa ' + get_sort_icon("machine") + ' clicked_sort"></a></th>';
+    new_tr +=  '<th style="min-width: 150px"><a data="data_type" class="clickable float_right fa ' + get_sort_icon("data_type") + ' clicked_sort"></a><span style="margin-right: 20px;">Data Type</span></th>';
+    new_tr +=  '<th style="min-width: 150px"><a data="machine" class="clickable float_right fa ' + get_sort_icon("machine") + ' clicked_sort"></a><span style="margin-right: 20px;">Machine</span></th>';
+
+    // add extra columnes
+    for(var field in extra_fields_in_table){
+        console.log(extra_fields_in_table[field])
+        var sort_html = '<a data="'+extra_fields_in_table[field]+'" class="clickable fa ' + get_sort_icon(extra_fields_in_table[field]) + ' clicked_sort"></a>'
+        var close_html = '<a data="'+extra_fields_in_table[field]+'" class="clickable fa fa-remove clicked_extra_column_close" style="margin: 3px;"></a>'
+        new_tr +=  '<th style="min-width: 150px"><div class="float_right">'+sort_html + " " + close_html +'</div><span style="margin-right: 20px;">'+extra_fields_in_table[field]+'</span> </th>';
+    }
+
+
     new_tr +=  "<th>Details</th>";
     new_tr +=  "</tr>";
     //record_important_fields
     for(var i = 0 ; i < records.length ; i++){
         var timestamp   = records[i]['_source']['Data']['@timestamp']
+        new_tr += '<tr class="event_record_click" id="'+i+'" data-type="'+records[i]['_source']['data_type']+'" record_id="'+records[i]['_id']+'">';
+        
+
+
+        // group by fields
+        if(group_by_fields.length){
+            for(var key = 0 ; key < records[i]['group_by']['key'].length ; key++ ){
+                new_tr +='<td style="background-color: rgb(99, 103, 119); ">\
+                    <span class="dropdown float_right">\
+                        <a class="fields-dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="clickable fa fa-filter "></span></a>\
+                        <ul class="dropdown-menu">\
+                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+records[i]['group_by']['key'][key]+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
+                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+records[i]['group_by']['key'][key]+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
+                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+records[i]['group_by']['key'][key]+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
+                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+records[i]['group_by']['key'][key]+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
+                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+records[i]['group_by']['key'][key]+'|reg"           class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
+                        <li class="clickable" data="item" id><a data="'+group_by_fields[key]+'" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
+                        </ul>\
+                    </span>\
+                    '+ records[i]['group_by']['key'][key] + '</td>';
+            }
+            new_tr +='<td style="background-color: rgb(99, 103, 119); ">'+ records[i]['group_by']['doc_count'] + '</td>';
+        }
+        // tags
         var hasTag      = ("tag_id" in records[i]['_source'])
         var tag_id_attr = hasTag ? 'tag_id="'+records[i]['_source']['tag_id']+'"' : "" ;
-        
-        new_tr += '<tr class="event_record_click" id="'+i+'" data-type="'+records[i]['_source']['data_type']+'">';
+        var tag_color = (hasTag) ? tags_color['malicious'] : tags_color['untag']; 
+        tag_color = ("tag_type" in records[i]['_source'] && records[i]['_source']['tag_type'] in tags_color) ? tags_color[records[i]['_source']['tag_type']] : tag_color ;
+        var rhaegal_icon = '<a style="cursor: pointer" tr_id="'+i+'" action="not_contains" class="add_rhaegal_search_on_searchbar"><i class="clickable fa"><img src="/static/dist/img/RhaegalLogo.png" width="16" height="16"></i></a>'
+        if('rhaegal' in records[i]['_source']['Data'])
+            rhaegal_icon = '<a style="cursor: pointer" tr_id="'+i+'" action="contains" class="add_rhaegal_search_on_searchbar"><i class="clickable fa"><img src="/static/dist/img/RhaegalLogoRed.png" width="16" height="16"></i></a>'
+
+
         new_tr +='<td>\
             <a><li data-id="'+records[i]['_id']+'" class="go_graph fa fa-code-fork clickable"></li></a>\
             <a data-toggle="modal" data-target="#record_details_dialog" class="record_details_dialog_click" style="cursor: pointer" id="'+i+'"><li class="fa  fa-caret-square-o-right" ></li></a>\
-            <a><li '+tag_id_attr+' data="just_tag" data-time="'+timestamp+'" id="'+records[i]['_id']+'" class="'+((hasTag) ? 'text-red' : '' )+' record_tag fa fa-tag clickable"></li></a>\
+            '+rhaegal_icon+'\
+            \
+            <span class="dropdown">\
+                <a class="fields-dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><li '+tag_id_attr+' data="just_tag" data-time="'+timestamp+'" id="tag_'+records[i]['_id']+'" class="text-'+tag_color+'  fa fa-tag clickable"></li></a>\
+                    <ul class="dropdown-menu">\
+                    <li class="clickable record_tag" tag_type="malicious"  id="malicious_'+records[i]['_id']+'" record_id="'+records[i]['_id']+'" ><a><i class="text-'+tags_color['malicious']+' fa fa-tag"></i> Malicious</a></li>\
+                    <li class="clickable record_tag" tag_type="suspicious" id="suspicious_'+records[i]['_id']+'" record_id="'+records[i]['_id']+'" ><a><i class="text-'+tags_color['suspicious']+' fa fa-tag"></i> Suspicious</a></li>\
+                    <li class="clickable record_tag" tag_type="legit"      id="legit_'+records[i]['_id']+'" record_id="'+records[i]['_id']+'" ><a><i class="text-'+tags_color['legit']+' fa fa-tag"></i> Legit</a></li>\
+                    <li class="clickable record_tag" tag_type="untag" id="untag_'+records[i]['_id']+'" style="display:'+ (hasTag ? 'block' : 'none')+ '"    record_id="'+records[i]['_id']+'" ><a><i class="text-'+tags_color['untag']+' fa fa-tag"></i> Untag</a></li>\
+                    </ul>\
+                </span>\
             </td>';
+//
 
-
-    
-	if( records[i]['_source']['Data']['@timestamp'] != null && records[i]['_source']['Data']['@timestamp'].indexOf('.') != -1)
+        // timestamp
+	    if( records[i]['_source']['Data']['@timestamp'] != null && records[i]['_source']['Data']['@timestamp'].indexOf('.') != -1)
         	timestamp = timestamp.substring(0 , records[i]['_source']['Data']['@timestamp'].indexOf('.'))
 
         new_tr +='<td>'+ timestamp.replace('T' , ' ') +' \
@@ -1012,8 +1171,8 @@ function rebuild_records(records){
               \
             </td>';
 
-
-        new_tr += '<td>'+ records[i]['_source']['data_type'] +' \
+        // data type 
+        new_tr += '<td>\
                 <span class="dropdown float_right">\
                     <a class="fields-dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="clickable fa fa-filter "></span></a>\
                     <ul class="dropdown-menu">\
@@ -1021,13 +1180,15 @@ function rebuild_records(records){
                     <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
                     <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
                     <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
+                    <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|reg"           class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
                     <li class="clickable" data="item" id><a data="data_type" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
                     </ul>\
                 </span>\
+                <span style="margin-right: 20px;">'+ records[i]['_source']['data_type'] +' </span>\
                 </td>';
         
-
-        new_tr += '<td>'+ records[i]['_source']['machinename'] +' \
+        // machine name
+        new_tr += '<td> \
                 <span class="dropdown float_right">\
                     <a class="fields-dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="clickable fa fa-filter "></span></a>\
                     <ul class="dropdown-menu">\
@@ -1035,11 +1196,34 @@ function rebuild_records(records){
                     <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
                     <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
                     <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
+                    <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|reg"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
                     <li class="clickable" data="item" id><a data="machine" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
                     </ul>\
                 </span>\
+                <span style="margin-right: 20px;">'+ records[i]['_source']['machinename'] +'</span>\
                 </td>';
 
+        // add extra columnes
+        for(var field in extra_fields_in_table){
+            var field_value = get_field_from_json_path(records[i]['_source'] , extra_fields_in_table[field]);
+            field_value = (field_value === undefined) ? '' : field_value;
+            new_tr +=  '<td>\
+                <span class="dropdown float_right">\
+                    <a class="fields-dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="clickable fa fa-filter "></span></a>\
+                    <ul class="dropdown-menu">\
+                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+field_value+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
+                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+field_value+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
+                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+field_value+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
+                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+field_value+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
+                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+field_value+'|reg"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
+                    <li class="clickable" data="item"><a data="'+extra_fields_in_table[field]+'" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
+                    </ul>\
+                </span>\
+                <span style="margin-right: 20px;">'+field_value+'</span>\
+            </td>';
+        }
+
+        // impotrant fields
         var date_type = records[i]['_source']['data_type']
         var imp_rec = record_important_fields[date_type];
         var td_details = "";
@@ -1061,6 +1245,7 @@ function rebuild_records(records){
                 <li class="clickable" data="item" id><a id="'+search_field_path+':'+escapeHtml(field_value)+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
                 <li class="clickable" data="item" id><a id="'+search_field_path+':'+escapeHtml(field_value)+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
                 <li class="clickable" data="item" id><a id="'+search_field_path+':'+escapeHtml(field_value)+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
+                <li class="clickable" data="item" id><a id="'+search_field_path+':'+escapeHtml(field_value)+'|reg"          class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
                 <li class="clickable" data="item" id><a data="'+search_field_path+'" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
                 </ul>\
               </span>';
@@ -1074,23 +1259,6 @@ function rebuild_records(records){
     $(".fields-dropdown-toggle").dropdown();
 
 
-    // on click add tag button
-    $('a').on( 'click' , 'li.record_tag' , function(){
-        var id          = $(this).attr('id');
-        var tag_content = $(this).attr('data');
-        var time        = $(this).attr('data-time');
-        var tag_id      = $(this).attr('tag_id')
-        if(tag_id != undefined){
-            // if it has tag, then remove it
-            del_tag(id , tag_id , $(this))
-        } else {
-            // if it does not has tag, then add tag
-            add_doc_tag(id , tag_content , time , $(this))
-        }
-        
-
-    })
-
     // on click go to graph
     $('a').on( 'click' , 'li.go_graph' , function(){
         var id = $(this).attr('data-id');
@@ -1098,6 +1266,10 @@ function rebuild_records(records){
         var baseURL = "{{url_for('graph_display' , case_id=case_details['casename'] , record_id='recordid')}}".replace('recordid' , id)
         location.href = baseURL;
     })
+
+
+
+
 }
 
 
@@ -1109,7 +1281,10 @@ function rebuild_records(records){
 
 // function used to delete tag from record through ajax
 function del_tag(record_id , tag_id , element){
-
+    if(!tag_id){
+        toast_msg("This record does not have tag: ["+record_id+"]");
+        return;
+    }
     $.ajax({
         type : 'POST',
         url : "/case/{{case_details['casename']}}/timeline_delete_tag_ajax",
@@ -1119,12 +1294,16 @@ function del_tag(record_id , tag_id , element){
           var result = JSON.parse(result);
           if(result['result'] == "successful"){
               
-              element.removeClass('text-red');
-              element.removeAttr('tag_id');
+                for(tag_color in tags_color)
+                    element.removeClass('text-' + tags_color[tag_color]);
+                
+                element.removeAttr('tag_id');
+                element.addClass('text-' + tags_color['untag'])
 
-              toast_msg("Deleted tag: ["+tag_id+"]");
+                $("#untag_"+record_id).hide(); // show the untag element on dropdown list
+                toast_msg("Deleted tag: ["+tag_id+"]");
           } else{
-              toast_msg(result['data']  , type = 'error' , header = 'Error')
+                toast_msg(result['data']  , type = 'error' , header = 'Error')
           }
             
               
@@ -1145,15 +1324,19 @@ function add_doc_tag(doc_id , tag_content , timestamp , element){
     type : 'POST',
     url : "/case/{{case_details['casename']}}/add_tag_ajax",
     contentType: 'application/json;charset=UTF-8',
-    data : JSON.stringify({'data': {"tag":tag_content , 'doc_id' : doc_id , 'time': timestamp } }),
+    data : JSON.stringify({'data': {"tag":tag_content ,"tag_type":tag_content , 'doc_id' : doc_id , 'time': timestamp } }),
     success: function(result) {
       var result = JSON.parse(result);
       if(result['result'] == "successful"){
 
           toast_msg("Added tag: ["+tag_content+"] to " + doc_id)
-          element.addClass('text-red');
-          element.attr('tag_id' , result['tag_id'])
+
+          for(tag_color in tags_color)
+            element.removeClass('text-' + tags_color[tag_color]);
       
+          element.addClass('text-' + tags_color[result['tag_type']]);
+          element.attr('tag_id' , result['tag_id'])
+          $("#untag_"+doc_id).show(); // show the untag element on dropdown list
       } else{
           toast_msg(result['data'] , type='error' , header='Error')
       }
@@ -1207,14 +1390,24 @@ function reload_records(search , wanted_page , sort_by = query_sort_by , wanted_
     
   var search  = (search == "") ? "" : 'AND (' + search+ ')'
   search      = '!(data_type:"tag") ' + search;
+  // loading page for the table
+  //$('#table_events tbody').html('<tr><td><i style="font-size: 25px; color: #777;position: sticky;left: 50%;top: 50%;" class="fa fa-refresh fa-spin"></i></td></tr>');
+  $('#table_events tbody').html('<tr><td style="text-align: center"><img src="/static/dist/img/giraffe_waiting.gif" width="600" height="600"></td></tr>');
+  $('#paging').html("");
+
+  var group_by = {
+        "fields"        : group_by_fields,
+        "size"          : 1,
+        "sort_count"    : group_by_fields_sort
+    }
+
 
   $.ajax({
     type : 'POST',
     url : "/case/{{case_details['casename']}}/browse_artifacts_ajax",
     contentType: 'application/json;charset=UTF-8',
-    data : JSON.stringify({'data': {"wanted_page":wanted_page , 'query' : search , 'sort_by' : sort_by } }),
+    data : JSON.stringify({'data': {"wanted_page":wanted_page , 'query' : search , 'sort_by' : sort_by , "group_by" : group_by } }),
     success: function(result) {
-
 
       var r = JSON.parse(result);
       var total_records = parseInt(r['res_total']);
@@ -1225,14 +1418,13 @@ function reload_records(search , wanted_page , sort_by = query_sort_by , wanted_
       else {
           // build paging table
           rebuild_paging(wanted_page , total_records);
-          ajax_records = r['res_records']
-
+          ajax_records  = r['res_records'] 
           // build records table
           rebuild_records(ajax_records);
           
           // build data type drop-down list 
           //console.log(r)
-          
+          /*
           var list = ""
           if(r['res_total'] != 0){
             var aggs = r['aggs']
@@ -1241,7 +1433,7 @@ function reload_records(search , wanted_page , sort_by = query_sort_by , wanted_
           }
           $('#artifacts_list').html(list);
           $('.artifacts_list_button').dropdown()
-        
+          */
           if (is_record_tr_clicked){
                 // click the first raw in the table
                 $("#table_events tr#" + wanted_record.toString()).click()
@@ -1263,6 +1455,34 @@ function reload_records(search , wanted_page , sort_by = query_sort_by , wanted_
   });
 
 
+  $.ajax({
+    type : 'POST',
+    url : "/case/{{case_details['casename']}}/browse_artifacts_list_ajax",
+    contentType: 'application/json;charset=UTF-8',
+    data : JSON.stringify({'data': {'query' : search } }),
+    success: function(result) {
+
+    
+      var r = JSON.parse(result);
+      // if there is no index print error message
+      if( "res_records" in r && r["res_records"] == "no such index")
+          toast_msg("No such index, try process the artifacts" , type='error' , header="Warning")
+      else {
+          var list = ""
+          if(r['res_total'] != 0){
+            var aggs = r['aggs']
+            for(var i = 0 ; i <aggs.length ; i++)
+                list += '<li class="clickable"><a id="data_type:'+aggs[i]['key']+'" class="clickable add_to_search_query">'+aggs[i]['key']+' <span class="badge bg-red">'+aggs[i]['doc_count']+'</span></a></li>'
+          }
+          $('#artifacts_list').html(list);
+          $('.artifacts_list_button').dropdown()
+        
+      }
+    },
+    error: function(error){
+      toast_msg("Connection Failed" , type='error' , header="Error")
+    }
+  });
 }
 
 
@@ -1366,7 +1586,7 @@ function build_search_query(json_query){
             var query_string          = "" ; // contain the string
             // fix the special characters
             var is_val_has_spec_chars = false;
-            if(field_mapping != undefined && field_mapping['type'] == 'text'){
+            if(field_mapping != undefined && field_mapping['type'] == 'text' && operator != "=r"){
                 // test for the following since elasticsearch use them as special characters:
                 // '+' ,'-', '=', '&&', '||', '>', '<', '!', '(', ')', '{', '}', '[', ']', '^', '"', '~', '*', '?', ':', '\\', '/'
                 var old_val             = val; // temp store old val
@@ -1392,19 +1612,25 @@ function build_search_query(json_query){
                     val = "(" + get_rule_by_name(val)['rule'] + ")"
             }
 
-
+            if(key == 'group'){
+                var values = []
+                
+                for (const machine of machine_group['machines'])
+                    values.push( "machine:" + machine ) 
+                val = "(" + values.join(" OR ") + ")"
+            }
             
             if(val == 'null')
                 val = "*"
             
 
             // check if the search for a range [], then dont not add the value inside ""
-            if ( (operator == "==" || operator == "!=") && !(val.startsWith("[") && val.endsWith("]")) && key != 'rule')
+            if ( (operator == "==" || operator == "!=") && !(val.startsWith("[") && val.endsWith("]")) && key != 'rule' && key != 'group')
                 val = '"' + val + '"'
               
               
             // check if the search for general terms such as string or rule
-            if( key == "string" || key == 'rule')
+            if( key == "string" || key == 'rule' || key == "group")
                 key = "";
             else
                 key = key + ":"
@@ -1415,13 +1641,18 @@ function build_search_query(json_query){
                   query_string = key + val;
                   break;
                 case "!=":
-                  query_string = "!" + key + val;
+                  if(val == '""') query_string = key + "/.+/";
+                  else          query_string = "!" + key + val;
                   break;
                 case "=~":
                   query_string = key + '*'+val+'*';
                   break;
                 case "!~":
                   query_string = "!" + key + '*'+val+'*';
+                  break;
+                
+                case "=r":
+                  query_string = key + '/'+val.toLowerCase()+'/';
                   break;
                 default:
                   query_string = val;
@@ -1480,7 +1711,8 @@ function build_elasticsearch_query_json(){
             colmn_name = '==' + colmn_name;
         else if(item[2] == 'not_equal')
             colmn_name = '!=' + colmn_name;
-
+        else if(item[2] == 'reg')
+            colmn_name = '=r' + colmn_name;
         v[colmn_name]   = column_value;
 
         search_json["AND"].push( v );
@@ -1507,6 +1739,21 @@ function build_elasticsearch_query_json(){
 function keydown_record_navegation(event){
     
     switch(event.which) {
+        case 77: // 'm' >> malicious
+        case 83: // 's' >> suspicious
+        case 76: // 'l' >> legit
+        case 85: // 'u' >> untag
+            var trs = $('#table_events').find('tr.disabled');
+            if(typeof trs.attr('id') == 'undefined')
+                return;
+            var record_id = trs.attr("record_id")
+            if(event.which == 77) record_id = "#malicious_" + record_id;
+            if(event.which == 83) record_id = "#suspicious_" + record_id;
+            if(event.which == 76) record_id = "#legit_" + record_id;
+            if(event.which == 85) record_id = "#untag_" + record_id;
+
+            $(record_id).click()
+            break;
         case 84: // 't'
             
 
@@ -1662,6 +1909,9 @@ $(document).on('click' , '.details-arrow-toggle' , function(e){
 
 $(document).ready(function(){
 	resizeDiv(); // resize the record_details and content_table
+
+
+    
 });
 
 
@@ -1686,17 +1936,21 @@ $(function () {
                  content     : $('#sample_search_confirm_popover').html(),
               })
     
-    // set the position of the popover
-  $(document).on('click' , '#sample_search_confirm_rule' , function(e){
-                  $('.popover').css("left" , "-230px");
-                  $('.popover.bottom>.arrow').css('left' , "94%");
-              })
-   
-
-
+    
 
 
 })
+
+// set the position of the popover
+$(document).on('click' , '#sample_search_confirm_rule' , function(e){
+    $('.popover').css("left" , "-230px");
+    $('.popover.bottom>.arrow').css('left' , "94%");
+})
+
+
+
+
+
 
 // if item clicked to be added to the search query (using fa-search-plus)
 $("#table_events,#dialog_content,#artifacts_list_container,#record_details_block").on('click' , 'a.table_timestamp_field_button' , function(){
@@ -1971,17 +2225,38 @@ $('#advance_search_dialog').on( 'click' , '.advanced_search_dialog_apply' , func
 
 
 
+$(document).on("click" , "#export_search_results" , function(){
+    if($(this).hasClass("disabled"))
+        return;
+    console.log("export")
+    var query = $('#sample_query_search h5 #sample_query_search_content').text().trim()
+    var fields =["Data.@timestamp" , "machine" , "data_type"]
+    for (i = 0; i < extra_fields_in_table.length; i++)
+        fields.push( extra_fields_in_table[i] ); 
+    
+    ExportResults(url="/case/{{case_details['casename']}}/browse_artifacts_export" , query=query , fields=fields)
 
+})
 
 
 // add a search term to specify only the tagged records
-$("#add_tag_search_on_searchbar").click(function(){
-    var re = add_search_query_input_tag("tag_id:*" , 'contains');
+$(".add_tag_search_on_searchbar").click(function(){
+    var tag_type = $(this).attr("tag_type")
+    if (tag_type == "all")
+        var re = add_search_query_input_tag("tag_id:*" , 'contains');
+    else
+        var re = add_search_query_input_tag("tag_type:" + tag_type , 'equal');
+
 })
 
+
+
 // add a search term to specify only the records with rhaegal hits
-$("#add_rhaegal_search_on_searchbar").click(function(){
-    var re = add_search_query_input_tag("Data.rhaegal.name:*" , 'contains');
+$("#table_events,#artifacts_list_container").on('click' , 'a.add_rhaegal_search_on_searchbar' , function(){
+    console.log("add rhaegal rule ")
+    var action =$(this).attr('action') ? $(this).attr('action') : 'contains'
+    console.log(action)
+    var re = add_search_query_input_tag("Data.rhaegal.name:*" , action);
 })
 
 
@@ -2024,7 +2299,8 @@ $('#search_query').on('tagOptions' , function( event ){
             <li class="tagOptions_action_equal_clicked" data="item"><a><span class="fa fa-search-plus" href="#"></span> Equals</a></li>\
     		<li class="tagOptions_action_contains_clicked" data="item"><a><span class="fa fa-search-plus" href="#"></span> Contains</a></li>\
             <li class="tagOptions_action_not_contains_clicked" data="item"><a><span class="fa fa-search-minus" href="#"></span> Not Contains</a></li>\
-            <li class="tagOptions_action_not_equal_clicked" data="item"><a><span class="fa fa-search-minus" href="#"></span> Not Equal</a></li>';
+            <li class="tagOptions_action_not_equal_clicked" data="item"><a><span class="fa fa-search-minus" href="#"></span> Not Equal</a></li>\
+            <li class="tagOptions_action_reg_clicked" data="item"><a><span class="fa fa-search-plus" href="#"></span> Regex</a></li>';
     dropdown_menu.html(menu_actions);
     dropdown_menu.dropdown('toggle');
 
@@ -2072,6 +2348,18 @@ $('#search_query').on('tagOptions' , function( event ){
             var item          = html_item.data('item')
             var item_parts    = item.split('|');
             var new_item      = item_parts[0] + "|" + item_parts[1] + "|contains";
+            search_query_tagsinput.tagsinput('change_tag' , [ item ,new_item ]);  // change the value of the tag
+            search_button_click();
+        });
+
+
+        // action "reg"
+        dropdown_menu.on('click' , 'li.tagOptions_action_reg_clicked' , function(){
+
+            // change the item content to <item_id>|<item_content>|reg
+            var item          = html_item.data('item')
+            var item_parts    = item.split('|');
+            var new_item      = item_parts[0] + "|" + item_parts[1] + "|reg";
             search_query_tagsinput.tagsinput('change_tag' , [ item ,new_item ]);  // change the value of the tag
             search_button_click();
         });
@@ -2128,6 +2416,25 @@ $('#search_query').on('beforeItemAdd' , function(event){
 
 
 
+// on click add tag button
+$("#table_events").on('click' , 'li.record_tag' , function(){
+
+    var record_id           = $(this).attr('record_id');
+    var tag_type            = $(this).attr('tag_type');
+    var record              = $("#tag_" + record_id)
+    var tag_id              = record.attr("tag_id")
+    var time                = record.data("time")
+    if(tag_type == 'untag'){
+        // if it has tag, then remove it
+        del_tag(record_id , tag_id , record)
+    } else {
+        // if it does not has tag, then add tag
+        add_doc_tag(record_id , tag_type , time , record)
+    }
+    
+
+});
+
 
 
 
@@ -2148,6 +2455,10 @@ $("#table_events,#dialog_content,#artifacts_list_container,#record_details_block
     else if(item.endsWith('|contains'))
         var re = add_search_query_input_tag(item.split('|')[0] , 'contains');   
 
+    // if specified action is reg
+    else if(item.endsWith('|reg'))
+        var re = add_search_query_input_tag(item.split('|')[0] , 'reg');   
+
     // default action is equal
     else
       var re = add_search_query_input_tag(item.split('|')[0] , 'equal');
@@ -2158,8 +2469,119 @@ $("#table_events,#dialog_content,#artifacts_list_container,#record_details_block
 
 
 
+// if item clicked to add a new column to the table
+$("#table_events,#dialog_content,#artifacts_list_container,#record_details_block").on('click' , 'a.add_extra_column_table_records' , function(){
+
+    var field = $(this).attr('field');
+    if(extra_fields_in_table.indexOf(field) != -1)
+        return ;
+    
+    extra_fields_in_table.push(field)
+    rebuild_records(ajax_records)
+
+    // set the extra fields in the url
+    var queryParams = new URLSearchParams(window.location.search);
+    queryParams.set("fields", extra_fields_in_table);
+    history.pushState(null, null, "?"+queryParams.toString());
+
+});
 
 
+// if clicked close extra column button on records
+$('#table_events').on('click' , '.clicked_extra_column_close' , function(){
+    var field = $(this).attr('data')
+    var field_index = extra_fields_in_table.indexOf(field)
+    if(field_index == -1)
+        return;
+    
+    extra_fields_in_table.splice(field_index, 1)
+    
+    rebuild_records(ajax_records)
+
+    // set the extra fields in the url
+    var queryParams = new URLSearchParams(window.location.search);
+    queryParams.set("fields", extra_fields_in_table);
+    history.pushState(null, null, "?"+queryParams.toString());
+
+})
+
+
+
+// if item clicked to add it to group by 
+$("#table_events,#dialog_content,#artifacts_list_container,#record_details_block").on('click' , 'a.add_group_by_table_records' , function(){
+
+    var field = $(this).attr('field');
+    if(group_by_fields.indexOf(field) != -1)
+        return ;
+    
+    group_by_fields.push(field)
+    search_button_click()
+    //rebuild_records(ajax_records)
+
+    // set the extra fields in the url
+    var queryParams = new URLSearchParams(window.location.search);
+    queryParams.set("group_by", group_by_fields);
+    history.pushState(null, null, "?"+queryParams.toString());
+
+});
+
+
+
+// if clicked close extra column button on records
+$('#table_events').on('click' , '.clicked_group_by_close' , function(){
+    var field = $(this).attr('data')
+    var field_index = group_by_fields.indexOf(field)
+    if(field_index == -1)
+        return;
+    
+        group_by_fields.splice(field_index, 1)
+    
+    search_button_click()
+
+    // set the extra fields in the url
+    var queryParams = new URLSearchParams(window.location.search);
+    queryParams.set("group_by", group_by_fields);
+    history.pushState(null, null, "?"+queryParams.toString());
+
+})
+
+
+// if clicked sort group by column
+$('#table_events').on('click' , '.clicked_sort_group_by' , function(){
+    if(current_clicked_sort_by != ""){
+        current_clicked_sort_by.removeClass(sort_asc_icon_class)
+        current_clicked_sort_by.removeClass(sort_desc_icon_class)
+        current_clicked_sort_by.addClass(sort_disabled_icon_class)
+    }
+    current_clicked_sort_by = $(this)
+    var sort_by_name = $(this).attr('data')
+    console.log(sort_by_name)
+    if( "_count" == sort_by_name){
+
+        switch(group_by_fields_sort){
+          // sort asc
+          case "asc":
+              $(this).removeClass(sort_desc_icon_class)
+              $(this).addClass(sort_asc_icon_class)
+              group_by_fields_sort ="desc"
+              break;
+          
+          // sort desc
+          case "desc":
+              $(this).removeClass(sort_asc_icon_class)
+              $(this).addClass(sort_desc_icon_class)
+              group_by_fields_sort ="asc"
+              break;
+        }
+
+    } else {
+        group_by_fields_sort = "desc";
+        $(this).removeClass(sort_disabled_icon_class)
+        $(this).addClass(sort_asc_icon_class)
+
+    }
+    $('#search_button').click();  // apply search 
+})
 
 
 
@@ -2269,7 +2691,7 @@ $("#table_events").on('click' , 'tr.event_record_click' , function(){
       if( data_type == "windows_events" || data_type == "Events" )
         var html = build_windows_event_table(ajax_records[clicked_id] , $('#record_details'));     
       else
-        var html = build_simple_artifacts_table(ajax_records[clicked_id] , $('#record_details'));  
+        var html = build_simple_artifacts_table(ajax_records[clicked_id] , $('#record_details'), spliter=true);  
       
 
       //$('#record_details').html(html);
@@ -2305,16 +2727,9 @@ $("#table_events").on('click' , 'tr td a.record_details_dialog_click' , function
     record_id   = $(this).attr('id');
     record      = ajax_records[record_id];
     results     = convert_json_to_list(record['_source']);
+    var container = $('#dialog_content')
 
-    var html    = '<tbody>';
-    html        += '<tr><th>Field Name</th><th>Value</th></tr>';
-    for(var i = 0 ; i < results.length ; i++ ){
-        var failed    = results[i][0].split('|').join('.');
-        var value     = results[i][1];
-        html          += '<tr><td>'+failed+' <a id="'+failed+':'+value+'" class="clickable add_to_search_query float_right"><i class="fa fa-search-plus"></i></a> </td><td>'+value+'</td></tr>';
-    }
-    html += '</tbody>';
-    $('#dialog_content').html(html);
+    build_simple_artifacts_table(records=record , container=container, searchable = true, spliter=true)
 });
 
 
@@ -2337,6 +2752,9 @@ search_query_obj.tagsinput({
             return "btn label label-success";
         else if(type == "not_equal")
             return "btn label label-danger";
+        
+        else if(type == "reg")
+            return "btn label label-info";
     },
     allowDuplicates: true,
     confirmKeys: [13, 44],
@@ -2455,6 +2873,7 @@ function handle_query_param(search){
             case '=~' : op = 'contains' ; break;
             case '!=' : op = 'not_equal' ; break;
             case '!~' : op = 'not_contains' ; break;
+            case '=r' : op = 'reg' ; break;
         }
 
         add_search_query_input_tag(item , op);
@@ -2465,21 +2884,15 @@ function handle_query_param(search){
 
 
 
-$(document).ready(function(){
-    
+$(document).ready(function(){    
     handle_query_param(search)
-
-    
 })
 
 $(document).click(function(e){
     //For descendants of menu_content being clicked, remove this check if you do not want to put constraint on descendants.
     if($(e.target).closest('#table_events').length){
-        console.log("clicked the table")
         return; 
     } else {
-        console.log("clicked other places")
-
         $('#' + clicked_id_record).removeClass('table_events_clicked_tr disabled');
         $('#' + clicked_id_record).css('background-color' ,  '');
 
@@ -2500,7 +2913,6 @@ $(document).on("keydown" , function(e) {
 window.onpopstate = function(event) {
     var urlParams = new URLSearchParams(window.location.search);
 
-    //console.log(JSON.parse(urlParams.get('q')))
     search_query = JSON.parse(urlParams.get('q'))
 
 

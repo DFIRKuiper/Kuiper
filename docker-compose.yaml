@@ -1,0 +1,278 @@
+version: "3.8"
+# service       network IPs         Exposed Port        Volumes
+# flask         172.30.250.12       5000                kuiper_nfs
+# celery        172.30.250.16                           kuiper_nfs
+# mongodb       172.30.250.13       27017               ./mongodb/db/
+# es01          172.30.250.14       9200                ./elasticsearch
+# nginx         172.30.250.15       443                 ./nginx/cert/
+# redis         172.30.250.11       6379                ./redis
+# nfs           172.30.250.10       2049                ./kuiper/files
+
+services: 
+    # =========================== Flask 
+    flask:
+        build: 
+            dockerfile: ./Dockerfile.prod.flask
+            context: ./
+            network: host
+
+        image: dfirkuiper/kuiper_flask:${GIT_KUIPER_VERSION}
+        container_name: kuiper_flask
+        restart: always
+
+        ports:
+            - "5000:5000"
+        volumes:
+            - type: volume
+              source: kuiper_nfs
+              target: /app/
+              volume:
+                nocopy: true
+            - type: volume
+              source: kuiper_nfs_files
+              target: /app/files
+              volume:
+                nocopy: true
+
+        depends_on:
+            - "nfs"
+            - "mongodb"
+            - "es01"
+            - "redis"
+            - "celery"
+
+        
+        networks:
+            kuiper:
+                ipv4_address: 172.30.250.12
+
+        env_file:
+            - ./.env
+
+        environment:
+            REDIS_IP: redis
+            MONGODB_IP: mongodb
+            ES_IP: es01
+
+        cap_add:
+            - sys_admin
+        devices:
+            - /dev/fuse
+        security_opt:
+            - apparmor:unconfined
+
+    # =========================== Celery
+    celery:
+        build: 
+            dockerfile: ./Dockerfile.prod.celery
+            context: ./
+            network: host
+
+        image: dfirkuiper/kuiper_celery:${GIT_KUIPER_VERSION}
+        container_name: kuiper_celery
+        restart: always
+
+        depends_on:
+            - nfs
+            - redis
+            - mongodb
+            - es01
+
+        volumes:
+            - type: volume
+              source: kuiper_nfs
+              target: /app/
+              volume:
+                nocopy: true
+            - type: volume
+              source: kuiper_nfs_files
+              target: /app/files
+              volume:
+                nocopy: true
+
+
+
+        environment:
+            REDIS_IP: redis
+            MONGODB_IP: mongodb
+            ES_IP: es01
+            FLASK_IP: flask
+
+            
+        env_file:
+            - ./.env
+
+        privileged: true
+        
+        networks:
+            kuiper:
+                ipv4_address: 172.30.250.16
+
+
+    # =========================== mongodb
+    mongodb:
+        
+        build: 
+            dockerfile: ./Dockerfile.prod.mongodb
+            context: ./
+            network: host
+
+        image: dfirkuiper/kuiper_mongodb:${GIT_KUIPER_VERSION}
+        container_name: kuiper_mongodb
+        restart: always
+        
+        ports:
+            - 27017:27017
+        
+        environment:
+            ME_CONFIG_MONGODB_URL: mongodb://root:example@mongo:27017/
+            FLASK_IP: flask
+
+        env_file:
+            - ./.env
+        volumes:
+            - ./mongodb/db/:/data/db
+
+        
+        networks:
+            kuiper:
+                ipv4_address: 172.30.250.13
+    
+    # =========================== Elasticsearch
+    es01:
+
+        build: 
+            dockerfile: ./Dockerfile.prod.es01
+            context: ./
+            network: host
+
+        image: dfirkuiper/kuiper_es01:${GIT_KUIPER_VERSION}
+        container_name: kuiper_es01
+        environment:
+          - node.name=es01
+          - cluster.name=es-docker-cluster
+          - discovery.seed_hosts=es01
+          - cluster.initial_master_nodes=es01
+          - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+          - FLASK_IP=flask
+          - ES_IP=es01
+        
+        volumes:
+          - ./elasticsearch:/usr/share/elasticsearch/data:rw
+        ports:
+          - 9200:9200
+
+        env_file:
+            - ./.env
+        networks:
+            kuiper:
+                ipv4_address: 172.30.250.14
+
+
+
+    # =========================== Nginx
+    nginx: 
+
+        build: 
+            dockerfile: ./Dockerfile.prod.nginx
+            context: ./
+            network: host
+
+        image: dfirkuiper/kuiper_nginx:${GIT_KUIPER_VERSION}
+        container_name: kuiper_nginx
+    
+        ports:
+            - "443:443"
+    
+        volumes:
+            - ./nginx/cert/:/nginx/cert/
+
+        
+        depends_on:
+            - flask
+            
+        env_file:
+            - ./.env
+
+        environment:
+            FLASK_IP: flask
+        
+    
+        networks:
+            kuiper:
+                ipv4_address: 172.30.250.15
+
+    # =========================== Redis
+    redis:
+        build: 
+            dockerfile: ./Dockerfile.prod.redis
+            context: ./
+            network: host
+
+        image: dfirkuiper/kuiper_redis:${GIT_KUIPER_VERSION}
+        container_name: kuiper_redis
+        ports:
+            - '6379:6379'
+        volumes:
+            - "./redis:/data"
+
+        
+        env_file:
+            - ./.env
+        
+        environment:
+            FLASK_IP: flask
+
+        networks:
+            kuiper:
+                ipv4_address: 172.30.250.11
+    # =========================== NFS Server
+    nfs:
+
+        build: 
+            dockerfile: ./Dockerfile.prod.nfs
+            context: ./
+            network: host
+
+        image: dfirkuiper/kuiper_nfs:${GIT_KUIPER_VERSION}
+        container_name: kuiper_nfs
+        
+        privileged: true
+
+        hostname: nfs.kuiper.local
+        domainname: nfs.kuiper.local
+        environment:
+            SHARED_DIRECTORY: /app
+            SHARED_DIRECTORY_2: /app/files
+            
+        env_file:
+            - ./.env
+        
+        ports:
+            - 2049:2049
+
+        volumes:
+            - ./kuiper/files/:/app/files/
+            - ./kuiper/:/app/               # use this during development
+
+        networks:
+            kuiper:
+                ipv4_address: 172.30.250.10
+        
+volumes:
+    kuiper_nfs:
+        driver_opts:
+            type: nfs4
+            o: "addr=172.30.250.10"         # this should match the nfs ip address
+            device: ":/"
+    kuiper_nfs_files:
+        driver_opts:
+            type: nfs4
+            o: "addr=172.30.250.10"         # this should match the nfs ip address
+            device: ":/files/"
+networks:
+    kuiper:
+        driver: bridge
+        ipam:
+            config: 
+                - subnet: 172.30.250.0/24

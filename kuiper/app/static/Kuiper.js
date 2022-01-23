@@ -21,6 +21,13 @@ var entityMap = {
   }
 
 
+  var tags_color = {
+    "malicious"         : "red",
+    "suspicious"        : "yellow",
+    "legit"             : "green",
+    "untag"             : "muted"
+}
+
 
 
 
@@ -43,13 +50,16 @@ function toast_msg(msg, type = "info", header = "Information") {
 // this function take a json variable and return a list of the elements
 function convert_json_to_list(json) {
     var result = []
+
+
     for (var key in json) {
         if (typeof json[key] == 'object') {
             var fetch = convert_json_to_list(json[key]);
             for (var obj = 0; obj < fetch.length; obj++)
                 result.push([key + '.' + fetch[obj][0].split('.').join('|'), fetch[obj][1]]);
-        } else
+        } else {
             result.push([key, json[key]])
+        }
     }
     return result;
 }
@@ -174,28 +184,42 @@ function build_windows_event_table(record , container) {
 
 
 // build simple table (record contains key and values)
-function build_simple_artifacts_table(records , container, searchable = true) {
+// spliter, if true, the table shows spliter column to add it to the table
+function build_simple_artifacts_table(records , container, searchable = true, spliter=true , group_by=true) {
 
     var open_badge = '<span class="badge bg-blue"> '
-    results = convert_json_to_list(records['_source'])
-
+    var results = convert_json_to_list(records['_source'])
     var rhaegal_hit = build_rhaegal_rules(records)
     
     html = rhaegal_hit + "<table class=\"table table-condensed table_left_header\"><tbody>";
+    
+    var list_of_keys = []
+    for(var i = 0 ; i < results.length ; i++)
+        list_of_keys.push(results[i][0])
+    
+    // display the "tag_type" field
+    if(list_of_keys.indexOf("tag_type") != -1){
+        var i = list_of_keys.indexOf("tag_type")
+        var field = results[i][0].split('|').join('.');
+        var value = results[i][1];
+
+        var search_plus = (searchable) ? '<a id="' + field + ':' + value + '" class="clickable add_to_search_query float_right"><i class="fa fa-search-plus"></i></a>' : '';
+        var tag_color = (value in tags_color) ? tags_color[value] : tags_color["untag"];
+        var value_html = (field == "tag_type") ? '<small class="label bg-'+tag_color+'">'+value+'</small>': escapeHtml(value);
+        html += '<tr><td> ' + open_badge + " " + field + ' </span> ' + search_plus + '</td><td  style="min-width:250px">' + value_html + '</td></tr>';
+    }
 
     for (var i = 0; i < results.length; i++) {
         var field = results[i][0].split('|').join('.');
         var value = results[i][1];
 
-        if (searchable)
-            var search_plus = '<a id="' + field + ':' + value + '" class="clickable add_to_search_query float_right"><i class="fa fa-search-plus"></i></a>'
-        else
-            var search_plus = ''
+        if(["tag_type" , "tag_id"].indexOf(field) != -1) // skip these fields
+            continue 
+        var search_plus = (searchable) ? '<a id="' + field + ':' + value + '" class="clickable add_to_search_query" ><i class="fa fa-search-plus"></i></a>' : '';
+        var spliter_plus = (spliter) ? '<a field="' + field + '" class="clickable add_extra_column_table_records" style="margin-left:3px;"><i class="fa fa-columns"></i></a>' : '';
+        var group_by_plus = (group_by) ? '<a field="' + field + '" class="clickable add_group_by_table_records" style="margin-left:3px;"><i class="fa fa-object-group"></i></a>' : '';
 
-        
-        html += '<tr><td> ' + open_badge + " " + field + ' </span> ' + search_plus + '</td><td  style="min-width:250px">' + escapeHtml(value) + '</td></tr>';
-        
-
+        html += '<tr><td  style="min-width:150px"><div class="float_right">' + group_by_plus + spliter_plus + " " + search_plus + '</div> <div style="margin-right:70px">' + open_badge + " " + field + ' </span></div></td><td  style="min-width:250px">' + escapeHtml(value) + '</td></tr>';
         
     }
 

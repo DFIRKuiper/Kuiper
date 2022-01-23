@@ -1,0 +1,11 @@
+FROM nginx
+
+
+RUN mkdir -p /nginx/
+WORKDIR /nginx/
+
+COPY ./nginx/proxy_params /etc/nginx/proxy_params
+COPY ./nginx/templates/kuiper-nginx.conf /etc/nginx/templates/default.conf.template
+
+
+EXPOSE 443

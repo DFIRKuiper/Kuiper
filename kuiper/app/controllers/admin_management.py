@@ -9,6 +9,7 @@ import urllib
 import yaml 
 import psutil
 from ast import literal_eval as make_tuple
+import uuid
 
 from flask import request, redirect, render_template, url_for, flash,send_file,session
 from flask import jsonify
@@ -281,6 +282,7 @@ def admin_create_case():
                 'date'      : str(datetime.now() ).split('.')[0]
             }
             if request.form['update_or_create_case'] == "create":
+                # ===================== Create case
 
                 retn_cre = db_cases.create_case( case_details )
                 # if failed to create case
@@ -300,11 +302,26 @@ def admin_create_case():
                 return redirect(url_for('home_page' , message="Case ["+case_details['casename']+"] created  "))
 
             else:
+                # ===================  update case 
                 retn_cre = db_cases.update_case( case_details['casename'] ,  case_details )
                 # if failed to create case
                 if retn_cre[0] == False:
                     logger.logger(level=logger.ERROR , type="admin", message="Failed updating case ["+casename+"]" , reason=retn_cre[1])
                     return redirect(url_for('home_page', err_msg="Error: " + retn_cre[1] ))
+
+                if request.form['status'] == "not_active":
+                    retn_cre = db_es.close_index(case_details['casename'])
+                    if retn_cre[0] == False:    
+                        print "Failed closing elasticsearch index ["+casename+"]: " + retn_cre[1]
+                        logger.logger(level=logger.ERROR , type="admin", message="Failed closing elasticsearch index ["+casename+"]" , reason=retn_cre[1])
+                        return redirect(url_for('home_page', err_msg="Error: " + retn_cre[1] ))
+                elif request.form['status'] == "active":
+                    retn_cre = db_es.open_index(case_details['casename'])
+                    if retn_cre[0] == False:
+                        print "Failed opening elasticsearch index ["+casename+"]: " + retn_cre[1]
+                        logger.logger(level=logger.ERROR , type="admin", message="Failed opening elasticsearch index ["+casename+"]" , reason=retn_cre[1])
+                        return redirect(url_for('home_page', err_msg="Error: " + retn_cre[1] ))
+ 
 
                 logger.logger(level=logger.INFO , type="admin", message="Case ["+casename+"] information updated")
                 return redirect(url_for('home_page' , message="Case ["+case_details['casename']+"] updated "))
@@ -377,7 +394,49 @@ def config_page():
     return render_template('admin/configuration.html',SIDEBAR=SIDEBAR, page_header="Configuration")
 
 
+@app.route('/admin/config/add_timeline_view' , methods=["POST"])
+def add_timeline_view():
+    if request.method == "POST":  
+        try:
+            logger.logger(level=logger.DEBUG , type="admin", message="Start adding/editing timeline view")
+            ajax_str =  urllib.unquote(request.data).decode('utf8')
+            ajax_j = json.loads(ajax_str)['data']
+            logger.logger(level=logger.DEBUG , type="admin", message="Timeline view details: ", reason=json.dumps(ajax_j))
+  
+            action = ajax_j['action'] # add or edit
+            if action == "edit": 
+                path                = ajax_j['path']  
+                content             = ajax_j['content']   
+                
+                t                   = buildTimeline.BuildTimeline(views_folder=app.config['TIMELINE_VIEWS_FOLDER'] , fname= None)
+                views_folder        = app.config['TIMELINE_VIEWS_FOLDER'] 
+                views               = t.set_views(content , os.path.join( views_folder , path ) )
+  
+                if views[0] == False: 
+                    logger.logger(level=logger.ERROR , type="admin", message="Failed edting timeline view", reason=views[1])
+                    return json.dumps({'result' : 'failed' , 'msg' : views[1]})
+                else: 
+                    return json.dumps({'result' : 'success'})
+            if action == "add":
+                path                = str(uuid.uuid4()) + ".yaml"
+                content             = ajax_j['content']    
+                t                   = buildTimeline.BuildTimeline(views_folder=app.config['TIMELINE_VIEWS_FOLDER'] ,fname=  None) 
+                views_folder        = app.config['TIMELINE_VIEWS_FOLDER'] 
+                views               = t.set_views(content , os.path.join( views_folder , path ) )
+                
+                if views[0] == False:   
+                    logger.logger(level=logger.ERROR , type="admin", message="Failed adding timeline view", reason=views[1])
+                    return json.dumps({'result' : 'failed' , 'msg' : views[1]})
+                else: 
+                    return json.dumps({'result' : 'success'})
 
+
+            return json.dumps({'failed' : 'success' , 'msg' : 'no action specified'})
+        except Exception as e:
+            logger.logger(level=logger.ERROR , type="admin", message="Failed adding/editing parser", reason=str(e))
+            return json.dumps({'result' : 'failed' , 'msg' : str(e)})
+    else:
+        return redirect(url_for('home_page'))
 
 
 # add parser information
@@ -497,6 +556,26 @@ def get_parsers_ajax():
     else:
         return redirect(url_for('home_page'))
 
+
+
+
+# get parser information
+@app.route('/admin/config/get_timeline_views_ajax', methods=["GET"])
+def get_timeline_views_ajax():
+    if request.method == "GET":  
+        try:
+            t                   = buildTimeline.BuildTimeline(views_folder=app.config['TIMELINE_VIEWS_FOLDER'] , fname= None)
+            views               = t.get_views(app.config['TIMELINE_VIEWS_FOLDER'])
+            ajax_res            = {'result' : 'successful' , 'data' : views}
+        except Exception as e:
+            logger.logger(level=logger.ERROR , type="admin", message="Failed getting timeline views details", reason=str(e))
+            ajax_res = {'result' : 'failed' , 'data' : str(e)}
+        
+        return json.dumps(ajax_res) 
+ 
+    else: 
+        return redirect(url_for('home_page'))
+
 # delete parser
 @app.route('/admin/config/delete_parsers_ajax', methods=["POST"])
 def delete_parsers_ajax():
@@ -522,6 +601,34 @@ def delete_parsers_ajax():
         return redirect(url_for('home_page'))
 
 
+
+ 
+# delete timeline view
+@app.route('/admin/config/delete_timeline_view_ajax', methods=["POST"])
+def delete_timeline_view_ajax():
+    if request.method == "POST":
+        try:
+            ajax_str =  urllib.unquote(request.data).decode('utf8')
+            ajax_data = json.loads(ajax_str)['data']  
+            logger.logger(level=logger.DEBUG , type="admin", message="Delete timeline view ["+ajax_data['name']+"]")
+
+            path = ajax_data['path'] 
+            name = ajax_data['name']
+            views_folder        = app.config['TIMELINE_VIEWS_FOLDER']
+              
+            t                   = buildTimeline.BuildTimeline(views_folder=views_folder , fname= None)    
+            views               = t.delete_views(name , os.path.join( views_folder , path ) )  
+            if views[0] == False: 
+                logger.logger(level=logger.ERROR , type="admin", message="Failed deleting timeline view", reason=views[1])
+                return json.dumps({'result' : 'failed' , 'msg' : views[1]})
+            else: 
+                return json.dumps({'result' : 'success'})
+
+        except Exception as e: 
+            return json.dumps({'result' : 'failed' , 'msg' : str(e)})
+
+    else:
+        return redirect(url_for('home_page'))
 
 
 

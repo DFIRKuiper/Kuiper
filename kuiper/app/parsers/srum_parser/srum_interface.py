@@ -18,5 +18,3 @@ def SRUM_interface(file, parser):
         msg = "[-] [Error] " + parser + " Parser: " + str(exc_obj) + " - Line No. " + str(exc_tb.tb_lineno)
         return (None , msg)
 
-
-

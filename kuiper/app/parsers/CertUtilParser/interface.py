@@ -16,6 +16,3 @@ def auto_interface(file,parser):
         msg = "[-] [Error] " + str(parser) + " Parser: " + str(exc_obj) + " - Line No. " + str(exc_tb.tb_lineno)
         print(msg)
         return (None , msg)
-
-if __name__ == "__main__":
-    print(json.dumps(auto_interface("6BADA8974A10C4BD62CC921D13E43B18_711ED44619924BA6DC33E69F97E7FF63","CertUtilParser")))

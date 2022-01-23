@@ -9,8 +9,13 @@
 
 <ul class="nav nav-tabs" id="myTab" role="tablist">
   <li class="nav-item active ">
-    <a class="nav-link" id="parsers-tab" data-toggle="tab" href="#parsers_tab" role="tab" aria-controls="contact">Parsers</a>
+    <a class="nav-link" id="parsers-tab" data-toggle="tab" href="#parsers_tab" role="tab" aria-controls="parsers">Parsers</a>
   </li>
+  
+  <li class="nav-item">
+    <a class="nav-link" id="timeline-views-tab" data-toggle="tab" href="#timeline_views_tab" role="tab" aria-controls="timeline-views">Timeline Views</a>
+  </li>
+
 </ul>
 
 <!-- =============== Ends tabs ============ -->
@@ -20,7 +25,7 @@
 <div class="tab-content" id="myTabContent">
   
   <!-- ================ Starts Parsers tab ===============-->
-  <div class="tab-pane show active" id="parsers_tab" role="tabpanel" aria-labelledby="contact-tab">
+  <div class="tab-pane active" id="parsers_tab" role="tabpanel" aria-labelledby="parsers-tab">
 
           <div class="box">
             <div class="box-header">
@@ -162,7 +167,72 @@
   </div>
   <!-- ================ Ends Parsers tab ===============-->
 
+  <!-- ================ Start Timeline Views =============== -->
+  <div class="tab-pane" id="timeline_views_tab" role="tabpanel" aria-labelledby="timeline-views-tab">
+      
+    <div class="box">
+        <div class="box-header">
+          <div class="btn-group  pull-right" id="timeline_view_global_buttons">
 
+            <button type="button" class="change_timeline_view btn btn-default btn-sm" data-content="list_timeline_views" title="List parser"><i class="fa fa-list"></i></button>
+            <button type="button" class="change_timeline_view btn btn-default btn-sm" data-content="add_timeline_views" title="Add parser"><i class="fa fa-plus"></i></button>            </div>
+          
+        </div>
+        <!-- timeline views list -->
+        <div class="box-body no-padding timeline_views" id="list_timeline_views" >
+            <div class="">
+              <table class="table table-striped ">
+                <thead>
+                  <tr>
+                    <th style="width: 60px">#</th>
+                    <th>Name</th>
+                    <th>Sheet</th>
+                    <th>Condition</th>
+                    <th>Default</th>
+                    <th width="100">Options</th>
+                  </tr>
+                </thead>
+              <tbody id="timeline_views_list_table"></tbody>
+            </table>
+          </div>
+        </div>
+
+
+        <!-- add timeline view -->
+        <div class="box-body no-padding timeline_views" id="add_timeline_views"  style="display:None">
+                <table class="table">
+                    
+                    
+                    <tr>
+                        <td width="100">Path</td>
+                        <td>
+                            <span id="timeline_view_add_path"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="100">Name</td>
+                        <td>
+                            <span id="timeline_view_add_name"></span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="100">Rule</td>
+                        <td>
+                            <textarea  rows="20" type="text" id="timeline_view_add_yaml" class="form-control"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td width="100"></td>
+                        <td>
+                            <button type="button" id="add_timeline_view_button" data-action="add" class="btn btn-info pull-right"><i class="fa fa-plus"></i> Submit</button>
+                        </td>
+                    </tr>
+                </table>
+        </div>
+    </div>
+
+  </div>
+  <!-- ================ End Timeline Views =============== -->
 </div>
 
 </section>
@@ -187,6 +257,11 @@
 <script src="../../static/dist/js/demo.js"></script>
 
 
+<script src="../../static/codeMirror/lib/codemirror.js"></script>
+<link rel="stylesheet" href="../../static/codeMirror/lib/codemirror.css">
+<script src="../../static/codeMirror/mode/yaml/yaml.js"></script>
+<link rel="stylesheet" href="../../static/codeMirror/theme/lucario.css">
+
 
 <!-- toast notifications -->
     <script src="../../static/dist/jquery_toast/jquery.toast.min.js"></script>
@@ -203,12 +278,77 @@
 
 /* =================== Variables ================ */
 
-var parsers_details = null
-var current_parser_view = 'parsers_list' // by default show the parsers_list view
+var parsers_details             = null
+var current_parser_view         = 'parsers_list' // by default show the parsers_list view
+var current_timeline_view_show  = 'list_timeline_views'
+var timeline_views              = []
 
+      
+var timeline_view_editor_element = document.getElementById("timeline_view_add_yaml")
 
+var timeline_view_editor = CodeMirror.fromTextArea(timeline_view_editor_element , {
+    styleActiveLine: true,
+    mode: "yaml",
+    theme: "lucario",
+    lineNumbers: true,
+    viewportMargin: Infinity,
+    extraKeys: {Tab: false},
+    autoRefresh: true
+
+});
 
 /* =================== Functions ================ */
+
+// pull the list of timeline views
+function pull_timeline_views(){
+    $.ajax({
+        type : 'GET',
+        url : "/admin/config/get_timeline_views_ajax",
+        
+        success: function(result) {
+    
+            var result_ajax = JSON.parse(result);
+            if(result_ajax['result'] == 'failed'){
+                toast_msg('Failed to get timeline views details' , type='error' , header = "Error")
+                return;
+            }
+            var r = result_ajax['data']
+            console.log(r)
+            timeline_views = r
+
+
+            var timeline_views_table = $("#timeline_views_list_table");
+            timeline_views_table.html('')
+
+            for(var i = 0 ; i < r.length ; i++){
+                var condition   = ('query' in r[i]['condition']) ? r[i]['condition']['query'] : ''
+                var name        = r[i]['name']
+                var sheet       = r[i]['sheet']
+                var isDefault   = ('default' in r[i]['condition'] && r[i]['condition']['default'] == true) ? 'Default' : ''
+                var tr = '<tr>';
+                tr += '<td>'+i+'</td>'
+                tr += '<td>'+name+'</td>'
+                tr += '<td>'+sheet+'</td>'
+                tr += '<td>'+condition+'</td>';
+                tr += '<td>'+isDefault+'</td>';
+                tr += '<td><div class="btn-group">\
+                            <button type="button" class="timeline_view_edit_view btn btn-warning btn-xs" data-path="'+r[i]['path']+'" data-name="'+r[i]['name']+'" data-ruleid="'+i+'" title="Edit Timeline View"><i class="fa fa-fw fa-edit"></i></button>\
+                            <button type="button" class="timeline_view_delete_view btn btn-danger btn-xs" data-path="'+r[i]['path']+'" data-name="'+r[i]['name']+'" data-ruleid="'+i+'" title="Remove Timeline View"><i class="fa fa-fw fa-remove "></i></button>\
+                            </div>\
+                        </td>';
+                tr += '</tr>'
+
+                timeline_views_table.append(tr)
+
+            }
+
+
+        },
+        error: function(error){
+          toast_msg('Failed to get timeline views details, check connection' , type='error' , header = "Error")
+        }
+      });
+}
 
 
 // build the table of parsers list 
@@ -282,6 +422,65 @@ function update_parsers_table(){
 
 
 /* =================== Listeners ================ */
+// timeline view optioons - add timeline view
+$('#timeline_view_global_buttons').on('click' , ".change_timeline_view[data-content='add_timeline_views']" , function(){
+    $('#timeline_view_add_path').html("")
+    $('#timeline_view_add_name').html("")
+    timeline_view_editor.setValue("")
+
+    $("#add_timeline_view_button").data("action" , "add")
+
+})
+
+
+// timeline view optioons - edit timeline view
+$('#timeline_views_list_table').on('click' , '.timeline_view_edit_view' , function(){
+
+
+    var path = $(this).data('path')
+    var name = $(this).data('name')
+    var ruleid = $(this).data('ruleid')
+
+    $(".change_timeline_view[data-content='add_timeline_views']").click()
+
+    timeline_view_editor.setValue(timeline_views[ruleid]['content'])
+    $('#timeline_view_add_path').html(path)
+    $('#timeline_view_add_name').html(name)
+    $("#add_timeline_view_button").data("action" , "edit")
+
+})
+
+
+$("#timeline_views_list_table").on('click' , ".timeline_view_delete_view" , function(){
+    var path = $(this).data('path')
+    var name = $(this).data('name')
+    var data =  {'data' : {'path' : path , 'name' : name} }
+    console.log(data)
+    $.ajax({
+      type : 'POST',
+      url : "/admin/config/delete_timeline_view_ajax",
+      contentType: 'application/json;charset=UTF-8',
+      data: JSON.stringify(data),
+      success: function(result) {
+  
+          var r = JSON.parse(result)['result'];
+          if(r == 'success'){
+            toast_msg('Timeline view ['+name+'] Removed Successfully')
+            pull_timeline_views()
+          } else {
+            toast_msg('timeline view ['+name+'] Could not be Removed: ' + r['msg'] , type='error' , header = "Error")
+          }
+
+  
+      },
+      error: function(error){
+          console.log(error)
+        toast_msg('Timeline view ['+name+'] Could not be Removed \n ' + error.toString() , type='error' , header="Error")
+      }
+    });
+
+})
+
 
 // parsers options - edit parser
 $('#parsers_list_table').on('click' , '.parsers_edit_parser' , function(){
@@ -351,16 +550,37 @@ $('#parsers_list_table').on( 'click',  '.parsers_delete_parser' , function(){
 
 // on document downloaded
 $(document).ready(function(){
+
+    pull_timeline_views()
+
   // show details of the parsers on the parser tab table
     $('#parsers_list').fadeIn("fast")
     update_parsers_table()
     $('#parsers_list_table').on('click' , '.dropdown_parser_details' , function(){
         $('#parser_details_' + $(this).attr('data')).fadeToggle()
     })
+
+
+    
 })
 
 
+// shows the timeline views content tab
+$('.change_timeline_view').on('click' , function(){
+    var clicked_timeline_view = $(this).data('content')
+  // if clicked timeline view is different than the current view change the view
+  if( current_timeline_view_show !=  clicked_timeline_view){
+    $('#' + current_timeline_view_show).fadeOut( "fast", function() {
+        $('#' + clicked_timeline_view).fadeIn("fast")
+    });
+    current_timeline_view_show = clicked_timeline_view
+  }
+  // if current view is timeline views list then build the table of views
+  if(current_timeline_view_show == "list_timeline_views")
+    pull_timeline_views()
 
+  
+})
 
 // showing the parsers content tab
 $('.change_parser_view').on( 'click' , function(){
@@ -491,7 +711,40 @@ $('#add_parser_button_submit').click( function(event){
 
 })
 
+$('#add_timeline_view_button').click(function(event){
+    
+    var  action = $(this).data('action')
+    var data = { 
+        "data" : {
+            'path' : $('#timeline_view_add_path').text(),
+            'name' : $('#timeline_view_add_name').text(),
+            'content': timeline_view_editor.getValue(),
+            'action' : action
+        }
+    }
+    console.log(data)
+    var url_page = '/admin/config/add_timeline_view'
+    $.ajax({
+            type: 'POST',
+            url: url_page,
+            contentType: 'application/json;charset=UTF-8',
+            data : JSON.stringify(data),
+            success: function(data, status, request) {
+                if(data['result'] == "failed")
+                  toast_msg(data['msg'], type = "error" , header = "Error")
+                else {
+                  toast_msg( (action == 'add') ? 'Timeline view added' : 'Timeline view updated' , type = "info" , header = "Done")
+                  $(".change_timeline_view[data-content='list_timeline_views']").click()
 
+                }
+
+            },
+            error: function() {
+                toast_msg('Failed to add timeline view details, check connection' , type='error' , header = "Error")
+            }
+      });
+      
+})
 
 
 /* =================== End Parser ================ */
