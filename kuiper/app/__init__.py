@@ -119,7 +119,7 @@ class Logger:
 
         
 
-        self.logfile_handle = open(log_file , 'a')
+        self.logfile_handle = open(log_file , 'a+')
 
         # if the file not empty write the log header
         if not os.stat(log_file).st_size:
