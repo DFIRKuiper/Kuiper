@@ -127,6 +127,7 @@ Starting from version 2.2.0, Kuiper now run over dockers, there are 7 dockers:
 To run the docker use the following command:
 
 ```shell
+docker-compose pull
 docker-compose up -d
 ```
 
