@@ -23,6 +23,7 @@
           "name": "Query"
         },
         {
+          "path": "cs_user_agent",
           "name": "User Agent"
         },
         {
@@ -41,4 +42,3 @@
       "description": "Processes IIS access logs."
     }
 ]
-  
