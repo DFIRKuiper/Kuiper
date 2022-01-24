@@ -95,7 +95,22 @@ app.config['DOCS_FOLDER'] 	            = os.path.abspath( ''.join(y['Directories
   
  
 app.secret_key = os.getenv('FLASK_SECRET_KEY', y['Kuiper']['secret_key']) 
+# ============== logs files
+logs_file                               = os.path.join(y['Logs']['log_folder'] , y['Logs']['kuiper_log'])
 
+
+# create of folders
+built_in_dirs = [
+    app.config['UPLOADED_FILES_DEST'] , 
+    app.config['UPLOADED_FILES_DEST_RAW'] , 
+    app.config['TIMELINE_FOLDER'],
+    logs_file
+    ]
+for d in :
+    try:
+        os.mkdir(d)
+    except:
+        pass
  
 
 # ===================== Logger - START ===================== # 
@@ -147,7 +162,7 @@ else:
     log_level = Logger.ERROR
     
  
-logger = Logger(os.path.join(y['Logs']['log_folder'] , y['Logs']['kuiper_log']) , log_level )
+logger = Logger(logs_file , log_level )
 
 # ===================== Logger - END ===================== # 
 
