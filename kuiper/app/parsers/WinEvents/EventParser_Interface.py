@@ -13,6 +13,10 @@ def Events_interface(file , parser):
 
     try:
         CurrentPath    =os.path.dirname(os.path.abspath(__file__))
+
+        if not os.path.exists(CurrentPath + "/temp/"):
+            os.mkdir(CurrentPath + "/temp/")
+            
         output_path = CurrentPath + "/temp/" + str(uuid.uuid4())
         cmd = CurrentPath + '/evtx_dump "'+file+'" --no-indent  --format json --ansi-codec utf-8 --dont-show-record-number --output ' + output_path
         proc = subprocess.Popen(cmd, shell=True ,stdin=None , stdout=subprocess.PIPE , stderr=subprocess.PIPE)
