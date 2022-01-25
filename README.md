@@ -114,7 +114,7 @@ Kuiper use the following components:
 
 ## Installation 
 
-Starting from version 2.2.0, Kuiper now run over dockers, there are 7 dockers:
+Starting from version 2.2.0, Kuiper run over dockers, there are 7 docker images:
 
 - **Flask**: the main docker which host the web application (check [docker image](https://hub.docker.com/r/dfirkuiper/dfir_kuiper)).
 - **Mongodb**: stores the cases and machines metadata.
@@ -127,6 +127,7 @@ Starting from version 2.2.0, Kuiper now run over dockers, there are 7 dockers:
 To run the docker use the following command:
 
 ```shell
+sysctl -w vm.max_map_count=262144
 git clone https://github.com/DFIRKuiper/Kuiper.git
 cd Kuiper
 docker-compose pull
@@ -170,22 +171,28 @@ To solve the issue, run the command again
 ```shell
 docker-compose up -d
 ```
+## Troubleshooting
 
-3- Note: if you faced issue with es01
-
-(output of `docker-compose ps -a`)
+To check the dockers, run the command
 ```shell
-kuiper_es01      /bin/tini -- /usr/local/bi ...   Exit 1                               
+docker-compose ps -a
+```
+It should show the results
+```
+     Name                   Command               State                         Ports                       
+------------------------------------------------------------------------------------------------------------
+kuiper_celery    /bin/sh -c cron && python  ...   Up                                                        
+kuiper_es01      /bin/tini -- /usr/local/bi ...   Up      0.0.0.0:9200->9200/tcp,:::9200->9200/tcp, 9300/tcp
+kuiper_flask     /bin/sh -c cron && gunicor ...   Up      0.0.0.0:5000->5000/tcp,:::5000->5000/tcp          
+kuiper_mongodb   docker-entrypoint.sh /bin/ ...   Up      0.0.0.0:27017->27017/tcp,:::27017->27017/tcp      
+kuiper_nfs       /usr/bin/nfsd.sh                 Up      0.0.0.0:2049->2049/tcp,:::2049->2049/tcp          
+kuiper_nginx     /docker-entrypoint.sh ngin ...   Up      0.0.0.0:443->443/tcp,:::443->443/tcp, 80/tcp      
+kuiper_redis     docker-entrypoint.sh /bin/ ...   Up      0.0.0.0:6379->6379/tcp,:::6379->6379/tcp          
 ```
 
-Check the logs for the elasticsearch `docker-compose -f --tail=100 es01`
-if the logs shows 
+if anyone failed, check the logs for the service that failed
 ```shell
-es01_1     | "stacktrace": ["org.elasticsearch.bootstrap.StartupException: ElasticsearchException[failed to bind service]; nested: AccessDeniedException[/usr/share/elasticsearch/data/nodes];",
-```
-Then to solve the issue, change the owner of `./elasticsearch/` folder to the host user account (non-root account)
-```shell
-sudo chown <user>:<user> -R ./elasticsearch/
+docker-compose logs -f --tail=100 <service>
 ```
 
 
