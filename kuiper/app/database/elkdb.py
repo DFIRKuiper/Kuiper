@@ -225,7 +225,7 @@ class ES_DB:
                     else:
                         shard_reason = shard['reason']['reason']
 
-
+                    print shard_reason 
 
                     # if the reason is that the field used for key is text and is not sortable, then try it sub-field ".keyword" 
                     if shard_reason.startswith("Text fields are not optimised for operations that require per-document field data like aggregations and sorting, so these operations are disabled by default"):
@@ -264,8 +264,14 @@ class ES_DB:
                     # if the result window is too large, increase the window
                     match = re.match('Result window is too large, from \+ size must be less than or equal to: \[([0-9]+)\] but was \[([0-9]+)\].*' , shard_reason)
                     if match is not None:
-                        max_result_window = int(match.groups()[1]) + 1000
-                        error_index = shard_reason = shard['reason']['index']
+                        max_result_window = int(match.groups()[1]) + 1000 
+
+                        # get the index name  
+                        if 'index' in shard:
+                            error_index = shard_reason = shard['index'] 
+                        else: 
+                            error_index = shard_reason = shard['reason']['index']
+                        
                         inc = self.es_db.indices.put_settings(index=error_index , body='{ "index" : { "max_result_window" : ' + str(max_result_window) + ' } }')
                         if inc["acknowledged"]:
                             logger.logger(level=logger.INFO , type="elasticsearch", message="Query ["+indexname+"] result window increased to " + str(self.get_max_result_window(indexname)))

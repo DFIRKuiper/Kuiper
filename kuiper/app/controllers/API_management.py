@@ -84,8 +84,8 @@ def api_get_artifacts():
             res = db_es.query( case_id, body )
         except Exception as e:
             res = [False, str(e)]
-        
         if res[0] == False:
+            print res 
             logger.logger(level=logger.ERROR , type="api", message="Case["+case_id+"]: Failed query artifacts from dataabase", reason=res[1])
             return json.dumps({'success' : False  , 'message' : res[1]} )
 
