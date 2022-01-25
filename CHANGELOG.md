@@ -6,6 +6,7 @@ This page list the Changelog for Kuiper project
 
 ### **Added:**
 - Export the browsed artifacts records from the interface (only the displayed columns).
+- Add group by aggregation search query for specific fields.
 - Search by machine group for artifacts from the list of machines.
 - Added load spinner for browse artifacts interface during the load for artifacts.
 - Export tagged records as a xlsx timeline based on previously built "views".
