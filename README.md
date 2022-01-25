@@ -171,7 +171,9 @@ To solve the issue, run the command again
 ```shell
 docker-compose up -d
 ```
-## Troubleshooting
+
+
+### Troubleshooting
 
 To check the dockers, run the command
 ```shell
