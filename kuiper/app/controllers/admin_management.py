@@ -410,6 +410,11 @@ def add_timeline_view():
                 
                 t                   = buildTimeline.BuildTimeline(views_folder=app.config['TIMELINE_VIEWS_FOLDER'] , fname= None)
                 views_folder        = app.config['TIMELINE_VIEWS_FOLDER'] 
+                # check if view schema correct
+                content_validation  = t.validate_view(content)
+                if not content_validation[0]: 
+                    return json.dumps({'result' : 'failed' , 'msg' : content_validation[1]})
+
                 views               = t.set_views(content , os.path.join( views_folder , path ) )
   
                 if views[0] == False: 
@@ -417,11 +422,22 @@ def add_timeline_view():
                     return json.dumps({'result' : 'failed' , 'msg' : views[1]})
                 else: 
                     return json.dumps({'result' : 'success'})
+
+
+
+
             if action == "add":
                 path                = str(uuid.uuid4()) + ".yaml"
                 content             = ajax_j['content']    
                 t                   = buildTimeline.BuildTimeline(views_folder=app.config['TIMELINE_VIEWS_FOLDER'] ,fname=  None) 
                 views_folder        = app.config['TIMELINE_VIEWS_FOLDER'] 
+
+
+                # check if view schema correct
+                content_validation  = t.validate_view(content)
+                if not content_validation[0]:
+                    return json.dumps({'result' : 'failed' , 'msg' : content_validation[1]})
+
                 views               = t.set_views(content , os.path.join( views_folder , path ) )
                 
                 if views[0] == False:   

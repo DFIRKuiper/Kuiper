@@ -253,7 +253,7 @@ services:
 
         volumes:
             - ./kuiper/files/:/app/files/
-            #- ./kuiper/:/app/               # use this during development
+            - ./kuiper/:/app/               # use this during development
 
         networks:
             kuiper:

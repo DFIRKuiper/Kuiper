@@ -6,6 +6,8 @@ import re
 import random 
 import warnings
 import os 
+
+#from pykwalify.core import Core
 warnings.filterwarnings('ignore' , category=UserWarning, module="openpyxl")
 
 # get the value from a json object based on provided path
@@ -185,5 +187,20 @@ class BuildTimeline:
 			else:
 				return (False, "Failed to delete view: " + set_v[1])
 
+		except Exception as e:
+			return (False, str(e))
+ 
+    
+	# validate the view data
+	def validate_view(self , content):
+		try:
+			y = yaml.load(content , Loader=yaml.FullLoader)
+			for i in y:
+				important_keys = ["fields" , 'name' , 'sheet' , 'condition']
+				for k in important_keys:
+					if k not in i:
+						return (False, '"'+k+'" field not specified in the yaml: ' + str(i) )
+
+			return (True, 'success')
 		except Exception as e:
 			return (False, str(e))
