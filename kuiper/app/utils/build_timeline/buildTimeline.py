@@ -190,11 +190,15 @@ class BuildTimeline:
 		except Exception as e:
 			return (False, str(e))
  
-    
+	
 	# validate the view data
 	def validate_view(self , content):
 		try:
 			y = yaml.load(content , Loader=yaml.FullLoader)
+			if not isinstance(y , list):
+				return (False, "The view should be a yaml list")
+
+				 
 			for i in y:
 				important_keys = ["fields" , 'name' , 'sheet' , 'condition']
 				for k in important_keys:

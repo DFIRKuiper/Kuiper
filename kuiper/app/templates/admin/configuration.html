@@ -300,7 +300,7 @@ var timeline_view_editor = CodeMirror.fromTextArea(timeline_view_editor_element 
     autoRefresh: true
 
 });
-
+console.log(timeline_view_editor)
 /* =================== Functions ================ */
 
 // pull the list of timeline views
@@ -431,8 +431,11 @@ $('#timeline_view_global_buttons').on('click' , ".change_timeline_view[data-cont
     $('#timeline_view_add_path').html("")
     $('#timeline_view_add_name').html("")
     $('#timeline_view_add_error').html("")
+    $('#timeline_view_add_error').hide();
+    console.log(timeline_view_editor)
     timeline_view_editor.setValue("")
-
+    timeline_view_editor.refresh()
+    timeline_view_editor.focus()
     $("#add_timeline_view_button").data("action" , "add")
 
 })
@@ -441,7 +444,7 @@ $('#timeline_view_global_buttons').on('click' , ".change_timeline_view[data-cont
 // timeline view optioons - edit timeline view
 $('#timeline_views_list_table').on('click' , '.timeline_view_edit_view' , function(){
 
-
+    
     var path = $(this).data('path')
     var name = $(this).data('name')
     var ruleid = $(this).data('ruleid')
@@ -449,10 +452,12 @@ $('#timeline_views_list_table').on('click' , '.timeline_view_edit_view' , functi
     $(".change_timeline_view[data-content='add_timeline_views']").click()
 
     timeline_view_editor.setValue(timeline_views[ruleid]['content'])
+    timeline_view_editor.refresh()
+    timeline_view_editor.focus()
     $('#timeline_view_add_path').html(path)
     $('#timeline_view_add_name').html(name)
     $('#timeline_view_add_error').html("")
-
+    $('#timeline_view_add_error').hide();
     $("#add_timeline_view_button").data("action" , "edit")
 
 })
