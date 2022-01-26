@@ -29,3 +29,6 @@ This page list the Changelog for Kuiper project
 ### **Changed:**
 - Fixed bugs on search browse artifacts.
 - Enhanced parsers.
+
+### **Fixes:**
+- Fixed the timeline view export to support unicode data (error faced during exporting Recyclebin `Data.Path` which is unicode)

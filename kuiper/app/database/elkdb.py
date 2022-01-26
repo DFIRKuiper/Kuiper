@@ -186,8 +186,8 @@ class ES_DB:
     # ================================ bulk query
     # this except index and bodies (list of single body requests)
     def multiqueries(self, index , bodies):
-        request_header = json.dumps({'index': index})
-        requests = []
+        request_header = json.dumps({'index': index}) 
+        requests = [] 
         for b in bodies:
             b["track_total_hits"] = True
             requests.extend([request_header , b])
@@ -195,7 +195,7 @@ class ES_DB:
 
         # check if there are failed queries
         for result in resp["responses"]:
-            if "error" in result.keys():
+            if "error" in result.keys(): 
                 return [False , result["error"]["root_cause"][0]["reason"]]
         return [True,  resp['responses']]
 

@@ -1435,23 +1435,26 @@ def case_timeline_build_ajax(case_id):
             # this list contains the ID of already added records to the sheet, so in the default records will not be added
             added_records = []
             added_records += t.get_values_by_column(sheet_timeline , sheet_kuiper_id_col)
-            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting timeline generator search", reason=added_records)
             for r in range(0 , len(res[1])):
                 if r < len(res[1])-1:
+                    
                     # if the results belongs to a search query
-                    for data in res[1][r]['hits']['hits']:           
+                    for data in res[1][r]['hits']['hits']: 
                         if data['_id'] in added_records: continue 
                         # add extra data related to the record itself
                         data['_source']['_id']              = data['_id']
                         data['_source']['_Export_Version']  = "V_" + str(new_version)
                         data['_source']['_Export_Date']     = export_date
 
-
+ 
                         fields_data = t.merge_data_and_fields(fields = all_active_rules[r]['fields'].copy(), data= data['_source'])
-                        t.add_data_to_sheet(sheet_timeline, fields_data)
-                        added_records.append(data['_id'])
+                        add_res = t.add_data_to_sheet(sheet_timeline, fields_data)
+                        if add_res[0]:
+                            added_records.append(data['_id']) 
+                        else:    
+                            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed adding the record ["+data['_id']+"] to xlsx timeline", reason=add_res[1])
                 elif default_rule is not None:
-                    # if the results does not belongs to a search query
+                    # if the results does not belongs to a search query 
                     for data in res[1][r]['hits']['hits']:
                         if data['_id'] in added_records: continue
                         
@@ -1461,15 +1464,14 @@ def case_timeline_build_ajax(case_id):
                         data['_source']['_Export_Date']     = export_date
                         
                         fields_data = t.merge_data_and_fields(fields = default_rule['fields'].copy(), data= data['_source'])
-                        t.add_data_to_sheet(sheet_timeline, fields_data)
+                        t.add_data_to_sheet(sheet_timeline, fields_data) 
             t.save(dest_timeline)
              
             return send_file(dest_timeline, as_attachment=True) 
 
-        except Exception as e:
-            print str(e)
+        except Exception as e: 
             logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed retriving timeline", reason=str(e))
-            return json.dumps( {'result': 'failed' , 'tags' : "Failed retriving timeline: " + str(e)} )
+            return json.dumps( {'result': 'failed' , 'message' : "Failed retriving timeline: " + str(e)} )
 
     else:
         return redirect(url_for('home_page'))

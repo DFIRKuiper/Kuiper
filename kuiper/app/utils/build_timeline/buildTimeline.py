@@ -15,7 +15,7 @@ def json_get_val_by_path(j , p):
 	try:
 		p_l = p.split('.')
 		if len(p_l) == 1:
-			return [True, j[p] ]
+			return [True, str(j[p]).replace(u"\x00" , u"") ]
 		k = p_l[0]
 		if k not in j.keys():
 			return [False, "Key ["+str(k)+"] not in the json"]
@@ -96,21 +96,35 @@ class BuildTimeline:
 
 	# insert a value to the sheet
 	def add_value_to_sheet(self, sheet_name, row , column , value , style=None):
-		ws = self.get_sheet_by_name(sheet_name)
-		cell = ws.cell(row=row , column=column)
-		cell.value = value
-		cell._style= style
-
+		try:
+			ws = self.get_sheet_by_name(sheet_name)
+			cell = ws.cell(row=row , column=column)
+			cell.value = value.encode('utf-8')
+			cell._style= style 
+			return True  
+		except Exception as e:   
+			return False
 	# add data object to the sheet, data object contains information about the data added
 	def add_data_to_sheet(self, sheet_name , data):
-		headers = self.get_sheet_headers(sheet_name)
-		ws = self.get_sheet_by_name(sheet_name)
-		new_row_count = ws.max_row+1
-		for d_header in data.keys():
-			header_index = headers.index(d_header)+1
+		failed_fields = []
+		try:
+			headers		 	= self.get_sheet_headers(sheet_name)
+			ws			  	= self.get_sheet_by_name(sheet_name)
+			new_row_count   = ws.max_row+1
+			 
+			for d_header in data.keys():  
+				header_index = headers.index(d_header)+1
+ 
+				style = self.get_style_from_sheet(column=d_header , value=data[d_header])
+				if not self.add_value_to_sheet(sheet_name=sheet_name , row=new_row_count , column=header_index , value=data[d_header] , style=style):
+					failed_fields.append((d_header , data[d_header]))
+			
+			if len(failed_fields):
+				return (False, "Failed adding value to timeline: " + str(failed_fields)) 
 
-			style = self.get_style_from_sheet(column=d_header , value=data[d_header])
-			self.add_value_to_sheet(sheet_name=sheet_name , row=new_row_count , column=header_index , value=data[d_header] , style=style)
+			return (True, "Done")
+		except Exception as e: 
+			return (False, "Failed adding value to timeline: " + str(failed_fields)) 
 
 	# save the generated timeline to a file
 	def save(self, path):
@@ -120,11 +134,11 @@ class BuildTimeline:
 	# map the fields configuration to the columns
 	def merge_data_and_fields(self, fields, data):
 		for f in fields.keys():
-			res = re.subn(r"(\$\{[a-zA-Z0-9@\._]*\})" , lambda x: str(json_get_val_by_path(data, x.group().lstrip("${").rstrip("}"))[1])  , fields[f])
+			res = re.subn(r"(\$\{[a-zA-Z0-9@\._]*\})" , lambda x: json_get_val_by_path(data, x.group().lstrip("${").rstrip("}"))[1] , fields[f])
 			fields[f] = res[0]
 
 		return fields
-	
+
 	# get a list of values based on sheet and column
 	def get_values_by_column(self, sheet_name, column):
 		headers = self.get_sheet_headers(sheet_name)
