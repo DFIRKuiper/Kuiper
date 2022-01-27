@@ -1474,6 +1474,7 @@ def case_timeline_build_ajax(case_id):
                         fields_data = t.merge_data_and_fields(fields = default_rule['fields'].copy(), data= data['_source'])
                         t.add_data_to_sheet(sheet_timeline, fields_data) 
             
+            # if there is a record on the old version of timeline has been untagged, remove it from the timeline new version
             for r in old_records:
                 if r not in added_records:
                     to_be_removed_records.append(r)
