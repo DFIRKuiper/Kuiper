@@ -126,6 +126,20 @@ class BuildTimeline:
 		except Exception as e: 
 			return (False, "Failed adding value to timeline: " + str(failed_fields)) 
 
+	# delete row
+	def delete_row_from_sheet_by_kuiperID(self, sheet_name, kuiper_id):
+		isDeleted = False
+		headers = self.get_sheet_headers(sheet_name)
+		header_index = headers.index("KuiperID")+1
+		ws = self.get_sheet_by_name(sheet_name)
+		
+		for row in ws.iter_rows():
+			if kuiper_id == row[0].value:  
+				ws.delete_rows( row[0].row , 1 ) 
+				isDeleted = True
+
+		return isDeleted
+
 	# save the generated timeline to a file
 	def save(self, path):
 		self.wb.save(path)
@@ -134,7 +148,7 @@ class BuildTimeline:
 	# map the fields configuration to the columns
 	def merge_data_and_fields(self, fields, data):
 		for f in fields.keys():
-			res = re.subn(r"(\$\{[a-zA-Z0-9@\._]*\})" , lambda x: json_get_val_by_path(data, x.group().lstrip("${").rstrip("}"))[1] , fields[f])
+			res = re.subn(r"(\$\{[a-zA-Z0-9@\._#]*\})" , lambda x: json_get_val_by_path(data, x.group().lstrip("${").rstrip("}"))[1] , fields[f])
 			fields[f] = res[0]
 
 		return fields
@@ -143,10 +157,12 @@ class BuildTimeline:
 	def get_values_by_column(self, sheet_name, column):
 		headers = self.get_sheet_headers(sheet_name)
 		header_index = headers.index(column)+1
-		res =[]
+		res =[] 
 		ws = self.get_sheet_by_name(sheet_name)
 		for cell in ws.iter_rows(header_index , ws.max_row):
 			res.append( cell[0].value )
+		del res[0]
+		
 		return res
 
 	# get the list of views from the views table
