@@ -16,7 +16,7 @@ services:
             context: ./
             network: host
 
-        image: dfirkuiper/kuiper_flask:${GIT_KUIPER_VERSION}
+        image: dfirkuiper/kuiper_flask:${GIT_KUIPER_FLASK_VERSION}
         container_name: kuiper_flask
         restart: always
 
@@ -68,7 +68,7 @@ services:
             context: ./
             network: host
 
-        image: dfirkuiper/kuiper_celery:${GIT_KUIPER_VERSION}
+        image: dfirkuiper/kuiper_celery:${GIT_KUIPER_CELERY_VERSION}
         container_name: kuiper_celery
         restart: always
 
@@ -117,7 +117,7 @@ services:
             context: ./
             network: host
 
-        image: dfirkuiper/kuiper_mongodb:${GIT_KUIPER_VERSION}
+        image: dfirkuiper/kuiper_mongodb:${GIT_KUIPER_MONGODB_VERSION}
         container_name: kuiper_mongodb
         restart: always
         
@@ -146,7 +146,7 @@ services:
             context: ./
             network: host
 
-        image: dfirkuiper/kuiper_es01:${GIT_KUIPER_VERSION}
+        image: dfirkuiper/kuiper_es01:${GIT_KUIPER_ES01_VERSION}
         container_name: kuiper_es01
         environment:
           - node.name=es01
@@ -178,7 +178,7 @@ services:
             context: ./
             network: host
 
-        image: dfirkuiper/kuiper_nginx:${GIT_KUIPER_VERSION}
+        image: dfirkuiper/kuiper_nginx:${GIT_KUIPER_NGINX_VERSION}
         container_name: kuiper_nginx
     
         ports:
@@ -209,7 +209,7 @@ services:
             context: ./
             network: host
 
-        image: dfirkuiper/kuiper_redis:${GIT_KUIPER_VERSION}
+        image: dfirkuiper/kuiper_redis:${GIT_KUIPER_REDIS_VERSION}
         container_name: kuiper_redis
         ports:
             - '6379:6379'
@@ -234,7 +234,7 @@ services:
             context: ./
             network: host
 
-        image: dfirkuiper/kuiper_nfs:${GIT_KUIPER_VERSION}
+        image: dfirkuiper/kuiper_nfs:${GIT_KUIPER_NFS_VERSION}
         container_name: kuiper_nfs
         
         privileged: true
