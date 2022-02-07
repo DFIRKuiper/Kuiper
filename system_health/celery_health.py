@@ -5,7 +5,8 @@ import os
 import json 
 from celery import Celery
 import psutil 
-from ast import literal_eval as make_tuple
+from datetime import datetime
+
 
 redis_ip                                = os.getenv('REDIS_IP' , '')
 redis_port                              = os.getenv('REDIS_PORT' , '')
