@@ -52,14 +52,21 @@ def get_celery_info(backend , broker):
             if task_state not in tasks_details.keys():
                 tasks_details[task_state] = []
 
+
+
+
+
             # get details of each task
             for task in inspect_tasks[task_state]:
-                task_args = make_tuple(task['args'])
+                task_args = task['args'].lstrip("(").rstrip(")")
+                task_case = task_args.split(",")[0].strip("'")
+                task_machine = task_args.split(",")[1].strip(" ").strip("'")
+                task_arguments = task_args.split("," , maxsplit=2)[2].strip(" ")
                 tasks_details[task_state].append({
                     'task_id'           : task['id'],
-                    'task_case'         : task_args[0],
-                    'task_machine'      : task_args[1],
-                    'task_arguments'    : str(task_args[2]),
+                    'task_case'         : task_case,
+                    'task_machine'      : task_machine,
+                    'task_arguments'    : task_arguments,
                     'task_ach'          : task['acknowledged'],
                     'task_start_time'   : datetime.fromtimestamp(task['time_start']).strftime("%Y-%m-%d %H:%M:%S"),
                     'worker_pid'        : task['worker_pid']

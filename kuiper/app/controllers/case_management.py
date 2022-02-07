@@ -469,8 +469,7 @@ def all_machines(case_id , group_name):
     case            = db_cases.get_case_by_id(case_id)
     parsers_details = db_parsers.get_parser()
     groups_list     = db_groups.get_groups(case_id)
-
-    # check if there is error getting the information
+    # check if there is error getting the information  
     error = None
     if machines[0] == False:    
         error = ["Case["+case_id+"]: Failed getting case machines" , machines[1]]
@@ -488,9 +487,9 @@ def all_machines(case_id , group_name):
     if group_name is not None:
         for i in groups_list[1]:
             if i['_id'] == case_id + "_" + group_name:
-                i['selected'] = True
+                i['selected'] = True 
 
-
+ 
     if error is not None:
         logger.logger(level=logger.ERROR , type="case", message=error[0], reason=error[1])
         return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message=error[0] + "<br />" + error[1])
@@ -624,18 +623,20 @@ def case_upload_machine(case_id):
 
 # ================================ Upload Artifacts
 # upload artifacts for specific machine
-@app.route('/case/<main_case_id>/uploadartifacts/<machine_case_id>', methods=['GET', 'POST'])
+@app.route('/case/<main_case_id>/uploadartifacts/<machine_case_id>', methods=['POST'])
 def main_upload_artifacts(main_case_id,machine_case_id):
+
     if request.method == 'POST':
         try:
-            
+               
             # get file
             file = request.files['files[]']
 
-            
+
             # if there is a file to upload
             if file:
                 base64_name = None if 'base64_name' not in request.form else request.form['base64_name']       
+
                 # start handling uploading the file
                 uf = upload_file(file , main_case_id , machine_case_id , base64_name=base64_name)
                 return json.dumps(uf[1])

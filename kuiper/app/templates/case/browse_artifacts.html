@@ -200,7 +200,6 @@
 
 
 
-
 <!-- ===================== Records details ===================== -->
 
 <div id="record_details_block" class="col-md-4">
@@ -280,8 +279,6 @@
     <script src="../../static/dist/air-datepicker/dist/js/datepicker.min.js"></script>
     <link rel="stylesheet" href="{{url_for('static', filename='dist/air-datepicker/dist/css/datepicker.min.css')}}">
     <script src="../../static/dist/air-datepicker/dist/js/i18n/datepicker.en.js"></script>
-
-
 
 
 <!-- This will take the AdminLTE input style and use it with the tags input style -->
@@ -500,7 +497,7 @@
 
 // ====================================== Variables
 
-var clicked_id_record;      // store the records clicked on the table
+var clicked_id_record = 0;      // store the records clicked on the table
 
 var rules                   = ({{rules|tojson|safe}})           // get list of all rules
 var toast                   = $.toast;                          // toast object
@@ -1269,6 +1266,11 @@ function rebuild_records(records){
 
 
 
+    $('#' + clicked_id_record).addClass('table_events_clicked_tr disabled');
+    $('#' + clicked_id_record).css('background-color' ,  '#636777');
+
+    // change records clicked status to clicked
+    is_record_tr_clicked = true
 
 }
 
@@ -1422,18 +1424,9 @@ function reload_records(search , wanted_page , sort_by = query_sort_by , wanted_
           // build records table
           rebuild_records(ajax_records);
           
-          // build data type drop-down list 
-          //console.log(r)
-          /*
-          var list = ""
-          if(r['res_total'] != 0){
-            var aggs = r['aggs']
-            for(var i = 0 ; i <aggs.length ; i++)
-                list += '<li class="clickable"><a id="data_type:'+aggs[i]['key']+'" class="clickable add_to_search_query">'+aggs[i]['key']+' <span class="badge bg-red">'+aggs[i]['doc_count']+'</span></a></li>'
-          }
-          $('#artifacts_list').html(list);
-          $('.artifacts_list_button').dropdown()
-          */
+
+
+
           if (is_record_tr_clicked){
                 // click the first raw in the table
                 $("#table_events tr#" + wanted_record.toString()).click()
@@ -2041,9 +2034,6 @@ $(document).on('click', function (e) {
     });
 
 })
-
-
-
 
 
 
@@ -2712,6 +2702,8 @@ $('#record_details_block').on('click' , '#remove_record_details_block' , functio
 	$('#record_details_block').slideUp('fast' , function(){
 		$('#content_table').removeClass('col-md-8');
 	});
+
+
 })
 
 
@@ -2888,19 +2880,8 @@ $(document).ready(function(){
     handle_query_param(search)
 })
 
-$(document).click(function(e){
-    //For descendants of menu_content being clicked, remove this check if you do not want to put constraint on descendants.
-    if($(e.target).closest('#table_events').length){
-        return; 
-    } else {
-        $('#' + clicked_id_record).removeClass('table_events_clicked_tr disabled');
-        $('#' + clicked_id_record).css('background-color' ,  '');
 
-        clicked_id_record = null
-        is_record_tr_clicked = false
-    }
-        
-})
+
 
 
 // enable the top-down press button

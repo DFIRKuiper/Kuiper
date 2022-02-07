@@ -10,6 +10,8 @@ kuiper/app/parsers/WinEvents/temp/**
 kuiper/app/parsers/MFT_Parser/temp/**
 kuiper/**/*.pyc
 system_health/**/*.pyc
-mongodb/db/**
+mongodb/**
+!mongodb/empty.md
 redis/dump.rdb
-elasticsearch/nodes/**
+elasticsearch/**
+!elasticsearch/empty.md

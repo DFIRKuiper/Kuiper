@@ -105,7 +105,9 @@ built_in_dirs = [
     app.config['UPLOADED_FILES_DEST_RAW'] , 
     app.config['TIMELINE_FOLDER'],
     logs_folder,
-    app.config['SYSTEM_HEALTH_PATH']
+    app.config['SYSTEM_HEALTH_PATH'],
+    os.path.join(app.config['PARSER_PATH'] , "temp")
+    
     ]
 for d in built_in_dirs:
     try:

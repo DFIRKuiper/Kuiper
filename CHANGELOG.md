@@ -1,6 +1,15 @@
 # **Changelog**
 This page list the Changelog for Kuiper project
 
+## **[2.3.1] - 2022-02-07**
+### **Fixes:**
+- Fixed dynamic add for folder `kuiper/app/parsers/temp`
+- Fixed issue of uploading files to a previously created machine
+- Fixed issue of handling error message in elasticsearch version 7.16.2 during the indexing
+- Fixed issue to preserve the selected record in browse artifact table if detailed table clicked
+- Fixes the system health for celery if the task has large number of arguments
+
+
 
 ## **[2.3.0] - 2022-01-25**
 

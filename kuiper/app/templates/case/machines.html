@@ -10,6 +10,7 @@
     <noscript><link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload-noscript.css')}}"/></noscript>
     <noscript><link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_file_upload/css/jquery.fileupload-ui-noscript.css')}}"/></noscript>
 
+
 <style>
 
 
@@ -392,6 +393,8 @@
                             <div class="buttons btn-group" style="text-align: center" valign="center">
                                 <a href='/case/{{case_details["casename"]}}/machine_files/{{machine["_id"]}}' class=" btn btn-default  btn-xs" title="Show uploaded files for the machine"><i class="fa fa-file-text-o"></i> Files</a>
                                 <button herf='' data-toggle="modal" data-id2="{{machine['_id']}}" data-id="{{machine['main_case']}}" data-target="#add_artifacts"  data-target="" class="open-caseid btn btn-success btn-xs" title="Upload artifacts"><i class="fa fa-upload"></i> Upload</button>
+
+
                                 {% if case_details['status'] == 'not_active' %}
                                     <button type="button"  data-machineid="{{machine['_id']}}" data-machinename="{{machine['machinename']}}" data-caseid="{{machine['main_case']}}" disabled class="start_processing2 btn btn-warning btn-xs" title="Process artifacts"><i class="fa fa-play"></i> Process</button>
                                 {% else %}
@@ -482,12 +485,59 @@
         </div>
     </div>
 
+
+<!-- template used for upload files -->
+{% raw %}
+    <!-- The template to display files available for upload -->
+    <script id="template-upload" type="text/x-tmpl">
+      {% for (var i=0, file; file=o.files[i]; i++) { %}
+          <tr class="template-upload fade">
+              <td>
+                  {% if (window.innerWidth > 480 || !o.options.loadImageFileTypes.test(file.type)) { %}
+                      <p class="name">{%=file.name%}</p>
+                  {% } %}
+                  <strong class="error text-danger"></strong>
+              </td>
+              <td width="10%">
+                  <span class="size">Processing...</span>
+			  </td>
+			  <td width="30%">
+                  <div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-prime" style="width:0%;"></div></div>
+              </td>
+              <td width="30%">
+			  		<div class="buttons btn-group pull-right">
+                  {% if (!o.options.autoUpload && o.options.edit && o.options.loadImageFileTypes.test(file.type)) { %}
+                    <button class="btn btn-success edit" data-index="{%=i%}" disabled>
+                        <i class="glyphicon glyphicon-edit"></i>
+                        <span>Edit</span>
+                    </button>
+                  {% } %}
+                  {% if (!i && !o.options.autoUpload) { %}
+                      <button class="btn btn-primary start" disabled>
+                          <i class="glyphicon glyphicon-upload"></i>
+                          <span>Start</span>
+                      </button>
+                  {% } %}
+                  {% if (!i) { %}
+                      <button class="btn btn-warning cancel">
+                          <i class="glyphicon glyphicon-ban-circle"></i>
+                          <span>Cancel</span>
+                      </button>
+                  {% } %}
+				  </div>
+              </td>
+          </tr>
+      {% } %}
+    </script>
+{% endraw %}
+
 <!-- ========================= Upload Artifacts Dialog END  ===================== -->
 
 
 
 <!-- jQuery 3 -->
 <script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+
 
 <script src="../../static/dist/jquery_file_upload/js/vendor/jquery.ui.widget.js"></script>
 
@@ -553,6 +603,8 @@
 <script src="../../static/dist/jquery_file_upload/js/jquery.fileupload-ui.js"></script>
 
 
+
+
 <script type="text/javascript">
 
 
@@ -583,40 +635,41 @@ if(Current_case_details['status'] == 'not_active'){
 
 jQuery(function($){
     $('.dropdown-toggle').dropdown();
+    
 
+            // file upload handler
+            $('#fileupload').fileupload({
+                downloadTemplateId  : null,         // disable downloadTemplateId 
+                disableImagePreview : true,       // disable preview
+                dataType            : 'json',
+                edit                : false,
+                autoUpload          : false,
+                maxFileSize         : 5000000000,   // 5 GB
+                maxNumberOfFiles    : 100,
+                sequentialUploads   : true,
+                done: function (e, data) {
+                    if( data._response.result.result == false){
+                        data.context.find('.error').html(data._response.result.message)
+                        data.context.find('.progress').html('<div class="progress-bar progress-bar-red" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>')
+                    } else {
+                        data.context.find('.buttons').html('<i class="fa fa-fw fa-check"></i>');
+                        data.context.find('.progress').html('<div class="progress-bar progress-bar-green" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>')
+                        
+                    }
+                    data.context.find('.progress').removeClass('active')
+                    data.context.find('.progress').removeClass('progress-striped')
+                },
 
-    // file upload handler
-    $('#fileupload').fileupload({
-        downloadTemplateId  : null,	        // disable downloadTemplateId 
-        disableImagePreview : true, 	    // disable preview
-        dataType            : 'json',
-        edit                : false,
-        autoUpload          : false,
-        maxFileSize         : 5000000000,   // 5 GB
-        maxNumberOfFiles    : 100,
-        sequentialUploads   : true,
-        done: function (e, data) {
-            if( data._response.result.result == false){
-                data.context.find('.error').html(data._response.result.message)
-                data.context.find('.progress').html('<div class="progress-bar progress-bar-red" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>')
-            } else {
-                data.context.find('.buttons').html('<i class="fa fa-fw fa-check"></i>');
-                data.context.find('.progress').html('<div class="progress-bar progress-bar-green" role="progressbar" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>')
-                
-            }
-            data.context.find('.progress').removeClass('active')
-            data.context.find('.progress').removeClass('progress-striped')
-        },
+                submit: function(e, data){
+                    // submit the file with name as base64 
+                    var fileName    = data.originalFiles[0].name
+                    var newFileName = btoa(fileName)
+                    // Update the form data with the new key value
+                    data.formData = { 'base64_name': newFileName };                                                       // new file name without extension
+                }
+            });
 
-        submit: function(e, data){
-            // submit the file with name as base64 
-            var fileName    = data.originalFiles[0].name
-            var newFileName = btoa(fileName)
-            // Update the form data with the new key value
-            data.formData = { 'base64_name': newFileName };                                                       // new file name without extension
-        }
-    });
-
+            
     for(group in groups_list){
         if(groups_list[group].hasOwnProperty("selected") && groups_list[group]["selected"] == true){
             
@@ -760,9 +813,6 @@ function update_parsers_progress_all_machines(){
                         total_done += parsers[p]['done']
                         total_queued += parsers[p]['queued']
                     }
-                    console.log(total_queued)
-                    console.log(total)
-                    console.log(total_done)
 
                     // if there is parsers still running, change the color of progress bar
                     var vfgColor = '#00bc8c'
@@ -849,7 +899,7 @@ $(document).on('click', function (e) {
     $('#add_group').each(function () {
         
         $popover = $(this);
-        if (!$popover.is(e.target) &&
+        if (!$popover.is(e.target) && 
             $popover.has(e.target).length === 0 &&
             $('.popover').has(e.target).length === 0)
         {
@@ -1164,19 +1214,20 @@ $('#parsers_selection_table').on('change' , '.parsers_selection_checkbox' , func
 
 
 
-
-
-
 // on click upload artifacts button 
 $(document).on("click", ".open-caseid", function () {
-  var main_case_id      = $(this).data('id')
-  var machine_case_id   = $(this).data('id2')
-  var upload_url        = "/case/"+main_case_id+"/uploadartifacts/"+machine_case_id
-
-  $(".add_artifacts_machine_name_title").html(machine_case_id.slice(main_case_id.length + 1))
-  $("#fileupload").attr("action" , upload_url)
+    var main_case_id      = $(this).data('id')
+    var machine_case_id   = $(this).data('id2')
+    var upload_url        = "/case/"+main_case_id+"/uploadartifacts/"+machine_case_id
   
-});
+    $(".add_artifacts_machine_name_title").html(machine_case_id.slice(main_case_id.length + 1))
+    $("#fileupload").attr("action" , upload_url)
+    
+  });
+  
+  
+
+
 
 
 

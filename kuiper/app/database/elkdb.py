@@ -463,10 +463,10 @@ class ES_DB:
             try:
                 
 
-                if 'caused_by' in doc['index']['error']:
-                    doc_reason = doc['index']['error']['caused_by']['reason']
-                else:
+                if 'reason' in doc['index']['error']: 
                     doc_reason = doc['index']['error']['reason']
+                else: 
+                    doc_reason = doc['index']['error']['caused_by']['reason']
 
                 logger.logger(level=logger.WARNING , type="elasticsearch", message=record_msg_info + ": record failed" , reason=doc_reason)
                 
