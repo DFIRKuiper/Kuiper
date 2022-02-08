@@ -1322,6 +1322,12 @@ function del_tag(record_id , tag_id , element){
 
 // function used to add tag to a document through ajax
 function add_doc_tag(doc_id , tag_content , timestamp , element){
+    console.log(is_record_tr_clicked)
+    if(!is_record_tr_clicked){
+        console.log("add tag disabled")
+        return;
+    }
+        
   $.ajax({
     type : 'POST',
     url : "/case/{{case_details['casename']}}/add_tag_ajax",
@@ -1744,20 +1750,8 @@ function keydown_record_navegation(event){
             if(event.which == 83) record_id = "#suspicious_" + record_id;
             if(event.which == 76) record_id = "#legit_" + record_id;
             if(event.which == 85) record_id = "#untag_" + record_id;
-
-            $(record_id).click()
-            break;
-        case 84: // 't'
-            
-
-            var trs = $('#table_events').find('tr.disabled');
-            if(typeof trs.attr('id') == 'undefined')
-                return;
-            
-
-            tag = trs.find("td>a>li.record_tag")
-            
-            tag[0].click()
+            if (is_record_tr_clicked)
+                $(record_id).click()
             break;
         case 37: //left
         case 39: // right
@@ -2426,7 +2420,9 @@ $("#table_events").on('click' , 'li.record_tag' , function(){
 });
 
 
-
+$(document).on("focusin" , "input" , function(){
+    is_record_tr_clicked = false
+})
 
 
 // if item clicked to be added to the search query (using fa-search-plus)
@@ -2666,7 +2662,7 @@ $("#table_events").on('click' , 'tr.event_record_click' , function(){
       clicked_id_record = clicked_id;
       $(this).addClass('table_events_clicked_tr disabled');
       $(this).css('background-color' ,  '#636777');
-
+        console.log("clicked")
       // change records clicked status to clicked
       is_record_tr_clicked = true
 
