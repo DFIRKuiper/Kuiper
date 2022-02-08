@@ -1,0 +1,16 @@
+- name: "Shellbags"
+  condition:
+    query: 'data_type:"Shellbags"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Shellbags"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
+    Details/Procedure: "Access to ${Data.path}"
+    Extra: "${Data.key_path}"
+    FileName/Path/URL: "${Data.path}"

@@ -1,0 +1,15 @@
+- name: "WMI_Persistence"
+  condition:
+    query: 'data_type:"WMI_Persistence"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "WMI_Persistence"
+    Details/Procedure: "Filter Name: ${Data.filter_name}, Consumer Name: ${Data.consumer_name}"
+    FileName/Path/URL: "${Data.binding_name}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

@@ -1,0 +1,16 @@
+- name: "Events_Failed_SMB_connection_30803"
+  condition: 
+    query: 'Data.Event.System.EventID.#text:"30803" AND data_type:"Events" AND Data.Event.System.Channel:"Microsoft\-Windows\-SmbClient\/Connectivity"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "30803"
+    Details/Procedure: "Failed SMB connection to ${Data.Event.EventData.ServerName}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
+    Extra: "Reason: ${Data.Event.EventData.Reason}"

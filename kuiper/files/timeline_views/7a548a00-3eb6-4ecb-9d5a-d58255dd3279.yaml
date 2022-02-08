@@ -1,0 +1,18 @@
+- name: "Events_SMBServerSecurity_551"
+  condition: 
+    query: 'data_type:"Events" AND Data.Event.System.EventID.#text:"551" AND Data.Event.System.Channel:"Microsoft\-Windows\-SMBServer\/Security"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "551"
+    Details/Procedure: "Failed SMB authentication session from: ${Data.Event.UserData.EventData.ClientName}"
+    Src: "${Data.Event.UserData.EventData.ClientName}"
+    Dst: "${Data.Event.System.Computer}"
+    Extra: "Channel: ${Data.Event.System.Channel}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

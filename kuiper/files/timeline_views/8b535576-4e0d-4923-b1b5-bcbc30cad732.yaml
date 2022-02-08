@@ -1,0 +1,17 @@
+- name: "Events_Unsuccessful_RDP_connection_226"
+  condition: 
+    query: 'Data.Event.System.EventID.#text:"226" AND data_type:"Events" AND Data.Event.System.Channel:"Microsoft\-Windows\-TerminalServices\-RDPClient\/Operational"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "226"
+    Details/Procedure: "Failed RDP connection, error code ${Data.Event.EventData.Error_Code}"
+    Extra: "ActivityID: ${Data.Event.System.Correlation.@ActivityID}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
+    User: "${Data.Event.System.Security.@UserID}"

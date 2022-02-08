@@ -1,0 +1,18 @@
+- name: "Events_Outgoing_RDP_disconnection_1025"
+  condition: 
+    query: 'data_type:"Events" AND Data.Event.System.Channel:"Microsoft\-Windows\-TerminalServices\-RDPClient\/Operational" AND Data.Event.System.EventID.#text:"1025"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "1025"
+    Details/Procedure: "Outgoing RDP disconnection"
+    Extra: "ActivityID: ${Data.Event.System.Correlation.@ActivityID}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
+    Src: "${Data.Event.System.Computer}"
+    User: "${Data.Event.System.Security.@UserID}"
