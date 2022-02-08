@@ -1,0 +1,16 @@
+- name: "Services"
+  condition:
+    query: 'data_type:"Services"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Services"
+    Details/Procedure: "Running of ${Data.ImagePath}, which start (${Data.Start})"
+    FileName/Path/URL: "${Data.ImagePath}"
+    Extra: "Service Type: ${Data.Type}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

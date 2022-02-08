@@ -1,0 +1,17 @@
+- name: "TerminalServerClient"
+  condition:
+    query: 'data_type:"TerminalServerClient"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "TerminalServerClient"
+    Details/Procedure: "RDP from ${machine} to ${Data.IP_Address}"
+    Src: "${machine}"
+    Dst: "${Data.IP_Address}"
+    User: "${Data.User_Name}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

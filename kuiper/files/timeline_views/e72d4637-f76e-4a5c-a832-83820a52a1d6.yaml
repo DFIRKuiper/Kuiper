@@ -1,0 +1,17 @@
+- name: "Scheduled_Task"
+  condition:
+    query: 'data_type:"Scheduled_Task"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Scheduled_Task"
+    Details/Procedure: "Task name: ${Data.task_name}, Created Date: ${Data.date}, Command: ${Data.actions.0.Command}"
+    FileName/Path/URL: "${Data.task_name}"
+    User: "${Data.author}"
+    Extra: "${Data.actions.0.Command}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

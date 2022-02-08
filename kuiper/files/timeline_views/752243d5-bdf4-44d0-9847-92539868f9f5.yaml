@@ -1,0 +1,16 @@
+- name: "Events_Microsoft_Office_Alerts_300"
+  condition: 
+    query: 'Data.Event.System.EventID.#text:"300" AND Data.Event.System.Channel:"OAlerts" AND data_type:"Events"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "300"
+    Details/Procedure: "${Data.Event.System.Provider.@Name}"
+    Extra: "${Data.Event.EventData.Data.#text}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

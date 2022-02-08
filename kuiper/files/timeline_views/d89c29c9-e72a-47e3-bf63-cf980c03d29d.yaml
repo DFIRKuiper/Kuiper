@@ -1,0 +1,17 @@
+- name: "RUA"
+  condition:
+    query: 'data_type:"RUA"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "RUA"
+    Details/Procedure: "Execution of ${Data.ExplorerFileName}"
+    FileName/Path/URL: "${Data.ExplorerFileName}"
+    User: "${Data.LastUserName}"
+    Extra: "${Data.FolderPath}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
