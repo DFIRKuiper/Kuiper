@@ -1,0 +1,16 @@
+- name: "Uninstall"
+  condition:
+    query: 'data_type:"Uninstall"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Uninstall"
+    Details/Procedure: "Uninstalling of ${Data.Application_Name}"
+    FileName/Path/URL: "${Data.Application_Name}"
+    Extra: "Publisher: ${Data.Publisher}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

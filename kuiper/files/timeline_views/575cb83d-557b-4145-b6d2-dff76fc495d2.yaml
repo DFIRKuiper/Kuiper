@@ -1,0 +1,18 @@
+- name: "Events_service_creation_7045"
+  condition: 
+    query: 'Data.Event.System.EventID.#text:"7045" AND data_type:"Events" AND Data.Event.System.Channel:"System"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "7045"
+    Details/Procedure: "New service creation ${Data.Event.EventData.ServiceName}"
+    Extra: "ServiceType: ${Data.Event.EventData.ServiceType}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
+    User: "${Data.Event.EventData.AccountName}"
+    FileName/Path/URL: "${Data.Event.EventData.ImagePath}"
