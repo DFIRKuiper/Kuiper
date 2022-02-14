@@ -93,9 +93,9 @@ Kuiper use the following components:
 
 - **MongoDB:** A database that stores data in JSON-like documents that can vary in structure, offering a dynamic, flexible schema, used to store Kuiper web application configurations and information about parsed files. 
 
-- **Redis:** A in-memory data structure store, used as a database, cache and message broker, used as a message broker to relay tasks to celery workers.
+- **Redis:** A in-memory data structure store, used as a database, cache and message broker, used as a message broker to relay tasks to Celery workers.
 
-- **Celery:** A asynchronous task queue/job queue based on distributed message passing, used as the main processing engine to process relayed tasks from redis.
+- **Celery:** A asynchronous task queue/job queue based on distributed message passing, used as the main processing engine to process relayed tasks from Redis.
 
 - **Gunicorn:** Handle multiple clients HTTPs requests
 
@@ -109,22 +109,22 @@ Kuiper use the following components:
 - **Disk:** 25GB for testing purposes and more disk space depends on the amount of data collected.
 
 **Notes**
-- If you want to use RAM more than 64GB to increase Elasticsearch performence, it is recommended to use multiple nodes for Elasticsearch cluster instead in different machines
+- If you want to use RAM more than 64GB to increase Elasticsearch performance, it is recommended to use multiple nodes for Elasticsearch cluster instead of different machines
 - For parsing, Celery generate workers based on CPU cores (worker per core), each core parse one machine at a time and when the machine finished, the other queued machines will start parsing, if you have large number of machines to process in the same time you have to increase the cores number
 
 ## Installation 
 
-Starting from version 2.2.0, Kuiper run over dockers, there are 7 docker images:
+Starting from version 2.2.0, Kuiper run as containers, there are 7 Docker images:
 
-- **Flask**: the main docker which host the web application (check [docker image](https://hub.docker.com/r/dfirkuiper/dfir_kuiper)).
+- **Flask**: the main container which host the web application (check [Docker image](https://hub.docker.com/r/dfirkuiper/dfir_kuiper)).
 - **Mongodb**: stores the cases and machines metadata.
 - **Elasticsearch (es01)**: stores the parsed artifacts data.
-- **Nginx**: reverse proxy for the flask container.
-- **Celery**: artifacts parser component check [docker image](https://hub.docker.com/r/dfirkuiper/dfir_kuiper).
+- **Nginx**: reverse proxy for the Flask container.
+- **Celery**: artifacts parser component check [Docker image](https://hub.docker.com/r/dfirkuiper/dfir_kuiper).
 - **Redis**: queue for celery workers
 - **NFS (Network File System)**: container that stores the shared files between Flask and Celery containers.
 
-To run the docker use the following command:
+To run the container setup use the following command:
 
 ```shell
 sysctl -w vm.max_map_count=262144
@@ -136,7 +136,7 @@ docker-compose up -d
 
 ### Issues
 
-1 - **Note**: when you first run the dockers, Elasticsearch will fail to run and give the following error
+1 - **Note**: when you first run the containers, Elasticsearch will fail to run and give the following error
 
 ```
 ERROR: [1] bootstrap checks failed
@@ -149,7 +149,7 @@ To solve the issue run the command
 sysctl -w vm.max_map_count=262144
 ```
 
-2- Note: if you faced the following issue
+2 - Note: if you faced the following issue
 
 ```shell
 Creating network "kuiper_kuiper" with driver "bridge"
@@ -172,10 +172,10 @@ To solve the issue, run the command again
 docker-compose up -d
 ```
 
-
 ### Troubleshooting
 
-To check the dockers, run the command
+To check the containers, run the command
+
 ```shell
 docker-compose ps -a
 ```
@@ -197,15 +197,12 @@ if anyone failed, check the logs for the service that failed
 docker-compose logs -f --tail=100 <service>
 ```
 
-
 # Kuiper API
 
 Kuiper has a limited feature API, check the repo [DFIRKuiperAPI](https://github.com/DFIRKuiper/DFIRKuiperAPI). 
 
 - [GetFieldsScript](https://github.com/DFIRKuiper/DFIRKuiperAPI#GetFieldsScript): Retrieves parsed data from Kuiper.
 - [UploadMachines](https://github.com/DFIRKuiper/DFIRKuiperAPI#UploadMachines): Upload new machine (.zip file) to specific case.
-
-
 
 # Issues Tracking and Contribution
 
@@ -217,14 +214,11 @@ we appreciate sharing any parsers you develop, please send a pull request to be 
 # Licenses
 
 - Each parser has its own license, all parsers placed in the following folder  `/kuiper/parsers/`.
-
 - All files in this project under GPL-3.0 license, unless mentioned otherwise.
 
 
 # Creators
 
-[Saleh Muhaysin](https://github.com/salehmuhaysin), Twitter ([@saleh_muhaysin](https://twitter.com/saleh_muhaysin)),
-
-[Muteb Alqahtani](https://github.com/muteb), Twitter([@muteb_alqahtani](https://twitter.com/muteb_alqahtani))
-
-[Abdullah Alrasheed](https://github.com/Abdullah-Alrasheed), Twitter([@abdullah_rush](https://twitter.com/abdullah_rush))
+- [Saleh Muhaysin](https://github.com/salehmuhaysin), Twitter ([@saleh_muhaysin](https://twitter.com/saleh_muhaysin)),
+- [Muteb Alqahtani](https://github.com/muteb), Twitter([@muteb_alqahtani](https://twitter.com/muteb_alqahtani))
+- [Abdullah Alrasheed](https://github.com/Abdullah-Alrasheed), Twitter([@abdullah_rush](https://twitter.com/abdullah_rush))
