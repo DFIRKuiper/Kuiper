@@ -463,7 +463,7 @@ class ES_DB:
             try:
                 
 
-                if 'caused_by' in doc['index']['error']: 
+                if 'caused_by' in doc['index']['error'] and not doc['index']['error']['caused_by']['reason'].startswith("failed to parse date field"): 
                     doc_reason = doc['index']['error']['caused_by']['reason']
                 else: 
                     doc_reason = doc['index']['error']['reason']
