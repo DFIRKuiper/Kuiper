@@ -78,7 +78,7 @@ def print_for_kuiper(file,log,plugin):
                 new_ex_name = plugin_sig_hive + ex
                 if new_ex_name.lower() in lg.lower():
                     defined_logs.append(lg)
-        defined_f = defind_single_file_logs(file,log)
+        defined_f = defind_single_file_logs(file,defined_logs)
 
         plugins = all_plugins()
         pl1 = plugins[plugin]['function'](defined_f['hive'],defined_f['logs'])
