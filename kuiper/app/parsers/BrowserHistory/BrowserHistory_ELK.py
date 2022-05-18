@@ -210,14 +210,15 @@ def extract_firefox_history(file_path):
 
 
 	visit_type = [
-		"TRANSITION_LINK" , 
-		"TRANSITION_TYPED" ,
-		'TRANSITION_BOOKMARK' ,
-		'TRANSITION_EMBED' ,
-		'TRANSITION_REDIRECT_PERMANENT' ,
-		'TRANSITION_REDIRECT_TEMPORARY' ,
-		'TRANSITION_DOWNLOAD',
-		'TRANSITION_FRAMED_LINK'
+		"TRANSITION_LINK",
+		"TRANSITION_TYPED",
+		"TRANSITION_BOOKMARK",
+		"TRANSITION_EMBED",
+		"TRANSITION_REDIRECT_PERMANENT",
+		"TRANSITION_REDIRECT_TEMPORARY",
+		"TRANSITION_DOWNLOAD",
+		"TRANSITION_FRAMED_LINK",
+		"TRANSITION_RELOAD"
 	]
 	for visit in visits:
 		# add the record type 
@@ -318,6 +319,10 @@ def extract_chrome_history(file_path):
 				downloads[columns[i][0]] = convert_timestamp(download[i] , browser_name='Chrome', tz='utc')
 			elif type(download[i]) is int or download[i] is None:
 				downloads[columns[i][0]] = download[i]
+			elif type(download[i]) is unicode:
+				downloads[columns[i][0]] = download[i].encode("utf-8")
+			elif type(download[i]) is buffer:
+				downloads[columns[i][0]] = str(download[i]).encode("hex")
 			else:
 				downloads[columns[i][0]] = download[i]
 
