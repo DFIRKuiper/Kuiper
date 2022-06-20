@@ -16,14 +16,14 @@ def Events_interface(file , parser):
 
         if not os.path.exists(CurrentPath + "/temp/"):
             os.mkdir(CurrentPath + "/temp/")
-            
-        output_path = CurrentPath + "/temp/" + str(uuid.uuid4())
-        cmd = CurrentPath + '/evtx_dump "'+file+'" --no-indent  --format json --ansi-codec utf-8 --dont-show-record-number --output ' + output_path
-        proc = subprocess.Popen(cmd, shell=True ,stdin=None , stdout=subprocess.PIPE , stderr=subprocess.PIPE)
-        dd , err = proc.communicate()
-        if err != "":
-            raise Exception(err.split("\n")[-2])
 
+        output_path = CurrentPath + "/temp/" + str(uuid.uuid4())
+        cmd = [CurrentPath + "/evtx_dump", file, "--format", "jsonl", "--ansi-codec", "utf-8", "--output", output_path]
+        proc = subprocess.Popen(cmd, stdin=None , stdout=subprocess.PIPE , stderr=subprocess.PIPE)
+        dd, err = proc.communicate()
+
+        if proc.returncode != 0:
+            raise Exception(err.split("\n")[-2])
 
         return open(output_path , 'r')
 

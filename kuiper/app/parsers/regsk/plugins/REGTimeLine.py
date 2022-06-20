@@ -371,7 +371,7 @@ class regtimeline():
 			else:
 				log0 = None
 
-			if 'log1' in self.log_files.keys() and  self.log_files['LOG1'] !=None:
+			if 'LOG1' in self.log_files.keys() and  self.log_files['LOG1'] !=None:
 				log1 = open(self.log_files[u'LOG1'], 'rb')
 			else:
 				log1 = None
