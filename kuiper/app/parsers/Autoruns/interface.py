@@ -6,7 +6,7 @@ import ast
 
 def auto_interface(file,parser):
 
-    lst = ["Logon","AppinitDLLs","Explorer","KnownDLLs","BootExecute","ImageHijacks","InternetExplorerAddons","Winsock","Codecs","OfficeAddins","PrintMonitorDLLs","LSAsecurityProviders","Winlogon"]
+    lst = ["Logon","AppinitDLLs","Explorer","KnownDLLs","BootExecute","ImageHijacks","InternetExplorerAddons","Winsock","Codecs","OfficeAddins","PrintMonitorDLLs","LSAsecurityProviders","Winlogon", "ServicesAndDrivers"]
     try:
         CurrentPath=os.path.dirname(os.path.abspath(__file__))
         if parser in lst:
