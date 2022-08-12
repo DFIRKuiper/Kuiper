@@ -2,7 +2,7 @@ import os,sys
 from lib.walker import defind_files_logs,defind_single_file_logs,get_files,logs_folder
 from os import walk
 import argparse
-from plugins import Logon,AppinitDLLs,BootExecute,KnownDLLs,Explorer,ImageHijacks,InternetExplorerAddons, Winsock, Codecs, OfficeAddins, PrintMonitorDLLs, LSAsecurityProviders, Winlogon
+from plugins import Logon,AppinitDLLs,BootExecute,KnownDLLs,Explorer,ImageHijacks,InternetExplorerAddons, Winsock, Codecs, OfficeAddins, PrintMonitorDLLs, LSAsecurityProviders, Winlogon, ServicesAndDrivers
 import glob
 """This function lists all praser"""
 def all_plugins():
@@ -19,7 +19,8 @@ def all_plugins():
                 "OfficeAddins":{'function':OfficeAddins.OfficeAddins},
                 "PrintMonitorDLLs":{'function':PrintMonitorDLLs.PrintMonitorDLLs},
                 "LSAsecurityProviders":{'function':LSAsecurityProviders.LSAsecurityProviders},
-                "Winlogon":{'function':Winlogon.Winlogon}}
+                "Winlogon":{'function':Winlogon.Winlogon},
+                "ServicesAndDrivers":{'function':ServicesAndDrivers.ServicesAndDrivers}}
 
     return plugins
 
