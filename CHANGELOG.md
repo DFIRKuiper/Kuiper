@@ -1,7 +1,7 @@
 # **Changelog**
 This page list the Changelog for Kuiper project
 
-## **[2.3.2] - 2022-02-07**
+## **[2.3.2] - 2022-08-13**
 ### **Fixes:**
 - Fixed the Autoruns parsers files
 
