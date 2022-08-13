@@ -7,6 +7,10 @@ This page list the Changelog for Kuiper project
 
 ### **Added:**
 - Add Search, Add extra column, and Group by for the Rhaegal alerts in browser artifacts
+- Timeline views
+- Autoruns parsers
+- Fennec parser for linux artifacts
+- SEP (Symantec Endpoint Protection) logs parser 
 
 ### **Removed:**
 - Removed the NFS service, and use only docker volumes directly (if you want to run the services in different machines, enable the nfs service in docker-compose.yaml)
