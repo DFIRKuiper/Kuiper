@@ -1,6 +1,18 @@
 # **Changelog**
 This page list the Changelog for Kuiper project
 
+## **[2.3.2] - 2022-02-07**
+### **Fixes:**
+- Fixed the Autoruns parsers files
+
+### **Added:**
+- Add Search, Add extra column, and Group by for the Rhaegal alerts in browser artifacts
+
+### **Removed:**
+- Removed the NFS service, and use only docker volumes directly (if you want to run the services in different machines, enable the nfs service in docker-compose.yaml)
+
+
+
 ## **[2.3.1] - 2022-02-07**
 ### **Fixes:**
 - Fixed dynamic add for folder `kuiper/app/parsers/temp`
