@@ -3,14 +3,14 @@ This page list the Changelog for Kuiper project
 
 ## **[2.3.2] - 2022-08-13**
 ### **Fixes:**
-- Fixed the Autoruns parsers files
+- Fixed the Autoruns parsers files (thanks to @mayHamad)
 
 ### **Added:**
 - Add Search, Add extra column, and Group by for the Rhaegal alerts in browser artifacts
 - Timeline views
-- Autoruns parsers
-- Fennec parser for linux artifacts
-- SEP (Symantec Endpoint Protection) logs parser 
+- Autoruns parsers (thanks to @mayHamad)
+- Fennec parser for linux artifacts (thanks to @AbdulRhmanAlfaifi)
+- SEP (Symantec Endpoint Protection) logs parser (thanks to @mnr-hmm)
 
 ### **Removed:**
 - Removed the NFS service, and use only docker volumes directly (if you want to run the services in different machines, enable the nfs service in docker-compose.yaml)
