@@ -107,21 +107,31 @@ library.json = {
 
 
 // this function build the alert of rhaegal detection
-function build_rhaegal_rules(record){
+function build_rhaegal_rules(record , searchable=true, spliter=true, group_by=true){
     if(!record['_source']['Data'].hasOwnProperty("rhaegal")){
         return "";
     }
+    var results = convert_json_to_list(record['_source'])
     
     var open_badge = '<span class="badge bg-blue">'
     var html = '<div class="box-header disabled color-palette"><b>Rhaegal</b></div>';
 
     html = html + "<table class=\"table table-condensed table_left_header\"><tbody>";
-    for (k in record['_source']['Data']['rhaegal']) {
-        html += "<tr><td>" + open_badge + k + " </span></td><td>" + record['_source']['Data']['rhaegal'][k] + "</td></tr>";
-    }
-    
-    html = html + "</tbody></table><br />";
 
+    for (var i = 0; i < results.length; i++) {
+        var field = results[i][0].split('|').join('.');
+        var value = results[i][1];
+        if(field.startsWith("Data.rhaegal")){
+            var search_plus = (searchable) ? '<a id="' + field + ':' + value + '" class="clickable add_to_search_query" ><i class="fa fa-search-plus"></i></a>' : '';
+            var spliter_plus = (spliter) ? '<a field="' + field + '" class="clickable add_extra_column_table_records" style="margin-left:3px;"><i class="fa fa-columns"></i></a>' : '';
+            var group_by_plus = (group_by) ? '<a field="' + field + '" class="clickable add_group_by_table_records" style="margin-left:3px;"><i class="fa fa-object-group"></i></a>' : '';
+            
+            html += '<tr><td  style="min-width:150px"><div class="float_right">' + group_by_plus + spliter_plus + " " + search_plus + '</div> <div style="margin-right:70px">' + open_badge + " " + field + ' </span></div></td><td  style="min-width:250px">' + escapeHtml(value) + '</td></tr>';
+
+        }
+    }
+
+    html = html + "</tbody></table><br />";
     return html
 }
 
@@ -154,7 +164,6 @@ function build_windows_event_table(record , container) {
     }
 
     var rhaegal_hit = build_rhaegal_rules(record)
-    
     var html = rhaegal_hit +  '<div class="box-header disabled color-palette"><b>System</b></div>';
     html = html + "<table class=\"table table-condensed table_left_header\"><tbody>";
     for (k in fields) {
