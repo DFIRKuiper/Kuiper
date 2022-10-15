@@ -107,6 +107,8 @@ Kuiper use the following components:
 - **RAM:**  4GB (minimum), 64GB (preferred)
 - **Cores:** 4 (minimum)
 - **Disk:** 25GB for testing purposes and more disk space depends on the amount of data collected.
+- **Docker**: Docker version 20.10.17
+- **Docker-Compose**: docker-compose version 1.29.2
 
 **Notes**
 - If you want to use RAM more than 64GB to increase Elasticsearch performence, it is recommended to use multiple nodes for Elasticsearch cluster instead in different machines
