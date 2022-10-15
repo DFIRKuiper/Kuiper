@@ -9,11 +9,24 @@ COPY ./kuiper/requirements_2.7.txt ./requirements_2.7.txt
 
 RUN apt update -y
 
-RUN apt install -y  python-minimal python3 python-dev libsasl2-dev libldap2-dev libssl-dev python-pip build-essential libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev python3-pip cron
+RUN apt install -y  python-minimal python3 python-dev libsasl2-dev libldap2-dev libssl-dev python-pip build-essential libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev python3-pip sqlite3 cron
 RUN pip2 install --upgrade pip
 RUN pip2 install -r "./requirements_2.7.txt"
 RUN python3 -m pip install --upgrade pip
 RUN python3 -m pip install -r "./requirements_3.txt"
+
+
+# install ndpi
+WORKDIR /tmp/
+RUN apt-get install -y build-essential git gettext flex bison libtool autoconf automake pkg-config libpcap-dev libjson-c-dev libnuma-dev libpcre2-dev libmaxminddb-dev librrd-dev
+RUN git clone https://github.com/ntop/nDPI.git
+WORKDIR /tmp/nDPI
+RUN chmod +x ./autogen.sh 
+RUN ./autogen.sh 
+RUN ./configure 
+RUN make 
+RUN make install
+WORKDIR /app
 
 
 COPY ./system_health/ /system_health/

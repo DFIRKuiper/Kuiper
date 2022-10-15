@@ -509,7 +509,21 @@ def all_machines_progress(case_id):
             
             machines        = db_files.get_parsing_progress(machine)
             if machines[0]:
-                machines_progress.append( {'machine': machine , 'progress' : machines[1] } )
+
+                # calculate progress
+                machine_static = {
+                        'pending' : 0,
+                        'parsing' : 0,
+                        'done'    : 0,
+                        'queued'  : 0,
+                        'error'   : 0
+                }
+                for parser in machines[1].keys():
+                    for f in machines[1][parser]:
+                        machine_static[f['status']] += 1
+
+
+                machines_progress.append( {'machine': machine , 'progress' : machine_static } )
             else:
                 logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed getting the process progress for machine ["+machine+"]", reason=machines[1])
                 return redirect(url_for('all_machines',case_id=case_id , err_msg=machine[1]))

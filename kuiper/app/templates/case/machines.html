@@ -792,28 +792,11 @@ function update_parsers_progress_all_machines(){
                     
                     var parsers = {}
                     
-                    var is_parsing  = 0; // if there are some parsers still parsing
-                    var total       = 0
-                    var total_done  = 0
-                    var total_queued= 0
-                    for(var p in progress_result){
-                        
-                        parsers[p] = {}
-                        parsers[p]['pending'] = 0;
-                        parsers[p]['parsing'] = 0;
-                        parsers[p]['done']    = 0;
-                        parsers[p]['queued']  = 0;
-                        parsers[p]['error']   = 0;
-
-                        for( var f in progress_result[p] )
-                            parsers[p][progress_result[p][f]['status']]++
-                        
-                        is_parsing += parsers[p]['parsing']; 
-                        total      += parsers[p]['pending'] + parsers[p]['parsing'] + parsers[p]['done'] + parsers[p]['queued'] + parsers[p]['error']
-                        total_done += parsers[p]['done']
-                        total_queued += parsers[p]['queued']
-                    }
-
+                    var is_parsing  = progress_result['parsing']; // if there are some parsers still parsing
+                    var total       = progress_result['pending'] + progress_result['parsing'] + progress_result['done'] + progress_result['queued'] + progress_result['error']
+                    var total_done  = progress_result['done']
+                    var total_queued= progress_result['queued']
+                    
                     // if there is parsers still running, change the color of progress bar
                     var vfgColor = '#00bc8c'
 
