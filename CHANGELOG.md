@@ -3,10 +3,12 @@ This page list the Changelog for Kuiper project
 
 ## **[2.3.3] - 2022-10-15**
 ### **Fixes:**
-- Fixed the update of machines process progress to be calculated in server side
+- Fixed the update of machines processing progress to be calculated in server side instead of client side
 
 ### **Added:**
 - PCAP parser
+- iOS Mobile Forensics Parsers `ios_*`
+- SDS parser (Security Descriptor Stream)
 - build new docker image for `celery` and `flask` version `2.3.2`
 
 
