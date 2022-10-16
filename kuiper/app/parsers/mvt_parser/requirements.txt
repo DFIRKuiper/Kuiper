@@ -1,0 +1,11 @@
+appdirs
+click>=8.0.3
+rich>=10.12.0
+tld>=0.12.6
+tqdm>=4.62.3
+requests>=2.26.0
+simplejson>=3.17.5
+packaging>=21.0
+iOSbackup>=0.9.913
+adb-shell>=0.4.2
+libusb1>=2.0.1
