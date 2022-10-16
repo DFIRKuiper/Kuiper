@@ -11,14 +11,14 @@
                 "name": "Owner SID"
             }
         ],
-        "name": "SDS_parser",
+        "name": "sds_parser",
         "interface_function": "interface.interface",
         "parser_files_categorization_type": "file_name",
         "creation_time": "2022-08-17T13:37:00.000000",
         "parser_type_field": "os_general",
         "action": "edit",
-        "parser_folder": "SDS_parser",
-        "_id": "SDS_parser",
-        "description": "NTFS Security Descriptor Stream ($Secure:$SDS) parser"
+        "parser_folder": "sds_parser",
+        "_id": "sds_parser",
+        "description": "NTFS Security Descriptor Stream ($Secure:$SDS) parser, use KAPE to extract the ADS of $Secure:$SDS"
     }
 ]
