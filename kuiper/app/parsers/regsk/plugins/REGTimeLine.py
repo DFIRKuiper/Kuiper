@@ -16,6 +16,7 @@ gretl =[]
 all_values =[]
 
 def print_value(value,key):
+	
 	try:
 		value_name = value.name()
 		dict ={}
@@ -45,17 +46,19 @@ def print_value(value,key):
 			data = value.data()
 		except UnicodeDecodeError:
 			data = value.data_raw()
-
+		
 		if type(data) is bytes:
 			dict['data'] = RegistryHelpers.HexDump(data)
 			
 		elif type(data) is list:
-			dict['data'] = data
+			dict['data'] = ','.join([str(d) for d in data])
 
-			for element in data:
-				print(element)
 		else:
 			dict['data'] = data
+		
+		dict['data'] = str(dict['data'])
+		if len(dict['data']) > 32700:
+			dict['data'] = dict['data'][:32700] + "..truncated"
 
 
 		dict['deleted'] ="false"
@@ -89,7 +92,6 @@ def print_key(key):
 	dict_v['access_bits'] = key.access_bits()
 	dict_v['deleted'] ="false"
 
-
 	key_flags = key.flags_str()
 	if key_flags is not None:
 		dict_v['flags'] = key_flags
@@ -107,9 +109,9 @@ def print_key(key):
 
 
 	
-	#values = []
-	#for value in key.values():
-#		values.append(print_value(value,key))
+	# values = []
+	for value in key.values():
+		print_value(value,key)
 	#dict_v['values']=values
 	do_deleted =True
 	if do_deleted:
@@ -177,6 +179,7 @@ def print_deleted_value(value,key=None):
 	except UnicodeDecodeError:
 		data = value.data_raw()
 
+	
 	if data is None:
 		dict['data'] = 'Data not recovered'
 	else:
@@ -184,10 +187,16 @@ def print_deleted_value(value,key=None):
 			dict['data'] = RegistryHelpers.HexDump(data)
 
 		elif type(data) is list:
-			dict['data'] = data
+			dict['data'] = ','.join([str(d) for d in data ])
 
 		else:
 			dict['data'] = data
+
+		dict['data'] = str(dict['data'])
+		if len(dict['data']) > 32700:
+			dict['data'] = dict['data'][:32700] + "..truncated"
+
+
 	gretl.append(dict)
 	# return dict
 	
@@ -329,92 +338,55 @@ class regtimeline():
 		self.prim_hive = prim_hive
 		self.log_files = log_files
 	def run(self):
-		lst =[]
-		print(self.prim_hive)
 		primary = open(self.prim_hive, 'rb')
 		recovery= True
+		logs = {'log': None, 'log1' : None, 'log2' : None}
+
 		try:
+			# load hive
 			hive = Registry.RegistryHive(primary)
-		except RegistryFile.NotSupportedException:
-
-			temp_obj = primary
-			log = RegistryFile.NewLogFile(temp_obj)
+			truncated = False
+		except (RegistryFile.NotSupportedException , RegistryFile.BaseBlockException):
+			log = RegistryFile.NewLogFile(primary)
 			primary = log.rebuild_primary_file_using_remnant_log_entries(True)
-			temp_obj.close()
-
-			truncated = True
-		except RegistryFile.BaseBlockException:
-
-			temp_obj = primary
-			primary = RegistryFile.FragmentTranslator(temp_obj)
-			temp_obj.close()
-
 			truncated = True
 		except Registry.RegistryException:
 			truncated = True
-		else:
-			truncated = False
-
+		
+		# load truncated primary hive
 		if truncated:
 			hive = Registry.RegistryHiveTruncated(primary)
-			process_truncated_hive(hive)
 
-			hive = None
-			primary.close()
-			sys.exit(0)
-
-		if recovery:
-			#log_files = RegistryHelpers.DiscoverLogFiles(args.primary_file)
-
-			if 'LOG' in self.log_files.keys() and  self.log_files['LOG'] !=None:
-				log0 = open(self.log_files[u'LOG'], 'rb')
-			else:
-				log0 = None
-
-			if 'LOG1' in self.log_files.keys() and  self.log_files['LOG1'] !=None:
-				log1 = open(self.log_files[u'LOG1'], 'rb')
-			else:
-				log1 = None
-
-			if 'LOG2' in self.log_files.keys() and  self.log_files['LOG2'] !=None:
-				log2 = open(self.log_files[u'LOG2'], 'rb')
-			else:
-				log2 = None
+		# recover the log hives
+		if recovery and not truncated:
+			
+			for l in self.log_files.keys():
+				if l.lower() in ['log' , 'log1' , 'log2'] and self.log_files[l] is not None:
+					try:
+						logs[l.lower()] = open(self.log_files[l], 'rb')
+					except:
+						pass
 
 			try:
-				recovery_result = hive.recover_auto(log0, log1, log2)
-			except Registry.AutoRecoveryException:
-				#print('An error has occurred when recovering a hive using a transaction log', file = sys.stderr)
-				process_normal_hive(hive)
-				recovered = False
-			else:
+				recovery_result = hive.recover_auto(logs['log'], logs['log1'], logs['log2'])
 				recovered = recovery_result.recovered
+			except Registry.AutoRecoveryException:
+				recovered = False
 
 		try:
-			hive.walk_everywhere()
+			if truncated:
+				process_truncated_hive(hive)
+			else:
+				hive.walk_everywhere()
+				process_normal_hive(hive)
 		except (RegistryFile.CellOffsetException, RegistryFile.ReadException):
-			if recovery and recovered:
-				raise
-
-			# A truncated dirty hive.
-			hive = Registry.RegistryHiveTruncated(primary)
-			process_truncated_hive(hive)
-		else:
-			process_normal_hive(hive)
-
+			pass
+		
 		hive = None
 		primary.close()
-
 		if recovery:
-			if log0 is not None:
-				log0.close()
-
-			if log1 is not None:
-				log1.close()
-
-			if log2 is not None:
-				log2.close()
-		# print(gretl)
-		return gretl
-
+			for i in logs.keys():
+				if logs[i] is not None:
+					logs[i].close()
 		
+		return gretl
