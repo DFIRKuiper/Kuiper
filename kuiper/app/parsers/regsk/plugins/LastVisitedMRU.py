@@ -85,6 +85,12 @@ class LastVisitedMRU():
                                 if value_name == "MRUListEx":
                                     pass
                                 else:
+                                    
+                                    if a_time == "":
+                                        a_time = None
+                                    if c_time == "":
+                                        c_time = None
+                                        
                                     record = OrderedDict([
                                         ("SequenceNumber", value_name),
                                         ("Key_timestamp", dat_key),

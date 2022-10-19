@@ -4,6 +4,8 @@ from os import walk
 import argparse
 from plugins import REGTimeLine,UserAssist,Bam,OpenSaveMRU,LastVisitedMRU,MuiCache,AppCompatFlags,LaunchTracing,ProfileList,Uninstall,InstalledApp,InstalledComponents,ShellExtensions,Sysinternals,RunMRU,StreamMRU ,TimeZoneInformation ,ComputerName,TypedUrls,DHCP,TypedPaths,WordWheelQuery,TerminalServerClient,BagMRU,VolatileEnvironment,PortForwading,Amcache,Services
 import glob
+import json 
+
 """This function is to include the address function of each praser as well as the trget hive with some discription"""
 def all_plugins():
     plugins = {"UserAssist":{'function': UserAssist.UserAssist,"Target_hives":"NTUSER.DAT","Discription":"test"},
@@ -60,7 +62,7 @@ def get_single_plugin(file,log,plugin):
         result = open(path+".log","a+")
         if results is not None:
             for d in results:
-                result.write(d+"\n")
+                result.write(json.dumps(d)+"\n")
         result.close()
 
 """print outpit for kuiper"""
@@ -83,7 +85,7 @@ def print_for_kuiper(file,log,plugin):
         plugins = all_plugins()
         pl1 = plugins[plugin]['function'](defined_f['hive'],defined_f['logs'])
         dd = pl1.run()
-        print (dd)
+        print(json.dumps(dd))
 
 """Get the main running argsparser"""
 def main(argv=None):
