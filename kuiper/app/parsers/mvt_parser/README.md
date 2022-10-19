@@ -13,7 +13,7 @@ It has been developed and released by the [Amnesty International Security Lab](h
 
 ## MVT_parser
 
-MVT_parser parses mvt tool decrypted backup. The parser at its current version supports ios backup only.
+MVT_parser parses mvt tool decrypted backup to be compatible with Kuiper. The parser at its current version supports ios backup only.
 
 ## Output
 
