@@ -847,7 +847,6 @@ def system_health():
 
 
 
-
 # request to pull current system health information, return json
 @app.route('/admin/system_health_pull/', methods=["GET"])
 def system_health_pull2():
@@ -856,17 +855,16 @@ def system_health_pull2():
     system_health = {}
     # read services system health
     for service in services:
-        with open(os.path.join( app.config['SYSTEM_HEALTH_PATH'] , service ) , 'r' ) as sys_health:
-            system_health[service] = json.load(sys_health)
-            if 'datetime' in system_health[service].keys():
-                date_obj = datetime.strptime(system_health[service]['datetime'] , "%Y-%m-%d %H:%M:%S.%f")
-                date_now = datetime.now()
-                system_health[service]["datetime_diff"] = (date_now - date_obj).total_seconds()
-
+        try:
+            with open(os.path.join( app.config['SYSTEM_HEALTH_PATH'] , service ) , 'r' ) as sys_health:
+                system_health[service] = json.load(sys_health)
+                if 'datetime' in system_health[service].keys():
+                    date_obj = datetime.strptime(system_health[service]['datetime'] , "%Y-%m-%d %H:%M:%S.%f")
+                    date_now = datetime.now()
+                    system_health[service]["datetime_diff"] = (date_now - date_obj).total_seconds()
+        except Exception as e:
+            logger.logger(level=logger.WARNING , type="admin", message="Failed reading the service ["+service+"] system health" , reason=str(e))
 
     return json.dumps({"result" : 'success' , 'data' : system_health})
-
-
-
 
 
