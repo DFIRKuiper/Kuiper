@@ -1,0 +1,177 @@
+<html>
+
+<head>
+<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
+<meta name=Generator content="Microsoft Word 15 (filtered)">
+<style>
+<!--
+ /* Font Definitions */
+ @font-face
+	{font-family:"Cambria Math";
+	panose-1:2 4 5 3 5 4 6 3 2 4;}
+@font-face
+	{font-family:Calibri;
+	panose-1:2 15 5 2 2 2 4 3 2 4;}
+ /* Style Definitions */
+ p.MsoNormal, li.MsoNormal, div.MsoNormal
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:0in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraph, li.MsoListParagraph, div.MsoListParagraph
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpFirst, li.MsoListParagraphCxSpFirst, div.MsoListParagraphCxSpFirst
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpMiddle, li.MsoListParagraphCxSpMiddle, div.MsoListParagraphCxSpMiddle
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:0in;
+	margin-left:.5in;
+	margin-bottom:.0001pt;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+p.MsoListParagraphCxSpLast, li.MsoListParagraphCxSpLast, div.MsoListParagraphCxSpLast
+	{margin-top:0in;
+	margin-right:0in;
+	margin-bottom:8.0pt;
+	margin-left:.5in;
+	line-height:107%;
+	font-size:11.0pt;
+	font-family:"Calibri",sans-serif;}
+.MsoChpDefault
+	{font-family:"Calibri",sans-serif;}
+.MsoPapDefault
+	{margin-bottom:8.0pt;
+	line-height:107%;}
+@page WordSection1
+	{size:8.5in 11.0in;
+	margin:1.0in 1.0in 1.0in 1.0in;}
+div.WordSection1
+	{page:WordSection1;}
+ /* List Definitions */
+ ol
+	{margin-bottom:0in;}
+ul
+	{margin-bottom:0in;}
+-->
+</style>
+
+</head>
+
+<body lang=EN-US>
+
+<div class=WordSection1>
+
+<p class=MsoNormal><b><u><span style='font-size:16.0pt;line-height:107%'>NETLOGON
+Specification and Limitation:</span></u></b></p>
+
+<p class=MsoListParagraphCxSpFirst style='text-indent:-.25in'><span
+style='font-size:14.0pt;line-height:107%'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span dir=LTR></span><span style='font-size:14.0pt;line-height:
+107%'>Timestamp Format:</span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:1.0in;text-indent:-.25in'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+dir=LTR></span><b>[FACT] </b>The logged Timestamp is in local-system time zone,
+not UTC.</p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:.5in'><b>[Parser
+Implementation] </b></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:1.25in;text-indent:-.25in'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+dir=LTR></span>By default, the time will be adjusted to UTC, assuming “Arab
+Standard Time” time zone which is equivalent to UTC+3.</p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:1.25in;text-indent:-.25in'>2.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+dir=LTR></span><b> </b>However, the parser can take other time zones as
+argument and adjust the output to UTC accordingly.</p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:1.0in;text-indent:-.25in'>b.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+dir=LTR></span><b>[FACT]</b> The logged Timestamp only logs the month day and
+time as MM/DD HH:MM:SS</p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:1.25in'><b>[Parser
+Implementation] </b></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:1.25in;text-indent:-.25in'>1.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+dir=LTR></span>Can only parse the dates within One Year.</p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:1.25in'><b>&nbsp;</b></p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:-.25in'><span
+style='font-size:14.0pt;line-height:107%'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;
+</span></span><span dir=LTR></span><span style='font-size:14.0pt;line-height:
+107%'>Multiple Logging modules </span></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:1.0in;text-indent:-.25in'>a.<span
+style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; </span><span
+dir=LTR></span><b>[FACT] </b>Multiple modules are logging on the Netlogon log</p>
+
+<p class=MsoListParagraphCxSpMiddle style='text-indent:.5in'><b>[Parser
+Implementation] </b></p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:117.0pt;text-indent:
+-.25in'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span dir=LTR></span>Only the “LOGON” module is being parsed.</p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:117.0pt;text-indent:
+-.25in'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</span><span dir=LTR></span>Limited parsing to type of NTLM authentication
+records within the LOGON module</p>
+
+<p class=MsoListParagraphCxSpMiddle style='margin-left:117.0pt'>&nbsp;</p>
+
+<p class=MsoListParagraphCxSpLast style='margin-left:117.0pt'>&nbsp;</p>
+
+<p class=MsoNormal><b><u><span style='font-size:16.0pt;line-height:107%'>Parser
+Specification and Documentation:</span></u></b></p>
+
+<p class=MsoNormal>&nbsp;</p>
+
+<p class=MsoNormal><img width=633 height=230 id="Picture 1"
+src="ReadMe_files/image001.png"></p>
+
+<p class=MsoListParagraphCxSpFirst style='margin-left:1.25in'>&nbsp;</p>
+
+<p class=MsoListParagraphCxSpMiddle><span style='font-size:16.0pt;line-height:
+107%'><img width=482 height=247 id="Picture 19" src="ReadMe_files/image002.png"></span></p>
+
+<p class=MsoListParagraphCxSpMiddle><span style='font-size:14.0pt;line-height:
+107%'>&nbsp;</span></p>
+
+<p class=MsoListParagraphCxSpLast><span style='font-size:14.0pt;line-height:
+107%'>&nbsp;</span></p>
+
+<p class=MsoNormal><b>&nbsp;</b></p>
+
+<p class=MsoListParagraph><span style='font-size:16.0pt;line-height:107%'>&nbsp;</span></p>
+
+<p class=MsoNormal><b><u><span style='font-size:16.0pt;line-height:107%'><span
+ style='text-decoration:none'>&nbsp;</span></span></u></b></p>
+
+</div>
+
+</body>
+
+</html>
