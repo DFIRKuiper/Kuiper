@@ -24,6 +24,6 @@
 
 **Parser Specification and Documentation:**
 
-![](RackMultipart20221212-1-651nes_html_4ba353bdbc92861b.png)
+![Parsing Mode](https://github.com/KnorahSa/Kuiper/blob/NetLogon-Parser/kuiper/app/parsers/NetLogon%20Parser/Parsing%20Mode.png)
 
-![](RackMultipart20221212-1-651nes_html_3a1bb75ceb27bdbf.png)
+![Parsed Fields](https://github.com/KnorahSa/Kuiper/blob/NetLogon-Parser/kuiper/app/parsers/NetLogon%20Parser/Parsed%20Fields.png)
