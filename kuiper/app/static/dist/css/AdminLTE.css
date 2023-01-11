@@ -4256,7 +4256,8 @@ table.text-center th {
 }
 .select2-container--default .select2-selection--single,
 .select2-selection .select2-selection--single {
-  border: 1px solid #d2d6de;
+  border: 1px solid #353a53;
+  background-color: #202030;
   border-radius: 0;
   padding: 6px 12px;
   height: 34px;
@@ -4278,6 +4279,7 @@ table.text-center th {
   -webkit-user-select: none;
 }
 .select2-container .select2-selection--single .select2-selection__rendered {
+  color: #a7a7ba;
   padding-left: 0;
   padding-right: 0;
   height: auto;
