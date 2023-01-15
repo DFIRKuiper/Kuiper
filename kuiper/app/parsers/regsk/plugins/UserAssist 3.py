@@ -16,13 +16,14 @@ class UserAssist:
 # registry_manager
     def run(self):
         # for reg_handler in registry_manager.iter_registry_handlers(name=u'NTUSER.DAT'):
-
+        print("In")
         hive = get_hive(self.prim_hive,self.log_files)
         user_assist_key = hive.find_key(u'Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\UserAssist')
         if user_assist_key is not None:
             lst =[]
             for guid_key in user_assist_key.subkeys():
                 guid_key_name = guid_key.name()
+                print(guid_key_name)
                 count_key = guid_key.subkey(u"Count")
                 dat_key =guid_key.last_written_timestamp().isoformat()
                 if count_key is not None:
@@ -57,10 +58,10 @@ class UserAssist:
                             record = OrderedDict([
                                 ("guid", guid_key_name),
                                 ("name", value_name_decoded),
-                                ("session", session),
-                                ("count", count),
-                                ("focus_count", focus_count),
-                                ("focus_time",format_ms(total_focus)),
+                                ("Session", session),
+                                ("name", value_name_decoded),
+                                ("Focus count", focus_count),
+                                ("Total time an application had focus",format_ms(total_focus)),
                                 ("key_creation_time",dat_key),
                                 ("@timestamp",new_datetime)
                             ])
@@ -70,6 +71,7 @@ class UserAssist:
             return lst
         else:
             return None
+
 
 def format_ms( milliseconds ): 
     seconds, milliseconds = divmod(milliseconds,1000) 
