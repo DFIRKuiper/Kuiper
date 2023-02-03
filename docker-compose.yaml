@@ -157,7 +157,7 @@ services:
           - cluster.name=es-docker-cluster
           - discovery.seed_hosts=es01
           - cluster.initial_master_nodes=es01
-          - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+          - "ES_JAVA_OPTS=-Xms4g -Xmx4g"
           - FLASK_IP=flask
           - ES_IP=es01
         
