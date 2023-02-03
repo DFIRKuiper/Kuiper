@@ -1516,8 +1516,11 @@ def case_timeline_build_ajax(case_id):
 
 
 # ================================ get all alerts for case
-@app.route('/case/<case_id>/alerts', methods=['GET'])
-def case_alerts(case_id):
+@app.route('/case/<case_id>/alerts/', defaults={'machinename': None, 'allMachines': False}, methods=['GET'])
+@app.route('/case/<case_id>/alerts/all/', defaults={'machinename': None, 'allMachines': True}, methods=['GET'])
+@app.route('/case/<case_id>/alerts/<machinename>', defaults={'allMachines': False}, methods=['GET'])
+def case_alerts(case_id, machinename, allMachines):
+
     logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: Open alerts page")
 
 
@@ -1537,20 +1540,38 @@ def case_alerts(case_id):
         logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting case information", reason='Index not found')
         return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Case["+case_id+"]: Failed getting case information<br />Index not found")
 
+    machines = db_cases.get_machines(case_id)
+
+    if machinename is not None:
+        # validate machine exists
+        machine_id = case_id + "_" + machinename
+        machine_info = db_cases.get_machine_by_id(machine_id)
+        if machine_info[0] is False or machine_info[1] is None: # machine_info[0] in case of exception False. machine_info[1] is machine or None (not found) or exception-string
+            logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed checking if the machine ["+machinename+"] exists", reason="")
+            return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message="Failed checking if the machine exists<br />" )
+        currentmachinename = machinename
+    elif allMachines is True:
+        currentmachinename = "All"
+        machine_id = None
+    else:
+        return render_template('case/alerts.html',case_details=case[1] ,SIDEBAR=SIDEBAR, all_rules=[], rhaegal_hits=[], machines=machines[1], currentmachinename="", browse_alert_link_query="", machine_id="")
 
     all_rules = db_rules.get_rules()
     if all_rules[0] == False:
         logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting rules information", reason=all_rules[1])
         return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message=all_rules[1])
 
-
     requests = []
     
     for rule in all_rules[1]:
+        if allMachines is True:
+            qrule = rule['rule']
+        else: #elif machine_id is not None: for sure
+            qrule = "machine:" + machine_id + " AND (" + rule['rule'] +")"
         requests.append({
                 "query":{
                     "query_string":{
-                        "query" : rule['rule'],
+                        "query" : qrule,
                         "default_field": "catch_all"
                     }
                 },
@@ -1567,17 +1588,26 @@ def case_alerts(case_id):
         logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed getting total hits of rules from database", reason=res[1])
         return render_template('case/error_page.html',case_details=case_id ,SIDEBAR=SIDEBAR , CASE_FIELDS=CASE_FIELDS[1] , message=res[1])
 
+    #prepare browse-machine-alerts link
+    browse_alert_link_query = ""
+    if allMachines is False and machine_id is not None:
+        json_query = {"AND" : [{"==machine": machine_id}]}
+        browse_alert_link_query = json.dumps(json_query)
+
     for r in range(0 , len(res[1])):
         all_rules[1][r]['hits'] =  res[1][r]['hits']['total']['value']
     
     # build the query to get all rhaegal hits
     
-    
+    if allMachines is True:
+        qrhaegal = "Data.rhaegal.name:*"
+    else: #elif machine_id is not None: for sure anyway
+        qrhaegal = "machine:" + machine_id + " AND (Data.rhaegal.name:*)"
     logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: get Rhaegal hits")
     Rhaegal_query = {
                 "query":{
                     "query_string":{
-                        "query" : "Data.rhaegal.name:*",
+                        "query" : qrhaegal,
                         "default_field": "catch_all"
                     }
                 },
@@ -1633,7 +1663,7 @@ def case_alerts(case_id):
 
     logger.logger(level=logger.DEBUG , type="case", message="Case["+case_id+"]: hits ["+str(len(Rhaegal_hits["names"]))+"]")
 
-    return render_template('case/alerts.html',case_details=case[1] ,SIDEBAR=SIDEBAR , all_rules= all_rules[1] , rhaegal_hits=Rhaegal_hits)
+    return render_template('case/alerts.html',case_details=case[1] ,SIDEBAR=SIDEBAR , all_rules= all_rules[1] , rhaegal_hits=Rhaegal_hits, machines=machines[1], currentmachinename=currentmachinename,browse_alert_link_query=browse_alert_link_query, machine_id=machine_id)
 
 
 
