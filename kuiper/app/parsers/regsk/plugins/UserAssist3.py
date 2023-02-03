@@ -33,23 +33,18 @@ class UserAssist:
                         count = None
                         win =""
                         if len(value_data) == 16:
-                            session = struct.unpack("<I", value_data[0:4])[0]
                             count = struct.unpack("<I",value_data[4:8])[0]
                             count -= 5
                             record = OrderedDict([
                                 ("_plugin", u"UserAssist"),
                                 ("guid", guid_key_name),
                                 ("name", value_name_decoded),
-                                ("Session", session),
                                 ("count", count),
                                 ("@timestamp",dat_key)
                             ])
                             lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
                         elif len(value_data) == 72:
-                            session = struct.unpack("<I", value_data[0:4])[0]
                             count = struct.unpack("<I", value_data[4:8])[0]
-                            focus_count = struct.unpack("<I", value_data[8:12])[0]
-                            total_focus = struct.unpack("<I", value_data[12:16])[0]
                             date_time = struct.unpack("<q", value_data[60:68])[0]
                             new_datetime =convert_datetime(date_time)
                             if new_datetime == "1601-01-01T00:00:00":
@@ -57,10 +52,7 @@ class UserAssist:
                             record = OrderedDict([
                                 ("guid", guid_key_name),
                                 ("name", value_name_decoded),
-                                ("session", session),
                                 ("count", count),
-                                ("focus_count", focus_count),
-                                ("focus_time",format_ms(total_focus)),
                                 ("key_creation_time",dat_key),
                                 ("@timestamp",new_datetime)
                             ])
@@ -70,11 +62,3 @@ class UserAssist:
             return lst
         else:
             return None
-
-def format_ms( milliseconds ): 
-    seconds, milliseconds = divmod(milliseconds,1000) 
-    minutes, seconds = divmod(seconds, 60) 
-    hours, minutes = divmod(minutes, 60) 
-    days, hours = divmod(hours, 24) 
-    seconds = seconds + milliseconds/1000 
-    return str(days)+"d, "+ str(hours)+"h, "+ str(minutes)+"m, "+str(seconds)+"s"
