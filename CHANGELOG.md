@@ -1,5 +1,14 @@
 # **Changelog**
 This page list the Changelog for Kuiper project
+## **[2.3.4] - 2023-02-03**
+### **Fixes:**
+- Bug Fix: Flask and Celery Docker Images (changed gevent to version 1.2.2) [Pull Request #85](https://github.com/DFIRKuiper/Kuiper/pull/85)
+- Bug Fix: fixed system health scheduler script 
+- Changed the Elasticsearch Java options from `ES_JAVA_OPTS=-Xms512m -Xmx512m` to `ES_JAVA_OPTS=-Xms4g -Xmx4g`
+### **Added:**
+- Net Logon parser parser [Pull Request #86](https://github.com/DFIRKuiper/Kuiper/pull/86)
+- Add machine select box to alerts page [Pull Request #88](https://github.com/DFIRKuiper/Kuiper/pull/88)
+
 
 ## **[2.3.3] - 2022-10-15**
 ### **Fixes:**

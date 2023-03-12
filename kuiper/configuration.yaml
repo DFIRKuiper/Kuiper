@@ -69,7 +69,7 @@ MongoDB:
 # ============ Git
 Git:
   git_url_release : 'https://api.github.com/repos/DFIRKuiper/Kuiper/releases/latest'                                     # link for git to pull new updates if exists
-  k_version       : "2.3.3"                                                                          # current version of kuiper
+  k_version       : "2.3.4"                                                                          # current version of kuiper
 
 # ============ Logs
 Logs:

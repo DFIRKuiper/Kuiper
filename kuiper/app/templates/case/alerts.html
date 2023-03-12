@@ -7,8 +7,25 @@
       <div class="row">
         <div class="col-md-12">
           <div class="box">
+            <div class="box-body" style="overflow:auto;" >
+		<div class="dataTables_filter" style="text-align: left;">
+			Machine: <select style="min-width: 200px;" class="machine_select" name="machines" onchange="this.options[this.selectedIndex].value && (window.location = this.options[this.selectedIndex].value);">
+        <option></option>
+				<option value="{{ url_for('case_alerts', case_id=case_details['casename'], allMachines=True)}}"
+				{% if currentmachinename == 'All' %} selected {% endif %}>All machines</option>
+				{% for machine in machines %}
+				<option value="{{ url_for('case_alerts', case_id=case_details['casename'] , machinename=machine['machinename'])}}"
+				{% if currentmachinename == machine['machinename'] %} selected {% endif %}>{{machine['machinename']}}</option>
+				{% endfor %}
+			</select>
+		</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-12">
+          <div class="box">
             <div class="box-header">
-                <h3 class="box-title"><i class="fa fa-bell"></i> Alerts</h3>
+                <h3 class="box-title"><i class="fa fa-bell"></i> Alerts - {{ currentmachinename }}</h3>
             </div>
             <!-- /.box-header -->
             <div class="box-body"  style="overflow:auto;" >
@@ -28,7 +45,11 @@
                 {% for rule in all_rules %}
                 <tr>
                   <td>
-                      <a class="badge badge-pill rule_name bg-blue" href="{{ url_for('case_browse_artifacts', case_id=case_details['casename'] , rule=rule['rule_name'])}}">
+                      <a class="badge badge-pill rule_name bg-blue" href="
+{% if currentmachinename == 'All' %} {{ url_for('case_browse_artifacts', case_id=case_details['casename'] , rule=rule['rule_name'])}}
+{% else %} {{ url_for('case_browse_artifacts', case_id=case_details['casename'] , rule=rule['rule_name'], q=browse_alert_link_query)}}
+{% endif %}
+">
                         {{rule['rule_name']}} &raquo;	
                       </a>
                   </td>
@@ -67,7 +88,7 @@
         <div class="col-md-12">
             <div class="box">
               <div class="box-header">
-                  <h3 class="box-title"><i class="fa"><img src="{{url_for('static', filename='dist/img/RhaegalLogo.png')}}" width="24" height="24" /></i> Rhaegal</h3>
+                  <h3 class="box-title"><i class="fa"><img src="{{url_for('static', filename='dist/img/RhaegalLogo.png')}}" width="24" height="24" /></i> Rhaegal - {{ currentmachinename }}</h3>
               </div>
 
               <!-- /.box-header -->
@@ -102,9 +123,8 @@
 <script src="../../static/dist/js/demo.js"></script>
 
 
-
-
 <script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+<link rel="stylesheet" href="{{url_for('static' , filename='Kuiper.css')}}">
     <!-- tag input -->
     
     <script src="../../static/dist/tagsinput/bootstrap-tagsinput.js"></script>
@@ -197,9 +217,14 @@ $(function () {
         'columns'     : [
             { title: "Type"         , data:"type"},
             { title: "Name"         , data:"name" , render: function(data, type){
+                var json_query = {"AND" : []}
+                json_query['AND'].push({"==Data.rhaegal.name" : data});
+                {% if currentmachinename != 'All' %}
+                  json_query['AND'].push({"==machine" : "{{machine_id}}" });
+                {% endif %}
                 
-                var query = escapeHtml('?q=%7B"AND"%3A%5B%7B"%3D%3DData.rhaegal.name"%3A"'+data+'"%7D%5D%7D')
-                return '<a class="badge badge-pill rule_name bg-blue" href="{{ url_for("case_browse_artifacts", case_id=case_details["casename"])}}'+query+'">'+data+' &raquo;</a>'
+                json_query_string = escapeHtml('?q=' + encodeURIComponent(JSON.stringify(json_query)));
+                return '<a class="badge badge-pill rule_name bg-blue" href="{{ url_for("case_browse_artifacts", case_id=case_details["casename"])}}'+json_query_string+'">'+data+' &raquo;</a>'
                 
             }},
             { title: "Count"        , data:"count"},
@@ -253,7 +278,25 @@ $(function () {
       
 
   })
-
+  $(document).ready(function() {
+    $('.machine_select').select2({
+      placeholder: "Select a machine",
+      allowClear: false,
+      maximumInputLength: 20,
+      width: 'resolve',
+      sorter: function(data) {
+        return data.sort(function(a, b){
+          if(a.text == "All machines"){
+            return -1;
+          }
+          if(b.text == "All machines"){
+            return 1;
+          }
+          return a.text.localeCompare(b.text)
+        });
+      }
+   });
+  });
 </script>
 
 
