@@ -8,7 +8,8 @@ import shutil
 import yaml 
 import zipfile
 import hashlib
-import base64 
+import base64
+import tarfile
 
 from datetime import datetime
 
@@ -89,25 +90,45 @@ def md5(fname):
     except Exception as e:
         return [False, str(e)]
 
-# ================================ unzip file
-# unzip the provided file to the dst_path
-def unzip_file(zip_path,dst_path):
+
+# ================================ decompress file
+# decompress the provided file to the dst_path
+def decompress_file(archive_path,dst_path):
     try:
         createfolders = create_folders(dst_path)
         if createfolders[0] == False:
             return createfolders
         
-        with zipfile.ZipFile(zip_path , mode='r') as zfile:
-            zfile.extractall(path=dst_path )
-        return [True , "All files of ["+zip_path+"] extracted to ["+dst_path+"]"]
+        # decompress archive based on archive type
+        if zipfile.is_zipfile(archive_path):
+            unzip_file(archive_path, dst_path)
+        elif tarfile.is_tarfile(archive_path):
+            untar_file(archive_path, dst_path)
+        else:
+            raise Exception("File [" + archive_path + "] is not an archive")
+        return [True , "All files of ["+archive_path+"] extracted to ["+dst_path+"]"]
 
     except UnicodeDecodeError as e:
         #handle unicode errors, like utf-8 codec issues
-        return [True , "All files of ["+zip_path+"] partialy extracted to ["+dst_path+"]"]
+        return [True , "All files of ["+archive_path+"] partially extracted to ["+dst_path+"]"]
     except Exception as e:
-        return [False, "Error extract the zip content: " + str(e)]
-    
-    
+        return [False, "Error extracting the archive content: " + str(e)]
+
+
+# ================================ unzip file
+# unzip the provided file to the dst_path
+def unzip_file(zip_path, dst_path):
+    with zipfile.ZipFile(zip_path , mode='r') as zfile:
+        zfile.extractall(path=dst_path)
+
+
+# ================================ untar file
+# untar the provided file to the dst_path
+def untar_file(tar_path, dst_path):
+    with tarfile.open(tar_path , mode='r') as tfile:
+        tfile.extractall(path=dst_path)
+
+
 # ================================ list zip file content
 # list zip file content
 def list_zip_file(zip_path):
@@ -146,6 +167,14 @@ def get_CASE_FIELDS():
     return [True, case_fields]
 
 
+# ================================ get machine name
+# return machine name based on the filename
+def get_machine_name(filename):
+    machine_name = os.path.splitext(filename)[0]
+    if machine_name.endswith('.tar'):
+        machine_name = os.path.splitext(machine_name)[0]
+    return machine_name.replace("/" , "_")
+
 
 # ============================= upload files
 # this function handle uploaded files, decompress it, create machine if machine uploaded, etc.
@@ -161,7 +190,7 @@ def upload_file(file , case_id , machine=None , base64_name=None):
     
     if isUploadMachine:
         # if the option is upload machine
-        machine_name    = source_filename.rstrip('.zip').replace("/" , "_")
+        machine_name    = get_machine_name(source_filename)
         machine_id      = case_id + "_" + machine_name
     else:
         # if upload artifacts
@@ -228,15 +257,13 @@ def upload_file(file , case_id , machine=None , base64_name=None):
         
 
         # ====== decompress zip file or move it to files folder
-        if temp_filename.endswith(".zip"):
-            # if zip file
-            # unzip the file to machine files
+        if zipfile.is_zipfile(raw_folder + temp_filename) or tarfile.is_tarfile(raw_folder + temp_filename):
+            # if archive
+            # decompress the file to machine files
             try:
-                unzip_fun = unzip_file(raw_folder + temp_filename ,  files_folder + temp_filename + "/")
+                unzip_fun = decompress_file(raw_folder + temp_filename, files_folder + temp_filename + "/")
 
                 if unzip_fun[0] == True:
-                    
-                    
                     if RemoveRawFiles:
                         # remove the raw file
                         remove_raw_files = remove_file(raw_folder + temp_filename)
@@ -245,9 +272,6 @@ def upload_file(file , case_id , machine=None , base64_name=None):
 
 
                 else:
-                    
-
-                    
                     remove_raw_files = remove_file(raw_folder +  temp_filename) # remove file if exists
                     if remove_raw_files[0] == False:
                         logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed removing raw file ["+raw_folder + temp_filename+"]", reason=remove_raw_files[1])
@@ -269,7 +293,7 @@ def upload_file(file , case_id , machine=None , base64_name=None):
                     logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed decompressing the file ["+raw_folder + temp_filename+"]", reason=str(e))
                     return [False, {'result' : False , 'filename' : source_filename , 'message' : 'Failed to unzip the file: ' + str(e)}]
         else:
-            # if not zip file
+            # if not archive
 
             try:
                 # create folder in files folder to include the file 
