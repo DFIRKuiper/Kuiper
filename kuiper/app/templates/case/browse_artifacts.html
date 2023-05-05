@@ -2675,9 +2675,11 @@ $("#table_events").on('click' , 'tr.event_record_click' , function(){
       // build the right side window depends on the data type
       var data_type = $(this).attr('data-type')
       if( data_type == "windows_events" || data_type == "Events" )
-        var html = build_windows_event_table(ajax_records[clicked_id] , $('#record_details'));     
+        var html = build_windows_event_table(ajax_records[clicked_id] , $('#record_details'));
+      else if( ajax_records[clicked_id]['_source']['Data'].hasOwnProperty('Advanced') )
+        var html = build_advanced_artifacts_table(ajax_records[clicked_id] , $('#record_details'));
       else
-        var html = build_simple_artifacts_table(ajax_records[clicked_id] , $('#record_details'), spliter=true);  
+        var html = build_simple_artifacts_table(ajax_records[clicked_id] , $('#record_details'), spliter=true);
       
 
       //$('#record_details').html(html);
@@ -2715,7 +2717,7 @@ $("#table_events").on('click' , 'tr td a.record_details_dialog_click' , function
     record_id   = $(this).attr('id');
     record      = ajax_records[record_id];
     results     = convert_json_to_list(record['_source']);
-    var container = $('#dialog_content')
+    var container = $('#j')
 
     build_simple_artifacts_table(records=record , container=container, searchable = true, spliter=true)
 });
