@@ -2717,7 +2717,7 @@ $("#table_events").on('click' , 'tr td a.record_details_dialog_click' , function
     record_id   = $(this).attr('id');
     record      = ajax_records[record_id];
     results     = convert_json_to_list(record['_source']);
-    var container = $('#j')
+    var container = $('#dialog_content')
 
     build_simple_artifacts_table(records=record , container=container, searchable = true, spliter=true)
 });
