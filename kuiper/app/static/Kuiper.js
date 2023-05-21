@@ -191,6 +191,55 @@ function build_windows_event_table(record , container) {
 }
 
 
+// build advanced table (contents of the 'Advanced' key will be shown as beautified json)
+function build_advanced_artifacts_table(records , container, searchable = true, spliter=true , group_by=true){
+    var open_badge = '<span class="badge bg-blue"> '
+    
+    var beautify = records['_source']['Data']['Advanced']
+    
+    var results = convert_json_to_list(records['_source'])
+    var rhaegal_hit = build_rhaegal_rules(records)
+
+    html = rhaegal_hit + "<table class=\"table table-condensed table_left_header\"><tbody>";
+    
+    var list_of_keys = []
+    for(var i = 0 ; i < results.length ; i++)
+        list_of_keys.push(results[i][0])
+    
+    // display the "tag_type" field
+    if(list_of_keys.indexOf("tag_type") != -1){
+        var i = list_of_keys.indexOf("tag_type")
+        var field = results[i][0].split('|').join('.');
+        var value = results[i][1];
+
+        var search_plus = (searchable) ? '<a id="' + field + ':' + value + '" class="clickable add_to_search_query float_right"><i class="fa fa-search-plus"></i></a>' : '';
+        var tag_color = (value in tags_color) ? tags_color[value] : tags_color["untag"];
+        var value_html = (field == "tag_type") ? '<small class="label bg-'+tag_color+'">'+value+'</small>': escapeHtml(value);
+        html += '<tr><td> ' + open_badge + " " + field + ' </span> ' + search_plus + '</td><td  style="min-width:250px">' + value_html + '</td></tr>';
+    }
+    for (var i = 0; i < results.length; i++) {
+        var field = results[i][0].split('|').join('.');
+        var value = results[i][1];
+
+        if(field.startsWith("Data.Advanced") || ["tag_type" , "tag_id"].indexOf(field) != -1 ) // skip these fields
+            continue 
+        var search_plus = (searchable) ? '<a id="' + field + ':' + value + '" class="clickable add_to_search_query" ><i class="fa fa-search-plus"></i></a>' : '';
+        var spliter_plus = (spliter) ? '<a field="' + field + '" class="clickable add_extra_column_table_records" style="margin-left:3px;"><i class="fa fa-columns"></i></a>' : '';
+        var group_by_plus = (group_by) ? '<a field="' + field + '" class="clickable add_group_by_table_records" style="margin-left:3px;"><i class="fa fa-object-group"></i></a>' : '';
+
+        html += '<tr><td  style="min-width:150px"><div class="float_right">' + group_by_plus + spliter_plus + " " + search_plus + '</div> <div style="margin-right:70px">' + open_badge + " " + field + ' </span></div></td><td  style="min-width:250px">' + escapeHtml(value) + '</td></tr>';
+    }
+    html = html + "</tbody></table>";
+    html = html + '<div class="box-header disabled color-palette"><b>Data.Advanced</b></div>';
+
+    html = html + '<pre><code id="event_json_viewer"></code></pre>';
+    
+
+    container.html(html);
+
+    $('#event_json_viewer').html(library.json.prettyPrint(beautify));
+}
+
 
 // build simple table (record contains key and values)
 // spliter, if true, the table shows spliter column to add it to the table

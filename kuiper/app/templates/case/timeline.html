@@ -638,9 +638,10 @@ $('.timeline').on( 'click' , 'a.record_details_button' , function(){
     var data_type = record['_source']['data_type']
       if( data_type == "windows_events" )
         var html = build_windows_event_table(record , $('#record_details'));
-      else {
+      else if ( record['_source']['Data'].hasOwnProperty('Advanced') )
+        var html = build_advanced_artifacts_table(record, $('#record_details'), false);
+      else
         var html = build_simple_artifacts_table(record , $('#record_details') , false);
-      }
 
     $('#tag_details').find('.modal-body').html(html)
 
