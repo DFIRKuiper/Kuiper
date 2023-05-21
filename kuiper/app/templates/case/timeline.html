@@ -134,6 +134,10 @@
 
 }
 
+
+.float_right {
+  float: right;
+}
 .timeline>li>.timeline-item>.time {
   float: left;
   padding: 11px;
@@ -412,11 +416,12 @@ function get_tag_message(tag , label , with_label = false){
         var record = tag['_source']['Data']['record_details']
         var date_type = record['_source']['data_type']
         var imp_rec = record_important_fields[date_type];
-        for(var j = 0 ; j < imp_rec.length; j++){
-            var search_field_path = imp_rec[j][1].substring( imp_rec[j][1].indexOf('.') +1  );
-            var field_value = get_field_from_json_path(record , imp_rec[j][1]);
-            important_fields += ' <span class="badge bg-blue"> ' + imp_rec[j][0]+'</span> <span>' + field_value + '</span>';
-        }
+        if(imp_rec !== undefined)
+            for(var j = 0 ; j < imp_rec.length; j++){
+                var search_field_path = imp_rec[j][1].substring( imp_rec[j][1].indexOf('.') +1  );
+                var field_value = get_field_from_json_path(record , imp_rec[j][1]);
+                important_fields += ' <span class="badge bg-blue"> ' + imp_rec[j][0]+'</span> <span>' + field_value + '</span>';
+            }
         important_fields = '<div class="timeline-body">' + important_fields + '</div>'
     }
     var label_html = "";
@@ -461,11 +466,12 @@ function get_tag_table(tag){
         var record = tag['_source']['Data']['record_details']
         var date_type = record['_source']['data_type']
         var imp_rec = record_important_fields[date_type];
-        for(var j = 0 ; j < imp_rec.length; j++){
-            var search_field_path = imp_rec[j][1].substring( imp_rec[j][1].indexOf('.') +1  );
-            var field_value = get_field_from_json_path(record , imp_rec[j][1]);
-            important_fields += ' <span class="badge bg-blue"> ' + imp_rec[j][0]+'</span> <span>' + field_value + '</span><br />';
-        }
+        if(imp_rec !== undefined)
+            for(var j = 0 ; j < imp_rec.length; j++){
+                var search_field_path = imp_rec[j][1].substring( imp_rec[j][1].indexOf('.') +1  );
+                var field_value = get_field_from_json_path(record , imp_rec[j][1]);
+                important_fields += ' <span class="badge bg-blue"> ' + imp_rec[j][0]+'</span> <span>' + field_value + '</span><br />';
+            }
         important_fields = '<div class="timeline-body">' + important_fields + '</div>'
 
         machine = tag['_source']['Data']['record_details']['_source']['machine'].substring(tag['_index'].length + 1)
