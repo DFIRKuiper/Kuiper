@@ -825,17 +825,19 @@ class DB_Files:
     def get_by_status(self, status):
         try:
             files = []
-            for machine in self.collection.find({}):
-                for f in machine['files']:
-                    for p in f['parsers']:
-                        if p['status'] == status:
-                            files.append({
-                                'machine'   : machine,
-                                'file_path' : f['file_path'],
-                                'file_size' : f['file_size'],
-                                'parser'    : p
-                                })
-                        
+            for machine in self.collection.aggregate([
+                        {"$unwind": "$files"},
+                        {"$unwind": "$files.parsers"},
+                        {"$match": {"files.parsers.status": status}}
+                    ], cursor={}):
+                f = machine["files"]
+                files.append({
+                    'machine_id': machine['_id'],
+                    'file_path': f['file_path'],
+                    'file_size': f['file_size'],
+                    'parser': f['parsers']
+                    })
+
             return [True, files]
         except Exception as e:
             return [False,  str(e)]
