@@ -26,3 +26,4 @@ iOSbackup>=0.9.913
 adb-shell>=0.4.2
 libusb1>=2.0.1"
 ntfs_sds_parser
+regipy
