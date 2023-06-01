@@ -1,26 +1,21 @@
 import json
 import logging
-import traceback
-from collections import OrderedDict
-from lib.helper import convert_datetime
 from lib.helper import ComplexEncoder
-from lib.helper import strip_control_characters
-from lib.hive_yarp import get_hive
 from lib.helper import strip_control_characters
 from yarp import *
 
-
+Entry = {"@timestamp": "N/A", "Launch String": "N/A", "Category": "Internet Explorer Addons", "Name": "N/A"}
 class InternetExplorerAddons():
-    def __init__(self,prim_hive,log_files):
+    def __init__(self,prim_hive):
         self.prim_hive = prim_hive
-        self.log_files = log_files
         
     def run(self):
-        lst = []
+        lst_json = []
+        lst_csv = []
         CLSID = []
         Launch_String = []
         "use the SOFTWARE && Ntuser hive to get the result"
-        hive = get_hive(self.prim_hive,self.log_files)
+        hive = Registry.RegistryHive(open(self.prim_hive, 'rb'))
         REG_Path_G1 = [ 'Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects',
                         'Microsoft\Windows\CurrentVersion\Explorer\Browser Helper Objects',
                         'Wow6432Node\Microsoft\Internet Explorer\Explorer Bars',
@@ -43,7 +38,7 @@ class InternetExplorerAddons():
                         CLSID.append(SK.name())
                         Launch_String.append(p)
             else:
-                logging.info(u"[{}] {} not found.".format('Explorer', p))
+                logging.info(u"[{}] {} not found.".format('Internet Explorer Addons', p))
         #############        
         # Group 2
         #############
@@ -54,7 +49,7 @@ class InternetExplorerAddons():
                     CLSID.append(x.name())
                     Launch_String.append(p)
             else:
-                logging.info(u"[{}] {} not found.".format('Explorer', p))
+                logging.info(u"[{}] {} not found.".format('Internet Explorer Addons', p))
         #############        
         # Get Path && Description From CLSID
         #############
@@ -68,18 +63,14 @@ class InternetExplorerAddons():
                     for SK in Bin_key.subkeys():
                         if SK.name() == 'InprocServer32':
                             for y in SK.values():
-                                TS = SK.last_written_timestamp().isoformat()
                                 if y.name()=='':
-                                    Path = strip_control_characters(y.data())
-                                record = OrderedDict([
-                                    ("@timestamp",TS),
-                                    ("Launch String", LS),
-                                    ("Category", "Explorer"),
-                                    ("Path", Path),
-                                    ("Description", Description)
-                                ])
-                            lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
+                                    Entry["@timestamp"] = SK.last_written_timestamp().isoformat()
+                                    Entry["Path"] = strip_control_characters(y.data())
+                                    Entry["Launch String"] = LS
+                                    Entry["Description"] = Description
+                                    lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                                    lst_csv.append(Entry.copy())                   
                 else:
-                    logging.info(u"[{}] {} not found.".format('InternetExplorerAddons', Bin_key))
+                    logging.info(u"[{}] {} not found.".format('Internet Explorer Addons', Bin_key))
 
-        return lst
+        return lst_json, lst_csv, Entry.keys()

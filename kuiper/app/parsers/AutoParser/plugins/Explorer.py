@@ -1,26 +1,21 @@
 import json
 import logging
-import traceback
-from collections import OrderedDict
-from lib.helper import convert_datetime
 from lib.helper import ComplexEncoder
-from lib.helper import strip_control_characters
-from lib.hive_yarp import get_hive
 from lib.helper import strip_control_characters
 from yarp import *
 
-
+Entry = {"@timestamp": "N/A", "Launch String": "N/A", "Category": "Explorer", "Path": "N/A"}
 class Explorer():
-    def __init__(self,prim_hive,log_files):
+    def __init__(self,prim_hive):
         self.prim_hive = prim_hive
-        self.log_files = log_files
         
     def run(self):
-        lst = []
+        lst_json = []
+        lst_csv = []
         CLSID = []
         Launch_String = []
         "use the SOFTWARE && Ntuser hive to get the result"
-        hive = get_hive(self.prim_hive,self.log_files)
+        hive = Registry.RegistryHive(open(self.prim_hive, 'rb'))
         REG_Path_G1 = [ 'Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\ShellServiceObjects',
                         'Wow6432Node\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers',
                         'Microsoft\Windows\CurrentVersion\Explorer\ShellServiceObjects',
@@ -148,16 +143,11 @@ class Explorer():
             Key = hive.find_key(p)
             if Key:
                 for x in Key.values():
-                    Path = strip_control_characters(x.data())
-                    TS = Bin_key.last_written_timestamp().isoformat()
-                    record = OrderedDict([
-                        ("@timestamp",TS),
-                        ("Launch String", REG_Path_G5),
-                        ("Category", "Explorer"),
-                        ("Path", Path)
-                    ])
-                    lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
-                    
+                    Entry["@timestamp"] = Key.last_written_timestamp().isoformat()
+                    Entry["Path"] = strip_control_characters(x.data())
+                    Entry["Launch String"] = p
+                    lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                    lst_csv.append(Entry.copy())  
             else:
                 logging.info(u"[{}] {} not found.".format('Explorer', p))
         ##########
@@ -168,17 +158,13 @@ class Explorer():
             for SK in Key.subkeys():
                 for x in SK.values():
                     if x.name() == "Source":
-                        Path = strip_control_characters(x.data())
-                        TS = Bin_key.last_written_timestamp().isoformat()
-                        record = OrderedDict([
-                            ("@timestamp",TS),
-                            ("Launch String", REG_Path_G5),
-                            ("Category", "Explorer"),
-                            ("Path", Path)
-                        ])
-                    lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
+                        Entry["@timestamp"] = SK.last_written_timestamp().isoformat()
+                        Entry["Path"] = strip_control_characters(x.data())
+                        Entry["Launch String"] = REG_Path_G5
+                        lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                        lst_csv.append(Entry.copy())
             else:
-                logging.info(u"[{}] {} not found.".format('Explorer', p))
+                logging.info(u"[{}] {} not found.".format('Explorer', REG_Path_G5))
         ##########
         ##Get BIN 
         ##########
@@ -192,17 +178,12 @@ class Explorer():
                 if Bin_key:
                     for y in Bin_key.values():
                         if y.name() == "":
-                            Path = strip_control_characters(y.data())
-                            TS = Bin_key.last_written_timestamp().isoformat()
-                            record = OrderedDict([
-                                ("@timestamp",TS),
-                                ("Launch String", LS),
-                                ("Category", "Explorer"),
-                                ("Path", Path)
-                            ])
-                            lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
-            
+                            Entry["@timestamp"] = Bin_key.last_written_timestamp().isoformat()
+                            Entry["Path"] = strip_control_characters(y.data())
+                            Entry["Launch String"] = LS
+                            lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                            lst_csv.append(Entry.copy())           
                 else:
                     logging.info(u"[{}] {} not found.".format('Explorer', Bin_key))
 
-        return lst
+        return lst_json, lst_csv, Entry.keys()

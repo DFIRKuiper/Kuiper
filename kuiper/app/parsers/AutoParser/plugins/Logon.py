@@ -1,22 +1,17 @@
 import json
 import logging
-import traceback
-from collections import OrderedDict
-from lib.helper import convert_datetime
 from lib.helper import ComplexEncoder
-from lib.helper import strip_control_characters
-from lib.hive_yarp import get_hive
 from lib.helper import strip_control_characters
 from yarp import *
 
-
+Entry = {"@timestamp": "N/A", "Launch String": "N/A", "Category": "Logon", "Path": "N/A", "Name": "N/A"}
 class Logon():
-    def __init__(self,prim_hive,log_files):
+    def __init__(self,prim_hive):
         self.prim_hive = prim_hive
-        self.log_files = log_files
-
+        
     def run(self):
-        lst = []
+        lst_json = []
+        lst_csv = []
         "use the SOFTWARE && SYSTEM && Ntuser hive to get the result"
         Registry_Path_G1 = u'Microsoft\Windows NT\CurrentVersion\Winlogon'
         
@@ -92,7 +87,7 @@ class Logon():
                             u'\\Software\\Microsoft\\Windows NT\\CurrentVersion\\Terminal Server\\Install\\Software\\Microsoft\\Windows\\CurrentVersion\\RunonceEx'
                             ]
                             
-        hive = get_hive(self.prim_hive,self.log_files)
+        hive = Registry.RegistryHive(open(self.prim_hive, 'rb'))
         ##########
         ##Group 1
         ##########
@@ -100,16 +95,12 @@ class Logon():
         if Registry_Key_G1:
             for x in Registry_Key_G1.values():
                 if x.name() == 'VMApplet' or x.name() == 'Userinit' or x.name() == 'Shell' or x.name() == 'TaskMan' or x.name() == 'AppSetup' :
-                    TS = Registry_Key_G1.last_written_timestamp().isoformat()
-                    Path = strip_control_characters(x.data())
-                    record = OrderedDict([
-                        ("@timestamp",TS),
-                        ("Launch String", Registry_Path_G1),
-                        ("Name", x.name()),
-                        ("Category", "Logon"),
-                        ("Path", Path)
-                    ])
-                    lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder))) 
+                    Entry["@timestamp"] = Registry_Key_G1.last_written_timestamp().isoformat()
+                    Entry["Name"] = x.name()
+                    Entry["Path"] = strip_control_characters(x.data())
+                    Entry["Launch String"] = Registry_Path_G1
+                    lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                    lst_csv.append(Entry.copy())
         else:
             logging.info(u"[{}] {} not found.".format('Logon', Registry_Path_G1))
         ##########
@@ -121,16 +112,12 @@ class Logon():
                 for SK in key.subkeys():
                     for x in SK.values():
                         if x.name() == SKN:
-                            TS = key.last_written_timestamp().isoformat()
-                            Path = strip_control_characters(x.data())
-                            record = OrderedDict([
-                                ("@timestamp",TS),
-                                ("Launch String", key_path),
-                                ("Name", x.name()),
-                                ("Category", "Logon"),
-                                ("Path", Path)
-                            ])
-                        lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
+                            Entry["@timestamp"] = key.last_written_timestamp().isoformat()
+                            Entry["Name"] = x.name()
+                            Entry["Path"] = strip_control_characters(x.data())
+                            Entry["Launch String"] = key_path
+                            lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                            lst_csv.append(Entry.copy())
             else:
                 logging.info(u"[{}] {} not found.".format('Logon', key))
         ##########
@@ -141,16 +128,12 @@ class Logon():
             if key:
                 for x in key.values():
                     if x.name() == SKN:
-                        TS = key.last_written_timestamp().isoformat()
-                        Path = strip_control_characters(x.data())
-                        record = OrderedDict([
-                            ("@timestamp",TS),
-                            ("Launch String", key_path),
-                            ("Name", x.name()),
-                            ("Category", "Logon"),
-                            ("Path", Path)
-                        ])
-                        lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
+                        Entry["@timestamp"] = key.last_written_timestamp().isoformat()
+                        Entry["Name"] = x.name()
+                        Entry["Path"] = strip_control_characters(x.data())
+                        Entry["Launch String"] = key_path
+                        lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                        lst_csv.append(Entry.copy())
             else:
                 logging.info(u"[{}] {} not found.".format('Logon', key))
         ##########
@@ -160,16 +143,12 @@ class Logon():
             key = hive.find_key(key_path)
             if key:
                 for x in key.values():
-                    TS = key.last_written_timestamp().isoformat()
-                    Path = strip_control_characters(x.data())
-                    record = OrderedDict([
-                        ("@timestamp",TS),
-                        ("Launch String", key_path),
-                        ("Name", x.name()),
-                        ("Category", "Logon"),
-                        ("Path", Path)
-                    ])
-                    lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
+                    Entry["@timestamp"] = key.last_written_timestamp().isoformat()
+                    Entry["Name"] = x.name()
+                    Entry["Path"] = strip_control_characters(x.data())
+                    Entry["Launch String"] = key_path
+                    lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                    lst_csv.append(Entry.copy())
             else:
                 logging.info(u"[{}] {} not found.".format('Logon', key))
         ##########
@@ -180,16 +159,12 @@ class Logon():
             if key:
                 for SK in key.subkeys():
                     for x in SK.values():
-                        TS = key.last_written_timestamp().isoformat()
-                        Path = strip_control_characters(x.data())
-                        record = OrderedDict([
-                            ("@timestamp",TS),
-                            ("Launch String", key_path),
-                            ("Name", x.name()),
-                            ("Category", "Logon"),
-                            ("Path", Path)
-                        ])
-                    lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
+                        Entry["@timestamp"] = key.last_written_timestamp().isoformat()
+                        Entry["Name"] = x.name()
+                        Entry["Path"] = strip_control_characters(x.data())
+                        Entry["Launch String"] = key_path
+                        lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                        lst_csv.append(Entry.copy())
             else:
                 logging.info(u"[{}] {} not found.".format('Logon', key))
         ##########
@@ -203,20 +178,16 @@ class Logon():
                     key = hive.find_key(key_path)
                     if key:
                         for x in SK.values():
-                            TS = key.last_written_timestamp().isoformat()
-                            Path = strip_control_characters(x.data())
-                            record = OrderedDict([
-                                ("@timestamp",TS),
-                                ("Launch String", key_path),
-                                ("Name", x.name()),
-                                ("Category", "Logon"),
-                                ("Path", Path)
-                            ])
-                            lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
+                            Entry["@timestamp"] = key.last_written_timestamp().isoformat()
+                            Entry["Name"] = x.name()
+                            Entry["Path"] = strip_control_characters(x.data())
+                            Entry["Launch String"] = key_path
+                            lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                            lst_csv.append(Entry.copy())
                     else:
                         logging.info(u"[{}] {} not found.".format('Logon', key))
             else:
                 logging.info(u"[{}] {} not found.".format('Logon', key))
 
         
-        return lst
+        return lst_json, lst_csv, Entry.keys()

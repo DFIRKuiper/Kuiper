@@ -1,28 +1,23 @@
 import json
 import logging
-import traceback
-from collections import OrderedDict
-from lib.helper import convert_datetime
 from lib.helper import ComplexEncoder
-from lib.helper import strip_control_characters
-from lib.hive_yarp import get_hive
 from lib.helper import strip_control_characters
 from yarp import *
 
-
+Entry = {"@timestamp": "N/A", "Launch String": "N/A", "Category": "Office Addins", "Path": "N/A", "Name": "N/A"}
 class OfficeAddins():
-    def __init__(self,prim_hive,log_files):
+    def __init__(self,prim_hive):
         self.prim_hive = prim_hive
-        self.log_files = log_files
         
     def run(self):
-        lst = []
+        lst_json = []
+        lst_csv = []
         CLSID = []
         Launch_String = []
         SubKeys = []
         KeyName = []
         "use the SOFTWARE && Ntuser hive to get the result"
-        hive = get_hive(self.prim_hive,self.log_files)
+        hive = Registry.RegistryHive(open(self.prim_hive, 'rb'))
         REG_Path_G1 = [ 'Wow6432Node\Microsoft\Office',
                         'Microsoft\Office']
         REG_Path_G2 = [u'\\SOFTWARE\\Wow6432Node\\Microsoft\\Office test\\Special\\Perf',
@@ -47,18 +42,14 @@ class OfficeAddins():
             if Key:
                 for x in Key.values():
                     if x.name() == '':
-                        TS = Key.last_written_timestamp().isoformat()
-                        Path = strip_control_characters(x.data())
-                        record = OrderedDict([
-                            ("@timestamp",TS),
-                            ("Launch String", p),
-                            ("Category", "Codecs"),
-                            ("Name", x.name()),
-                            ("Path", Path)
-                            ])
-                        lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))  
+                        Entry["@timestamp"] = key.last_written_timestamp().isoformat()
+                        Entry["Name"] = x.name()
+                        Entry["Path"] = strip_control_characters(x.data())
+                        Entry["Launch String"] = p
+                        lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                        lst_csv.append(Entry.copy()) 
             else:
-                logging.info(u"[{}] {} not found.".format('OfficeAddins', p))
+                logging.info(u"[{}] {} not found.".format('Office Addins', p))
 
         ##################
         ###GET Key Path G1
@@ -72,7 +63,7 @@ class OfficeAddins():
                         KeyName.append(SK.name())
                         Launch_String.append(p)
                 else:
-                    logging.info(u"[{}] {} not found.".format('OfficeAddins', p))
+                    logging.info(u"[{}] {} not found.".format('Office Addins', p))
         ###############
         ###GET CLSID G1
         ###############
@@ -96,17 +87,13 @@ class OfficeAddins():
                 if Bin_key:
                     for y in Bin_key.values():
                         if y.name() == "":
-                            TS = Bin_key.last_written_timestamp().isoformat()
-                            Path = strip_control_characters(y.data())
-                            record = OrderedDict([
-                                ("@timestamp",TS),
-                                ("Launch String", LS),
-                                ("Category", "Codecs"),
-                                ("Path", Path)
-                            ])
-                            lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
-            
+                            Entry["@timestamp"] = Bin_key.last_written_timestamp().isoformat()
+                            Entry["Name"] = "N/A"
+                            Entry["Path"] = strip_control_characters(y.data())
+                            Entry["Launch String"] = LS
+                            lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                            lst_csv.append(Entry.copy())
                 else:
                     logging.info(u"[{}] {} not found.".format('Codecs', Bin_key))
 
-        return lst
+        return lst_json, lst_csv, Entry.keys()

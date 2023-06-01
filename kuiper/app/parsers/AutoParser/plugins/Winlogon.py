@@ -1,26 +1,21 @@
 import json
 import logging
-import traceback
-from collections import OrderedDict
-from lib.helper import convert_datetime
 from lib.helper import ComplexEncoder
-from lib.helper import strip_control_characters
-from lib.hive_yarp import get_hive
 from lib.helper import strip_control_characters
 from yarp import *
 
-
+Entry = {"@timestamp": "N/A", "Launch String": "N/A", "Category": "Winlogon", "Path": "N/A"}
 class Winlogon():
-    def __init__(self,prim_hive,log_files):
+    def __init__(self,prim_hive):
         self.prim_hive = prim_hive
-        self.log_files = log_files
         
     def run(self):
-        lst = []
+        lst_json = []
+        lst_csv = []
         CLSID = []
         Launch_String = []
         "use the SOFTWARE && SYSTEM && Ntuser hive to get the result"
-        hive = get_hive(self.prim_hive,self.log_files)
+        hive = Registry.RegistryHive(open(self.prim_hive, 'rb'))
         REG_Path_G1 = [ 'Microsoft\Windows\CurrentVersion\Authentication\Credential Providers',
                         'Microsoft\Windows\CurrentVersion\Authentication\Credential Provider Filters',
                         'Microsoft\Windows\CurrentVersion\Authentication\PLAP Providers',]
@@ -48,17 +43,13 @@ class Winlogon():
             if Key:
                 for x in Key.values():
                     if x.name() == SKN:
-                        TS = Key.last_written_timestamp().isoformat()
-                        Path = strip_control_characters(x.data())
-                        record = OrderedDict([
-                            ("@timestamp",TS),
-                            ("Launch String", REG_Path_G2),
-                            ("Category", "Winlogon"),
-                            ("Path", Path)
-                        ])
-                        lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
+                        Entry["@timestamp"] = Key.last_written_timestamp().isoformat()
+                        Entry["Path"] = strip_control_characters(x.data())
+                        Entry["Launch String"] = REG_Path_G2
+                        lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                        lst_csv.append(Entry.copy())
         else:
-            logging.info(u"[{}] {} not found.".format('Explorer', p))
+            logging.info(u"[{}] {} not found.".format('Winlogon', p))
         ###############
         ###Get Bin Path
         ###############
@@ -69,17 +60,12 @@ class Winlogon():
                 if Bin_key:
                     for y in Bin_key.values():
                         if y.name() == "":
-                            TS = Bin_key.last_written_timestamp().isoformat()
-                            Path = strip_control_characters(y.data())
-                            record = OrderedDict([
-                                ("@timestamp",TS),
-                                ("Launch String", LS),
-                                ("Category", "Winlogon"),
-                                ("Path", Path)
-                            ])
-                            lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
-            
+                            Entry["@timestamp"] = Bin_key.last_written_timestamp().isoformat()
+                            Entry["Path"] = strip_control_characters(y.data())
+                            Entry["Launch String"] = LS
+                            lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                            lst_csv.append(Entry.copy())          
                 else:
-                    logging.info(u"[{}] {} not found.".format('Explorer', Bin_key))
+                    logging.info(u"[{}] {} not found.".format('Winlogon', Bin_key))
 
-        return lst
+        return lst_json, lst_csv, Entry.keys()

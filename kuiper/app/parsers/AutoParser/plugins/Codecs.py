@@ -1,26 +1,21 @@
 import json
 import logging
-import traceback
-from collections import OrderedDict
-from lib.helper import convert_datetime
 from lib.helper import ComplexEncoder
-from lib.helper import strip_control_characters
-from lib.hive_yarp import get_hive
 from lib.helper import strip_control_characters
 from yarp import *
 
-
+Entry = {"@timestamp": "N/A", "Launch String": "N/A", "Category": "Codecs", "Path": "N/A", "Name": "N/A"}
 class Codecs():
-    def __init__(self,prim_hive,log_files):
+    def __init__(self,prim_hive):
         self.prim_hive = prim_hive
-        self.log_files = log_files
         
     def run(self):
-        lst = []
         CLSID = []
         Launch_String = []
+        lst_json = []
+        lst_csv = []
         "use the SOFTWARE && Ntuser hive to get the result"
-        hive = get_hive(self.prim_hive,self.log_files)
+        hive = Registry.RegistryHive(open(self.prim_hive, 'rb'))
         REG_Path_G1 = [ 'Wow6432Node\Microsoft\Windows NT\CurrentVersion\Drivers32',
                         'Microsoft\Windows NT\CurrentVersion\Drivers32'
                         u'\\Software\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion\\Drivers32',
@@ -53,16 +48,12 @@ class Codecs():
             Key = hive.find_key(p)
             if Key:
                 for x in Key.values():
-                    Path = strip_control_characters(x.data())
-                    TS = Key.last_written_timestamp().isoformat()
-                    record = OrderedDict([
-                        ("@timestamp",TS),
-                        ("Launch String", p),
-                        ("Category", "Codecs"),
-                        ("Name", x.name()),
-                        ("Path", Path)
-                        ])
-                    lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))  
+                    Entry["@timestamp"] = Key.last_written_timestamp().isoformat()
+                    Entry["Path"] = strip_control_characters(x.data())
+                    Entry["Launch String"] = p
+                    Entry["Name"] = x.name()
+                    lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                    lst_csv.append(Entry.copy())  
             else:
                 logging.info(u"[{}] {} not found.".format('Codecs', p))
         ##########
@@ -86,17 +77,13 @@ class Codecs():
                 if Bin_key:
                     for y in Bin_key.values():
                         if y.name() == "":
-                            TS = Bin_key.last_written_timestamp().isoformat()
-                            Path = strip_control_characters(y.data())
-                            record = OrderedDict([
-                                ("@timestamp",TS),
-                                ("Launch String", LS),
-                                ("Category", "Codecs"),
-                                ("Path", Path)
-                            ])
-                            lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
-            
+                            Entry["@timestamp"] = Bin_key.last_written_timestamp().isoformat()
+                            Entry["Path"] = strip_control_characters(y.data())
+                            Entry["Launch String"] = LS
+                            Entry["Name"] = "N/A"
+                            lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                            lst_csv.append(Entry.copy())  
                 else:
                     logging.info(u"[{}] {} not found.".format('Codecs', Bin_key))
 
-        return lst
+        return lst_json, lst_csv, Entry.keys()

@@ -1,23 +1,18 @@
 import json
 import logging
-import traceback
-from collections import OrderedDict
-from lib.helper import convert_datetime
 from lib.helper import ComplexEncoder
-from lib.helper import strip_control_characters
-from lib.hive_yarp import get_hive
 from lib.helper import strip_control_characters
 from yarp import *
 
-
+Entry = {"@timestamp": "N/A", "Launch String": "N/A", "Category": "Image Hijacks", "Path": "N/A", "Name": "N/A"}
 class ImageHijacks():
-    def __init__(self,prim_hive,log_files):
+    def __init__(self,prim_hive):
         self.prim_hive = prim_hive
-        self.log_files = log_files
 
     def run(self):
-        lst = []
-        hive = get_hive(self.prim_hive,self.log_files)
+        lst_json = []
+        lst_csv = []
+        hive = Registry.RegistryHive(open(self.prim_hive, 'rb'))
         "use the SOFTWARE && Ntuser hive to get the result"
         REG_Path_G1 = ['Microsoft\Windows NT\CurrentVersion\Image File Execution Options',
                        'Wow6432Node\Microsoft\Windows NT\CurrentVersion\Image File Execution Options',
@@ -42,17 +37,14 @@ class ImageHijacks():
                 for SK in Key.subkeys():
                     for x in SK.values():
                         if x.name() == 'Debugger' or x.name() == 'MonitorProcess':
-                            TS = SK.last_written_timestamp().isoformat()
-                            Path = strip_control_characters(x.data())
-                            record = OrderedDict([
-                                ("@timestamp",TS),
-                                ("Launch String", p),
-                                ("Category", "ImageHijacks"),
-                                ("Binary Name", SK.name()),
-                                ("Path", Path)])
-                            lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder))) 
+                            Entry["@timestamp"] = SK.last_written_timestamp().isoformat()
+                            Entry["Path"] = strip_control_characters(x.data())
+                            Entry["Launch String"] = p
+                            Entry["Name"] = SK.name()
+                            lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                            lst_csv.append(Entry.copy())
             else:
-                logging.info(u"[{}] {} not found.".format('ImageHijacks', p))
+                logging.info(u"[{}] {} not found.".format('Image Hijacks', p))
         # Group 2
         
         for p, SKN in zip(REG_Path_G2, SK_Name_G2):
@@ -60,16 +52,14 @@ class ImageHijacks():
             if Key:
                 for x in Key.values():
                     if x.name() == SKN:
-                        Data = x.data()
-                        TS = Key.last_written_timestamp().isoformat()
-                        record = OrderedDict([
-                            ("@timestamp",TS),
-                            ("Launch String", p),
-                            ("Category", "ImageHijacks"),
-                            ("Data", Data)])
-                        lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder))) 
+                        Entry["@timestamp"] = Key.last_written_timestamp().isoformat()
+                        Entry["Path"] = "N/A"
+                        Entry["Launch String"] = p
+                        Entry["Name"] = x.data()
+                        lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                        lst_csv.append(Entry.copy())
             else:
-                logging.info(u"[{}] {} not found.".format('ImageHijacks', p))
+                logging.info(u"[{}] {} not found.".format('Image Hijacks', p))
 
         for p in REG_Path_G3:
             Key = hive.find_key(p)
@@ -80,17 +70,15 @@ class ImageHijacks():
                         Path = "Classes\\" + Value + "\shell\open\command"
                         K = hive.find_key(Path)
                         if K:
-                            for x in Key.values():
+                            for x in K.values():
                                 if x.name() == '':
-                                    TS = K.last_written_timestamp().isoformat()
-                                    Data = x.data()
-                                    record = OrderedDict([
-                                        ("@timestamp",TS),
-                                        ("Launch String", p),
-                                        ("Category", "ImageHijacks"),
-                                        ("Name", Data)])
-                        lst.append(u"{}".format(json.dumps(record, cls=ComplexEncoder)))
+                                    Entry["@timestamp"] = K.last_written_timestamp().isoformat()
+                                    Entry["Path"] = "N/A"
+                                    Entry["Launch String"] = p
+                                    Entry["Name"] = x.data()
+                                    lst_json.append(u"{}".format(json.dumps(Entry.copy(), cls=ComplexEncoder)))
+                                    lst_csv.append(Entry.copy())
             else:
-                logging.info(u"[{}] {} not found.".format('ImageHijacks', p))
+                logging.info(u"[{}] {} not found.".format('Image Hijacks', p))
 
-        return lst
+        return lst_json, lst_csv, Entry.keys()
