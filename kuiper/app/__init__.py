@@ -195,19 +195,26 @@ def before_request():
         return
     # check if the api token correct
     if request.full_path.lower().startswith('/api'):
+        # first, read the json data from the request
         try:
             request_str =  urllib.unquote(request.data).decode('utf8')
-        
-            # if the request from has the correct token in data field
             request_json = json.loads(request_str)['data']
+        except:
+            return redirect(url_for('error_api', error="error getting request json"))
+
+        # API token can be in request json data or in forms data
+        if 'api_token' in request_json:
             if request_json['api_token'] == app.config['FLASK_API_TOKEN']:
                 return
-        except:
-            # if the api token not in the data field, check form field
-            if "api_token" in dict(request.form) and request.form["api_token"] == app.config['FLASK_API_TOKEN']:
+            else:
+                return redirect(url_for('error_api', error="invalid api token supplied"))
+        elif 'api_token' in dict(request.form):
+            if request.form["api_token"] == app.config['FLASK_API_TOKEN']:
                 return
-
-        return redirect(url_for('error_api', error="invalid token"))
+            else:
+                return redirect(url_for('error_api', error="invalid api token supplied"))
+        else:
+            return redirect(url_for('error_api', error="no api token supplied"))
 
     
     if app.config['LDAP_ENABLED']  == False:
