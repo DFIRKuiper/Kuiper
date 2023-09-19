@@ -289,13 +289,18 @@ $('#edit_case_info_modal').on('hidden.bs.modal' , function(){
 })
 
 // stop moving to case page when delete button on case card clicked
-$('#cases_cards').on('click' , '.remove_case_info' , function(){ 
-    stop_moving_to_case_page = true;
-    var casename = $(this).attr('data')
-    $(this).closest('.col-md-3').remove()
+$('#cases_cards').on('click' , '.remove_case_info' , function(){
+    var casename = $(this).attr('data');
+    if (confirm("Are you sure you want to delete the case '" + casename + "'? This action is not reversible!")){
+      stop_moving_to_case_page = true;
+      $(this).closest('.col-md-3').remove()
 
-    var link = "../admin/delete_case/" + casename;
-    window.location.href=link;
+      var link = "../admin/delete_case/" + casename;
+      window.location.href=link;
+    }
+    else {
+      stop_moving_to_case_page = true;
+    }
 
 });
 
