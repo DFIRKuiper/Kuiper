@@ -1,5 +1,13 @@
 # **Changelog**
 This page list the Changelog for Kuiper project
+## **[2.3.5] - 2023-11-18**
+### **Fixes:**
+- Bug Fix: improve api results [Pull Request #113](https://github.com/DFIRKuiper/Kuiper/pull/113)
+- Bug Fix: fix redis Dockerfile [Pull Request #108](https://github.com/DFIRKuiper/Kuiper/pull/108)
+- Bug Fix: fix path traversal vulnerability when extracting tar files [Pull Request #106](https://github.com/DFIRKuiper/Kuiper/pull/106)
+- Bug Fix: fix issue with extracting the compressed zip file
+- Bug Fix: fix issue with data including quoting [Kuiper modifies meaning of parsed data (quoting)](https://github.com/DFIRKuiper/Kuiper/issues/107)
+
 ## **[2.3.4] - 2023-02-03**
 ### **Fixes:**
 - Bug Fix: Flask and Celery Docker Images (changed gevent to version 1.2.2) [Pull Request #85](https://github.com/DFIRKuiper/Kuiper/pull/85)
