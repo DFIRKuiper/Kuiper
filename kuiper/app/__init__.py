@@ -195,20 +195,30 @@ def before_request():
         return
     # check if the api token correct
     if request.full_path.lower().startswith('/api'):
+        # first, read the json data from the request
         try:
             request_str =  urllib.unquote(request.data).decode('utf8')
-        
-            # if the request from has the correct token in data field
             request_json = json.loads(request_str)['data']
+        except:
+            logger.logger(level=logger.ERROR , type="API", message="Bad Request" , reason="Error getting request json")
+            return "Error getting request json", 400
+
+        # API token can be in request json data or in forms data
+        if 'api_token' in request_json:
             if request_json['api_token'] == app.config['FLASK_API_TOKEN']:
                 return
-        except:
-            # if the api token not in the data field, check form field
-            if "api_token" in dict(request.form) and request.form["api_token"] == app.config['FLASK_API_TOKEN']:
+            else:
+                logger.logger(level=logger.ERROR , type="API", message="Unauthorized" , reason="Invalid API token")
+                return "Invalid API token", 401
+        elif 'api_token' in dict(request.form):
+            if request.form["api_token"] == app.config['FLASK_API_TOKEN']:
                 return
-
-        return redirect(url_for('error_api', error="invalid token"))
-
+            else:
+                logger.logger(level=logger.ERROR , type="API", message="Unauthorized" , reason="Invalid API token")
+                return "Invalid API token", 401
+        else:
+            logger.logger(level=logger.ERROR , type="API", message="Unauthorized" , reason="No API token")
+            return "No API token", 401
     
     if app.config['LDAP_ENABLED']  == False:
         return
