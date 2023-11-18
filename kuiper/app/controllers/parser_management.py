@@ -719,7 +719,7 @@ class Parser_Manager:
                 json_data[k] = self.convert_json_fields_to_str(json_data[k])
             return json_data
         else:
-            return str(json_data).replace('"' , "'") # replace all (") with ('), elasticsearch does not support it
+            return str(json_data)
 
 
 

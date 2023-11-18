@@ -1108,11 +1108,11 @@ function rebuild_records(records){
                     <span class="dropdown float_right">\
                         <a class="fields-dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="clickable fa fa-filter "></span></a>\
                         <ul class="dropdown-menu">\
-                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+records[i]['group_by']['key'][key]+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
-                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+records[i]['group_by']['key'][key]+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
-                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+records[i]['group_by']['key'][key]+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
-                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+records[i]['group_by']['key'][key]+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
-                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+records[i]['group_by']['key'][key]+'|reg"           class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
+                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+escapeHtml(records[i]['group_by']['key'][key])+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
+                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+escapeHtml(records[i]['group_by']['key'][key])+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
+                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+escapeHtml(records[i]['group_by']['key'][key])+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
+                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+escapeHtml(records[i]['group_by']['key'][key])+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
+                        <li class="clickable" data="item" id><a id="'+group_by_fields[key]+':'+escapeHtml(records[i]['group_by']['key'][key])+'|reg"           class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
                         <li class="clickable" data="item" id><a data="'+group_by_fields[key]+'" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
                         </ul>\
                     </span>\
@@ -1173,11 +1173,11 @@ function rebuild_records(records){
                 <span class="dropdown float_right">\
                     <a class="fields-dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="clickable fa fa-filter "></span></a>\
                     <ul class="dropdown-menu">\
-                    <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
-                    <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
-                    <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
-                    <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
-                    <li class="clickable" data="item" id><a id="data_type:'+records[i]['_source']['data_type']+'|reg"           class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
+                    <li class="clickable" data="item" id><a id="data_type:'+escapeHtml(records[i]['_source']['data_type'])+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
+                    <li class="clickable" data="item" id><a id="data_type:'+escapeHtml(records[i]['_source']['data_type'])+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
+                    <li class="clickable" data="item" id><a id="data_type:'+escapeHtml(records[i]['_source']['data_type'])+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
+                    <li class="clickable" data="item" id><a id="data_type:'+escapeHtml(records[i]['_source']['data_type'])+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
+                    <li class="clickable" data="item" id><a id="data_type:'+escapeHtml(records[i]['_source']['data_type'])+'|reg"           class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
                     <li class="clickable" data="item" id><a data="data_type" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
                     </ul>\
                 </span>\
@@ -1189,11 +1189,11 @@ function rebuild_records(records){
                 <span class="dropdown float_right">\
                     <a class="fields-dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="clickable fa fa-filter "></span></a>\
                     <ul class="dropdown-menu">\
-                    <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
-                    <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
-                    <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
-                    <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
-                    <li class="clickable" data="item" id><a id="machine:'+records[i]['_source']['machine']+'|reg"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
+                    <li class="clickable" data="item" id><a id="machine:'+escapeHtml(records[i]['_source']['machine'])+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
+                    <li class="clickable" data="item" id><a id="machine:'+escapeHtml(records[i]['_source']['machine'])+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
+                    <li class="clickable" data="item" id><a id="machine:'+escapeHtml(records[i]['_source']['machine'])+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
+                    <li class="clickable" data="item" id><a id="machine:'+escapeHtml(records[i]['_source']['machine'])+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
+                    <li class="clickable" data="item" id><a id="machine:'+escapeHtml(records[i]['_source']['machine'])+'|reg"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
                     <li class="clickable" data="item" id><a data="machine" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
                     </ul>\
                 </span>\
@@ -1208,11 +1208,11 @@ function rebuild_records(records){
                 <span class="dropdown float_right">\
                     <a class="fields-dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><span class="clickable fa fa-filter "></span></a>\
                     <ul class="dropdown-menu">\
-                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+field_value+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
-                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+field_value+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
-                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+field_value+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
-                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+field_value+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
-                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+field_value+'|reg"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
+                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+escapeHtml(field_value)+'|equal"        class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Equals</a></li>\
+                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+escapeHtml(field_value)+'|contains"     class="clickable add_to_search_query"><i class="fa fa-search-plus"></i> Contains</a></li>\
+                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+escapeHtml(field_value)+'|not_contains" class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Contains</a></li>\
+                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+escapeHtml(field_value)+'|not_equal"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Not Equals</a></li>\
+                    <li class="clickable" data="item"><a id="'+extra_fields_in_table[field]+':'+escapeHtml(field_value)+'|reg"    class="clickable add_to_search_query"><i class="fa fa-search-minus"></i> Regex</a></li>\
                     <li class="clickable" data="item"><a data="'+extra_fields_in_table[field]+'" class="clickable clicked_sort"><i class="fa fa-sort-amount-asc"></i> Sort</a></li>\
                     </ul>\
                 </span>\
@@ -1471,7 +1471,7 @@ function reload_records(search , wanted_page , sort_by = query_sort_by , wanted_
           if(r['res_total'] != 0){
             var aggs = r['aggs']
             for(var i = 0 ; i <aggs.length ; i++)
-                list += '<li class="clickable"><a id="data_type:'+aggs[i]['key']+'" class="clickable add_to_search_query">'+aggs[i]['key']+' <span class="badge bg-red">'+aggs[i]['doc_count']+'</span></a></li>'
+                list += '<li class="clickable"><a id="data_type:'+escapeHtml(aggs[i]['key'])+'" class="clickable add_to_search_query">'+aggs[i]['key']+' <span class="badge bg-red">'+aggs[i]['doc_count']+'</span></a></li>'
           }
           $('#artifacts_list').html(list);
           $('.artifacts_list_button').dropdown()
