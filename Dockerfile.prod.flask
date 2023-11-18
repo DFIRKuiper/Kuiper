@@ -2,7 +2,7 @@ FROM python:2.7
 
 RUN mkdir -p /app/
 WORKDIR /app
-RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf
+# RUN echo "nameserver 8.8.8.8" > /etc/resolv.conf
 
 COPY ./kuiper/requirements_3.txt ./requirements_3.txt
 COPY ./kuiper/requirements_2.7.txt ./requirements_2.7.txt
