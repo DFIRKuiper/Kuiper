@@ -10,6 +10,7 @@ import zipfile
 import hashlib
 import base64
 import tarfile
+import subprocess
 
 from datetime import datetime
 
@@ -114,13 +115,17 @@ def decompress_file(archive_path,dst_path):
     except Exception as e:
         return [False, "Error extracting the archive content: " + str(e)]
 
-
-# ================================ unzip file
+ 
+# ================================ unzip file  
 # unzip the provided file to the dst_path
-def unzip_file(zip_path, dst_path):
-    with zipfile.ZipFile(zip_path , mode='r') as zfile:
-        zfile.extractall(path=dst_path)
-
+def unzip_file(zip_path, dst_path): 
+    try:
+        with zipfile.ZipFile(zip_path , mode='r') as zfile:
+            zfile.extractall(path=dst_path)
+    except:
+        # if failed to extract using ZipFile, use 7z
+        p = subprocess.Popen(" ".join(["7z", "x", zip_path, "-o" + dst_path, "-y" , ">" , "/dev/nul"]), stdout=subprocess.PIPE, shell=True)
+        p_status = p.wait()
 
 # ================================ is within directory
 # check if target is within a given directory
@@ -287,21 +292,22 @@ def upload_file(file , case_id , machine=None , base64_name=None):
                 unzip_fun = decompress_file(raw_folder + temp_filename, files_folder + temp_filename + "/")
 
                 if unzip_fun[0] == True:
-                    if RemoveRawFiles:
-                        # remove the raw file
-                        remove_raw_files = remove_file(raw_folder + temp_filename)
-                        if remove_raw_files[0] == False:
-                            logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed removing raw file ["+raw_folder + temp_filename+"]", reason=remove_raw_files[1])
+                    pass
+                    # if RemoveRawFiles:
+                    #     # remove the raw file
+                    #     remove_raw_files = remove_file(raw_folder + temp_filename)
+                    #     if remove_raw_files[0] == False:
+                    #         logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed removing raw file ["+raw_folder + temp_filename+"]", reason=remove_raw_files[1])
 
-
+ 
                 else:
-                    remove_raw_files = remove_file(raw_folder +  temp_filename) # remove file if exists
-                    if remove_raw_files[0] == False:
-                        logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed removing raw file ["+raw_folder + temp_filename+"]", reason=remove_raw_files[1])
+                    # remove_raw_files = remove_file(raw_folder +  temp_filename) # remove file if exists
+                    # if remove_raw_files[0] == False:
+                    #     logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed removing raw file ["+raw_folder + temp_filename+"]", reason=remove_raw_files[1])
 
-                    remove_files_folder = remove_folder(files_folder + temp_filename + "/") # remove file if exists
-                    if remove_files_folder[0] == False:
-                        logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed removing files folder ["+files_folder + temp_filename + "/"+"]", reason=remove_files_folder[1])
+                    # remove_files_folder = remove_folder(files_folder + temp_filename + "/") # remove file if exists
+                    # if remove_files_folder[0] == False:
+                    #     logger.logger(level=logger.WARNING , type="case", message="Case["+case_id+"]: Failed removing files folder ["+files_folder + temp_filename + "/"+"]", reason=remove_files_folder[1])
                     
 
                     logger.logger(level=logger.ERROR , type="case", message="Case["+case_id+"]: Failed decompressing the file ["+raw_folder + temp_filename+"]", reason=unzip_fun[1])

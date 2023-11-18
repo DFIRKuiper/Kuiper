@@ -9,7 +9,7 @@ COPY ./kuiper/requirements_2.7.txt ./requirements_2.7.txt
 
 RUN apt update -y
 
-RUN apt install -y  python-minimal python3 python-dev libsasl2-dev libldap2-dev libssl-dev python-pip build-essential libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev python3-pip sqlite3 cron
+RUN apt install -y  python-minimal python3 python-dev libsasl2-dev libldap2-dev libssl-dev python-pip build-essential libssl-dev libffi-dev libxml2-dev libxslt1-dev zlib1g-dev python3-pip sqlite3 cron p7zip-full
 RUN pip2 install --upgrade pip
 RUN pip2 install -r "./requirements_2.7.txt"
 RUN python3 -m pip install --upgrade pip
