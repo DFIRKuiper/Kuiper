@@ -122,11 +122,34 @@ def unzip_file(zip_path, dst_path):
         zfile.extractall(path=dst_path)
 
 
+# ================================ is within directory
+# check if target is within a given directory
+def is_within_directory(directory, target):
+    abs_directory = os.path.abspath(directory)
+    abs_target = os.path.abspath(target)
+
+    prefix = os.path.commonprefix([abs_directory, abs_target])
+
+    return prefix == abs_directory
+
+
+# ================================ safe tar extraction
+# Safe extraction of tar file to avoid path traversal vulnerability (CVE-2007-4559)
+# Patch taken from https://github.com/dbt-labs/dbt-core/pull/5981/files
+def safe_tar_extract(tar, dst_path):
+    for member in tar.getmembers():
+        member_path = os.path.join(dst_path, member.name)
+        if not is_within_directory(directory=dst_path, target=member_path):
+            raise Exception("Attempted Path Traversal in Tar File")
+
+    tar.extractall(path=dst_path)
+
+
 # ================================ untar file
 # untar the provided file to the dst_path
 def untar_file(tar_path, dst_path):
     with tarfile.open(tar_path , mode='r') as tfile:
-        tfile.extractall(path=dst_path)
+        safe_tar_extract(tfile, dst_path)
 
 
 # ================================ list zip file content
