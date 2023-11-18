@@ -5,6 +5,7 @@ import shutil
 import os
 import urllib
 import importlib
+import re
 from datetime import datetime
 import binascii
 import json
@@ -649,6 +650,8 @@ class Parser_Manager:
     def fix_issues_with_parsed_data(self, data):
         fixed       = 0    # this store the number of fixed records, or even if does not need to be fixed
         not_fixed   = 0    # this store the number of records failed to be fixed
+        iso_date = re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z?$')
+
         if data is not None and len(data) > 0:
             d = 0
             while d < len(data):
@@ -657,9 +660,9 @@ class Parser_Manager:
                     self.convert_json_fields_to_str( data[d]['Data'] )
                     
                     # if timestamp contain space " " replace it with "T" to meet the ISO format
-                    if '@timestamp' not in data[d]['Data'] or data[d]['Data']['@timestamp'] is None:
+                    if '@timestamp' not in data[d]['Data'] or data[d]['Data']['@timestamp'] is None or data[d]['Data']['@timestamp'] is "" or iso_date.match(data[d]['Data']['@timestamp']) is None:
                         data[d]['Data']['@timestamp'] = '1700-01-01T00:00:00'
-
+                    
                     if '@timestamp' in data[d]['Data']:
                         data[d]['Data']['@timestamp'] = data[d]['Data']['@timestamp'].replace(' ' , 'T')
 
