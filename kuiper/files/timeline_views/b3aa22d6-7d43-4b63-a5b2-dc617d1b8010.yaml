@@ -1,0 +1,18 @@
+- name: "Events_logon_4624"
+  condition: 
+    query: 'data_type:"Events" AND Data.Event.System.EventID.#text:"4624" AND Data.Event.System.Channel:"Security"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "4624"
+    Details/Procedure: "Successful logon using ${Data.Event.EventData.TargetUserName}"
+    Extra: "Logon type: ${Data.Event.EventData.LogonType}, ActivityID: ${Data.Event.System.Correlation.@ActivityID}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
+    Dst: "${machine}"
+    User: "${Data.Event.EventData.TargetUserName}"

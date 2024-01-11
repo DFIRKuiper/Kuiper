@@ -1,0 +1,16 @@
+- name: "Events_PowerShell_400"
+  condition: 
+    query: 'data_type:"Events" AND Data.Event.System.Channel:"Windows\ PowerShell" AND Data.Event.System.EventID.#text:"400"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "400"
+    Details/Procedure: "Execution of PowerShell command"
+    Extra: "Command: ${Data.Event.EventData.Data.#text}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

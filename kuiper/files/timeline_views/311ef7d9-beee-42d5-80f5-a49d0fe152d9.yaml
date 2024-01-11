@@ -1,0 +1,16 @@
+- name: "Prefetch"
+  condition:
+    query: 'data_type:"Prefetch"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Prefetch"
+    Details/Procedure: "Execution of ${Data.Executable_Name}"
+    FileName/Path/URL: "${Data.prefetch_file}"
+    Extra: "Run count ${Data.Run_Count}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

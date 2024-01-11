@@ -1,3 +1,0 @@
-six
-argparse
-python-registry

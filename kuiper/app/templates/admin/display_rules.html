@@ -1,0 +1,414 @@
+
+{% extends  "admin/index.html" %}
+
+{% block content %}
+
+<!-- ==================== Rules table ==================== -->
+      <div class="row">
+          <!-- ====================== Rules Start ========================== -->
+
+          <div class="col-xs-12">
+            <div class="box">
+              <div class="box-header">
+                <h3 class="box-title"><i class="fa fa-list-alt"></i> Rules</h3>
+              </div>
+              <br />
+              <!-- /.box-header -->
+              <div id="rules_table" class="box-body no-padding">
+                <table class="table">
+                  <tbody><tr>
+                    <th width="10%">Rule Name</th>
+                    <th width="10px" style="width: 10px">Severity</th>
+                    <th width="40%">Rule Description</th>
+                    <th width="50%">Rule Query</th>
+                    <th style="width: 100px"  nowrap="nowrap">Options</th>
+                  </tr>
+                </tbody></table>
+              </div>
+              <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+          </div>
+
+          <!-- ====================== Rules End ============================ -->
+
+
+
+
+          <!-- ====================== Rhaegal Start ========================== -->
+
+          <div class="col-xs-12">
+            <div class="box">
+              <div class="box-header">
+                <h3 class="box-title"><img src="{{url_for('static', filename='dist/img/RhaegalLogo.png')}}" width="16" height="16" /> Rhaegal <span class="text-red">{{rhaegal_rules|length}}</span>
+                    <a class="pull-right btn btn-info btn-sm" href="../../admin/rules_rhaegal/edit" role="button" id="rhaegal_form_back">Add</a>
+
+                </h3>
+              </div>
+              <br />
+              <!-- /.box-header -->
+              <div id="rhaegal_table" class="box-body no-padding" style="overflow: auto;">
+                <table class="table">
+                  <tbody><tr>
+                    <th width="5%">Type</th>
+                    <th width="15%">Name</th>
+                    <th width="10%">Channel</th>
+                    <th width="30%">Description</th>
+                    <th width="10%">Score</th>
+                    <th width="20%">File</th>
+                    <th style="width: 120px"  nowrap="nowrap">Options</th>
+                  </tr>
+                </tbody></table>
+              </div>
+              <!-- /.box-body -->
+            </div>
+            <!-- /.box -->
+          </div>
+          
+          <!-- ====================== Rhaegal End ============================ -->
+
+      </div>
+
+
+
+
+
+
+
+
+
+<!-- jQuery 3 -->
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- prograsbar  -->
+<script src="../../static/dist/js/nanobar.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="../../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="../../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="../../static/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="../../static/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="../../static/dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../static/dist/js/demo.js"></script>
+
+
+
+
+<script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+    <!-- tag input -->
+    
+    <script src="../../static/dist/tagsinput/bootstrap-tagsinput.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput-typeahead.css')}}">
+
+    <!-- toast notifications --> 
+    <script type="text/javascript" src="../../static/dist/jquery_toast/jquery.toast.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+
+<style type="text/css">
+
+.jq-toast-single {
+    font-size: 12px;
+    width: fit-content;
+    white-space: nowrap;
+}
+.jq-toast-single h2{
+    font-size: 14px;
+        font-weight: bold;
+
+}
+
+
+</style>
+
+
+<script>
+
+// ============================ Variables
+
+var rules_list = ({{ all_rules|tojson|safe }}); // list of all rules
+var toast = $.toast;
+
+var rhaegal_rules = ({{ rhaegal_rules|tojson|safe }}); // list of all rules
+
+// ============================ Functions
+
+// used to color the rule html
+function build_rule_html(rule){
+    return rule.split(' AND ').join(' <span class="text-red">AND</span> ')
+      .split(' OR ').join(' <span class="text-red">OR</span> ')
+      .split('!').join('<span class="text-green">!</span>')
+}
+
+
+// build the severity badge html
+function build_rule_severity_html(severity){
+  switch(severity){
+      case "Critical"   : var severity_class = "bg-gray"; break;
+      case "High"      : var severity_class = "bg-red"; break;
+      case "Medium"     : var severity_class = "bg-yellow"; break;
+      case "Low"        : var severity_class = "bg-green"; break;
+      case "Whitelist"  : var severity_class = "bg-light-blue"; break;
+    }
+
+    return '<span class="label '+severity_class+'">' + severity + '</span>'
+}
+
+
+
+// ============================ Listeners
+
+// edit rule
+$('#rules_table').on('click' , '.edit_rule' , function(){
+    var rule_id = $(this).attr('data')
+    $(this).attr("disabled", true);
+
+    // chagnge the rule html to input
+    var rule=  $('#rule_' + rule_id)
+    var input_html = '<div id="group_edit_rule_'+rule_id+'" class="input-group input-group-sm">\
+                <input type="text" id="rule_input_'+rule_id+'" class="form-control">\
+                    <span class="input-group-btn">\
+                      <button type="button" data="'+rule_id+'" class="btn btn-info btn-flat rule_edit_save">Save</button>\
+                      <button type="button" data="'+rule_id+'" class="btn btn-warning btn-flat rule_edit_cancel">Cancel</button>\
+                    </span>\
+              </div>\
+              ';
+    rule.parent().append(input_html)
+    $('#rule_input_' + rule_id).val(rule.text())
+    rule.hide()
+
+
+    // change the severity html to select
+    var current_sev = $('#rule_severity_' + rule_id)
+    var current_sev_text = current_sev.text()
+    var severity_html = '<select class="form-control" id="rule_severity_'+rule_id+'" style="width: 100px; height: 30px;">\
+                          <option data="Critical">Critical</option>\
+                          <option data="High">High</option>\
+                          <option data="Medium">Medium</option>\
+                          <option data="Low">Low</option>\
+                          <option data="Whitelist">Whitelist</option>\
+                        </select>';
+
+    current_sev.children('span').hide()
+    current_sev.append(severity_html)
+
+    $('#rule_severity_' + rule_id + " option[data="+current_sev_text+"]").attr('selected' , 'selected')
+    
+
+    // change the rule description rule
+    // chagnge the rule html to input
+    var rule_desc=  $('#rule_desc_' + rule_id)
+    var desc_html = '<textarea type="text" id="rule_textarea_'+rule_id+'" class="form-control">'+rule_desc.text()+'</textarea>';
+
+    rule_desc.parent().append(desc_html)
+    rule_desc.hide()
+
+    
+})
+
+// "save" button save the rule in mongoDB 
+$('#rules_table').on('click' , '.rule_edit_save' , function(){
+    
+    var rule_id = $(this).attr('data')
+    var rule=  $('#rule_' + rule_id)
+    var rule_val = $('#rule_input_' + rule_id).val()
+    var rule_sev = $('#rule_severity_' + rule_id + ' option:selected').val()
+    var rule_desc = $('#rule_textarea_' + rule_id).val()
+
+    $.ajax({
+        type : 'POST',
+        url : "/admin/update_rule",
+        contentType: 'application/json;charset=UTF-8',
+
+        data : JSON.stringify({'data': {
+              "rule_id":rule_id , 
+              'new_rule' : rule_val , 
+              'new_sev' : rule_sev ,
+              'new_desc' : rule_desc
+            } }),
+        success: function(result) {
+            var result = JSON.parse(result);
+            
+            // if failed 
+            if(result['result'] == "failed")
+                toast_msg(result['message'] , type='error' , header='Update rule failed')
+
+            // if success
+            else{
+                toast_msg( rule_id , type='info' , header='Rule updated')
+
+                $('#rule_severity_' + rule_id).html(build_rule_severity_html(rule_sev)) // edit the rule html
+                $('#rule_' + rule_id).html(build_rule_html(rule_val))                   // edit the rule html
+                $('#rule_' + rule_id).show()                                            // show the rule in table
+                $('#group_edit_rule_' + rule_id).remove()                               // remove the input group
+                $('#rule_desc_' + rule_id).text(rule_desc)                              // edit the rule description html
+                $('#rule_desc_' + rule_id).show()                                       // show the description html
+                $('#rule_textarea_' + rule_id).remove()                                 // remove the rule description textarea
+            }
+            
+        },  
+        error: function(error){
+            toast_msg('Connection failed, check connection' , type='error' , header = "Error")
+        }
+    });
+
+
+
+    $('.edit_rule[data='+rule_id+']').attr('disabled' , false)
+
+})
+
+// "close" button close the input rule and show again the text of the rule
+$('#rules_table').on('click' , '.rule_edit_cancel' , function(){
+    
+    var rule_id = $(this).attr('data')
+    var rule=  $('#rule_' + rule_id)
+
+    // remove the textarea description and show the actual description
+    $('#rule_desc_' + rule_id).show()
+    $('#rule_textarea_' + rule_id).remove()
+
+    // remove the severity select and show the badge
+    $('#rule_severity_' + rule_id).children('span').show()
+    $('#rule_severity_' + rule_id).children('select').remove()
+
+
+    // remove the edit input rule and show the rule html 
+    $('#group_edit_rule_' + rule_id).remove()
+    rule.show()
+    $('.edit_rule[data='+rule_id+']').attr('disabled' , false)
+
+})
+
+// delete rule
+$('#rules_table').on('click' , '.delete_rule' , function(){
+    var rule_id = $(this).attr('data')
+    var rule_tr = $(this).closest('tr') // get the rule tr row
+
+    $.ajax({
+        type : 'POST',
+        url : "/admin/delete_rule",
+        contentType: 'application/json;charset=UTF-8',
+
+        data : JSON.stringify({'data': {"rule_id":rule_id } }),
+        success: function(result) {
+            var result = JSON.parse(result);
+            
+            // if failed 
+            if(result['result'] == "failed")
+                toast_msg(result['message'] , type='error' , header='Delete rule failed')
+
+            // if success
+            else{
+                rule_tr.remove() // remove the tr
+                toast_msg( rule_id , type='info' , header='Rule deleted')
+            }
+            
+        },  
+        error: function(error){
+            toast_msg('Connection failed, check connection' , type='error' , header = "Error")
+        }
+    });
+
+
+})
+
+
+// delete rhaegal rule
+$('#rhaegal_table').on('click' , '.delete_rhaegal' , function(){
+    var rulePath = $(this).attr('data')
+    var rule_tr = $(this).closest('tr') // get the rule tr row
+
+    $.ajax({
+        type : 'POST',
+        url : "/admin/rules_rhaegal/delete",
+        contentType: 'application/json;charset=UTF-8',
+
+        data : JSON.stringify({'data': {"rulePath":rulePath } }),
+        success: function(result) {
+            var result = JSON.parse(result);
+            
+            // if failed 
+            if(result['result'] == "failed")
+                toast_msg(result['message'] , type='error' , header='Delete Rhaegal rule failed')
+
+            // if success
+            else{
+                rule_tr.remove() // remove the tr
+                toast_msg( rulePath , type='info' , header='Rhaegal Rule deleted')
+            }
+            
+        },  
+        error: function(error){
+            toast_msg('Connection failed, check connection' , type='error' , header = "Error")
+        }
+    });
+
+
+})
+
+// ================ Main code
+
+
+// build the table
+for(var i = 0 ; i < rules_list.length ; i++){
+    var rule = build_rule_html( rules_list[i]['rule'] )
+
+    // rule 
+    rule = '<div id="rule_'+rules_list[i]['_id']+'" style="padding: 4px 9px;margin-bottom: 0px;">'+rule+'</div>'
+    
+    // options buttons
+    var options = '<span class="box-tools">\
+                  <div class="btn-group">\
+                    <button type="button" class="btn btn-default btn-xs edit_rule" data="'+rules_list[i]['_id']+'" ><i class="fa fa-edit" title="Edit rule"></i></button>\
+                    <button type="button" class="btn btn-danger btn-xs delete_rule" data="'+rules_list[i]['_id']+'" ><i class="fa fa-remove" title="Delete rule"></i></button>\
+                  </div>\
+              </span>';
+
+    // rule name
+    var rule_name = '' + rules_list[i]['rule_name'] + ''
+
+    // rule severity
+    var rule_severity = '<div id="rule_severity_'+rules_list[i]['_id']+'">' +  build_rule_severity_html(rules_list[i]['rule_severity']) + '</div>'
+
+    // rule description
+    var rule_desc = '<div id="rule_desc_'+rules_list[i]['_id']+'" style="padding: 4px 9px;margin-bottom: 0px; height: 30px">'+rules_list[i]['rule_description']+'</div>'
+
+
+    var td = '<td style="vertical-align: middle;">'
+    $('#rules_table tbody').append("<tr>" + td +rule_name+"</td>" + td +rule_severity+"</td>" + td +rule_desc+"</td>"+ td +rule+"</td>" + td +options+"</td></tr>")  
+}
+
+// build rhaegal rules table
+for(var i = 0 ; i < rhaegal_rules.length ; i++){
+
+    var url = "/admin/rules_rhaegal/edit?path=" + rhaegal_rules[i]['path'] + "&rule=" + rhaegal_rules[i]['name']
+    // options buttons
+    var options = '<td><span class="box-tools">\
+        <div class="btn-group">\
+          <a class="btn btn-default btn-xs edit_rule" href="'+url+'" role="button"><i class="fa fa-edit" title="Edit rule"></i></a>\
+          <button type="button" class="btn btn-danger btn-xs delete_rhaegal" data="'+rhaegal_rules[i]['path']+'" ><i class="fa fa-remove" title="Delete rule"></i></button>\
+        </div>\
+    </span></td>';
+
+    var rule_name = '<td style="vertical-align: middle;">' + rhaegal_rules[i]['name'] + '</td>' ;
+    var rule_type = '<td style="vertical-align: middle;">' + rhaegal_rules[i]['type'] + '</td>' ;
+    var rule_path = '<td style="vertical-align: middle;">' + rhaegal_rules[i]['path'] + '</td>' ;
+    var rule_channel = '<td style="vertical-align: middle;">' + rhaegal_rules[i]['data']['Channel'] + '</td>' ;
+
+
+    var rule_score = '<td style="vertical-align: middle;">' + rhaegal_rules[i]['data']['metadata']['score'] + '</td>' ;
+    var rule_description = '<td style="vertical-align: middle;">' + rhaegal_rules[i]['data']['metadata']['description'] + '</td>' ;
+
+    $('#rhaegal_table tbody').append('<tr>' + rule_type + rule_name + rule_channel + rule_description +  rule_score + rule_path + options + '</tr>')  
+
+}
+
+</script>
+
+</aside>
+{% endblock %}

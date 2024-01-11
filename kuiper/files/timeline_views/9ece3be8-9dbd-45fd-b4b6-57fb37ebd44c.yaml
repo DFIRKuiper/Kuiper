@@ -1,0 +1,16 @@
+- name: "JumpList"
+  condition:
+    query: 'data_type:"JumpList"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "JumpList"
+    Details/Procedure: "Path Accessed: ${Data.Local_Path} App: ${Data.AppDesc}"
+    FileName/Path/URL: "${Data.Local_Path}"
+    Extra: "${Data.AppDesc}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

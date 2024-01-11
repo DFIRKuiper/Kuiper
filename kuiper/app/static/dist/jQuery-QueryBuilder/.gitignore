@@ -1,0 +1,7 @@
+bower_components
+node_modules
+doc
+.sass-cache
+.coverage-results
+.idea
+*.iml

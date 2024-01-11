@@ -1,0 +1,58 @@
+private SMBExecServiceCreated
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "10/08/2020"
+      score: 200
+      description: "Detected remote execution tool smbexec.py"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "7045"
+}
+
+private SMBExecServiceTimeout
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "10/08/2020"
+      score: 200
+      description: "Detected remote execution tool smbexec.py"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "7009"
+}
+
+public SMBExecDetected
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "10/08/2020"
+      score: 200
+      description: "Detected remote execution tool smbexec.py"
+    include:
+      rule:
+      - "SMBExecServiceCreated"
+      - "SMBExecServiceTimeout"
+      if:
+        within: 500
+}
+
+public SMBExecSessionStarted
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "10/08/2020"
+      score: 200
+      description: "Detected remote execution tool smbexec.py"
+    Channel: "System"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "7045"
+      Event.EventData.ImagePath: "*echo cd*"
+}

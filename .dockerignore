@@ -1,0 +1,11 @@
+./kuiper/files/files/*
+./kuiper/files/raw/*
+./kuiper/files/timeline/*
+./kuiper/files/logs/Kuiper.log
+./kuiper/files/logs/system_health/*
+./kuiper/gunicorn.pid
+./kuiper/app/utils/Dracarys/temp_records/*
+./kuiper/app/parsers/temp/*
+./kuiper/app/parsers/WinEvents/temp/*
+./kuiper/app/parsers/MFT_Parser/temp/*
+./kuiper/**/*.pyc

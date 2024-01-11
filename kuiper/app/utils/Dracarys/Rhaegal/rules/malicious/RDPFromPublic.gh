@@ -1,0 +1,73 @@
+public Inbound_RDP_Session_From_Public_IP
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 200
+      description: "Successfull Inbound RDP Session From Public IP"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-TerminalServices-LocalSessionManager/Operational"
+      Event.System.EventID.#text: 
+      - "21"
+      - "22"
+      - "25"
+    exclude:
+      Event.UserData.EventXML.Address: 
+      - "192.168.*.*"
+      - "10.*.*.*"
+      - "172.16.*.*"
+      - "172.17.*.*"
+      - "172.18.*.*"
+      - "172.19.*.*"
+      - "172.20.*.*"
+      - "172.21.*.*"
+      - "172.22.*.*"
+      - "172.23.*.*"
+      - "172.24.*.*"
+      - "172.25.*.*"
+      - "172.26.*.*"
+      - "172.27.*.*"
+      - "172.28.*.*"
+      - "172.29.*.*"
+      - "172.30.*.*"
+      - "172.31.*.*"
+      - "LOCAL"
+}
+
+
+public Inbound_RDP_Session_From_Public_IP_2
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 200
+      description: "Successfull Inbound RDP Session From Public IP"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-TerminalServices-RemoteConnectionManager/Operational"
+      Event.System.EventID.#text: "1149"
+    exclude:
+      Event.UserData.EventXML.Param3: 
+      - "192.168.*.*"
+      - "10.*.*.*"
+      - "172.16.*.*"
+      - "172.17.*.*"
+      - "172.18.*.*"
+      - "172.19.*.*"
+      - "172.20.*.*"
+      - "172.21.*.*"
+      - "172.22.*.*"
+      - "172.23.*.*"
+      - "172.24.*.*"
+      - "172.25.*.*"
+      - "172.26.*.*"
+      - "172.27.*.*"
+      - "172.28.*.*"
+      - "172.29.*.*"
+      - "172.30.*.*"
+      - "172.31.*.*"
+      - "LOCAL"
+}

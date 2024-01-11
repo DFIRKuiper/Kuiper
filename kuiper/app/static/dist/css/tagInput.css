@@ -1,0 +1,13 @@
+.labelinput, .labelinput:focus { 
+	border: none; 
+	outline: none; 
+}
+
+.tagLabel { 
+	margin: 0 4px 4px 0; 
+	font-size: 100%;
+}
+
+.closelabel { 
+	color: white; 
+}

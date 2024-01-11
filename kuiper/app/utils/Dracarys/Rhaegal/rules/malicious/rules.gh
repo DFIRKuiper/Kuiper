@@ -1,0 +1,222 @@
+public MaliciousServiceInstalled
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "Init Rules"
+      creationDate: "01/01/2019"
+      score: 70
+      description: "Detect RemoteAccessTool Service Installed"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "7045"
+      Event.EventData.ServiceName: 
+      - "*PSEXE*"
+      - "*paexe*"
+      - "*anydesk*"
+      - "*mssecsvc*"
+      - "*pwdump*"
+      - '*gsecdump*'
+      - '*cachedump*'
+}
+
+public AmCache_Cleared
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "Internal Research"
+      creationDate: "13/02/2020"
+      score: 70
+      description: "Detects AmCache hive cleared"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "16"
+      Event.EventData.HiveName: "*AmCache*"
+      Event.EventData.KeysUpdated: "0"
+}
+
+public Powershell_Execution
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "Init Rules"
+      creationDate: "01/01/2019"
+      score: 100
+      description: "Detect Malicious powershell execution"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Windows PowerShell"
+      Event.System.EventID.#text:
+        - "600"
+        - "403"
+        - "400"
+      Event.EventData.Data.#text:
+        - "*downloadstring*"
+        - "*downloadfile*"
+        - "*iex*"
+        - "* -e *"
+}
+
+
+public ScheduledTaskCreated
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "Init Rules"
+      creationDate: "17/10/2019"
+      score: 70
+      description: "New Scheduled Task was Created"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-TaskScheduler/Operational"
+      Event.System.EventID.#text: "106"
+    exclude:
+      Event.EventData.TaskName:
+      - "*Microsoft IRTK Scan Task"
+      - "*Scheduled task CIS2"
+}
+
+public ScheduledTaskDeleted
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "Init Rules"
+      creationDate: "17/10/2019"
+      score: 70
+      description: "New Scheduled Task was Deleted"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Microsoft-Windows-TaskScheduler/Operational"
+      Event.System.EventID.#text: "141"
+    exclude:
+      Event.EventData.TaskName:
+      - "*Microsoft IRTK Scan Task"
+      - "*Scheduled task CIS2"
+}
+
+
+public PTHAttack_1
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "Init Rules"
+      creationDate: "17/10/2019"
+      score: 80
+      description: "Pass the Hash was detected"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4624"
+      Event.EventData.SubjectUserSid: "S-1-0-0"
+      Event.EventData.LogonType: "3"
+      Event.EventData.LogonProcessName: "NtLmSsp"
+}
+
+public PTHAttack_2
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "Init Rules"
+      creationDate: "17/10/2019"
+      score: 80
+      description: "Pass the Hash was detected"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4624"
+      Event.EventData.LogonType: "9"
+      Event.EventData.LogonProcessName: "seclogo"
+    exclude:
+      Event.EventData.TargetUserName: "ANONYMOUS LOGON"
+}
+
+
+public Possible_Detection_of_CVE_EID1
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "https://gist.github.com/SwitHak/62fa7f8df378cae3a459670e3a18742d"
+      creationDate: "16/01/2019"
+      score: 100
+      description: "This Event is generated when an attempt to exploit a known vulnerability is detected"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Application"
+      Event.System.EventID.#text: "1"
+      Event.System.Provider.@Name : "Microsoft-Windows-Audit-CVE"
+}
+
+public Possible_Detection_of_CVE_EID2
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "https://gist.github.com/SwitHak/62fa7f8df378cae3a459670e3a18742d"
+      creationDate: "16/01/2019"
+      score: 100
+      description: "This Event is generated when an attempt to exploit a known vulnerability is detected"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "2"
+      Event.System.Provider.@Name : "Microsoft-Windows-Audit-CVE"
+}
+
+public DetectPsExec
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "N/A"
+      creationDate: "20/10/2019"
+      score: 50
+      description: "PsExec Execution Detected"
+    include:
+      rule:
+      - "LoginType3"
+      - "PsExecSeriveInstalled"
+      if:
+        within: 100
+}
+
+
+private LoginType3
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "N/A"
+      creationDate: "20/10/2019"
+      description: "Login type 3"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Security"
+      Event.System.EventID.#text: "4624"
+      Event.EventData.LogonType: "3"
+}
+
+private PsExecSeriveInstalled
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "N/A"
+      creationDate: "20/10/2019"
+      description: "PsExec Service (PSEXESVC) Installed"
+    Channel: "Events"
+    include:
+      Event.System.Channel: "System"
+      Event.System.EventID.#text: "7045"
+      Event.EventData.ServiceName: "*PSEXESVC*"
+}
+
+public Add_Type_cmdlet_execution
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "10/02/2020"
+      score: 100
+      description: "Deleted execution of Add-Type cmdlet which allow the execution of C# code."
+    Channel: "Events"
+    include:
+      Event.System.Channel: "Windows PowerShell"
+      Event.System.EventID.#text: "800"
+}
