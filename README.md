@@ -26,22 +26,6 @@
 
     
 
-
-<!-- /TOC -->
-## Premium Version
-
-<img src="https://i.postimg.cc/8zzqftDs/Outlook-4ouykv25.png" height="25%" width="25%" >
-<br />
-
-If you like Kuiper and want more, please contact us in [CyberBomah](https://cyberbomah.com), It is a total rebuild version with more features, including but not limited to:
-- Full API control and access.
-- User management.
-- Case Management.
-- Faster processing.
-- Enricher features.
-- Feeds management.
-- Alert system.
-
   
 # Kuiper
 
