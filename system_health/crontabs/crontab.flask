@@ -1,0 +1,2 @@
+* * * * * root bash -c "/system_health/scheduler.sh flask" >> /var/log/cron_flask.log 2>&1
+# empty line

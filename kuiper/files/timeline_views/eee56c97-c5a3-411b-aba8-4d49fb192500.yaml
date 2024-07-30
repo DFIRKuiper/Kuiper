@@ -1,0 +1,17 @@
+- name: "Events_BITS_service_4"
+  condition: 
+    query: 'data_type:"Events" AND Data.Event.System.EventID.#text:"4" AND Data.Event.System.Channel:"Microsoft\-Windows\-Bits\-Client\/Operational"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "4"
+    Details/Procedure: "Completion of BITS transfer job ${Data.Event.EventData.jobTitle}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
+    User: "${Data.Event.EventData.User}"
+    Extra: "Job Owner: ${Data.Event.EventData.jobOwner}, bytes transferred: ${Data.Event.EventData.bytesTransferred}, file count: ${Data.Event.EventData.fileCount}"

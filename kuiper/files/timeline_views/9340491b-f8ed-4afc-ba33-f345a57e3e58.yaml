@@ -1,0 +1,17 @@
+- name: "ProfileList"
+  condition:
+    query: 'data_type:"ProfileList"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "ProfileList"
+    Details/Procedure: "User Directory: ${Data.Path}"
+    FileName/Path/URL: "${Data.Path}"
+    User: "${Data.User}"
+    Extra: "${Data.sid}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

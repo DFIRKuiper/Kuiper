@@ -1,0 +1,15 @@
+- name: "Events_SMB_connection_30808"
+  condition: 
+    query: 'Data.Event.System.EventID.#text:"30808" AND data_type:"Events" AND Data.Event.System.Channel:"Microsoft\-Windows\-SmbClient\/Connectivity"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "30808"
+    Details/Procedure: "SMB connection to ${Data.Event.EventData.ServerName}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

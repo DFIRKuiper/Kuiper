@@ -1,0 +1,13 @@
+public WindowsEventLogCleared
+{
+    metadata:
+      author: "AbdulRhman Alfaifi"
+      reference: "internal research"
+      creationDate: "06/06/2020"
+      score: 500
+      description: "Windows Event log was cleared"
+    Channel: "Events"
+    include:
+      Event.System.EventID.#text: "104"
+      Event.System.Channel: "System"
+}

@@ -1,0 +1,15 @@
+- name: "WordWheelQuery"
+  condition:
+    query: 'data_type:"WordWheelQuery"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "WordWheelQuery"
+    Details/Procedure: "Searched word: ${Data.Url}"
+    FileName/Path/URL: "${Data.Url}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

@@ -1,0 +1,336 @@
+{% extends  "case/index.html" %}
+
+{% block content %}
+
+
+<div class="row">
+  <div class="col-xs-12">
+    <div class="box">
+      <div class="box-header">
+        <h3 class="box-title"><i class="fa fa-share-alt"></i> {{page_header}}</h3>
+
+      </div>
+      <div class="row">
+        <div class="col-md-8">
+          <div id='container'>
+            <div id='graph'>
+            </div>
+          </div>
+        </div>
+
+
+        <div class="col-md-4">
+
+          <div class="box">
+            <div class="box-header with-border">
+              <h3 class="box-title">Node Details</h3>
+
+              <div class="box-tools pull-right">
+                <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                </button>
+              </div>
+              <!-- /.box-tools -->
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body no-padding"  style="overflow-y: scroll;">
+              <table class="table" id="node_details" style="">
+                  
+              </table>
+            </div>
+            <!-- /.box-body -->
+          </div>
+
+
+      </div>
+    </div>
+    <!-- /.box -->
+  </div>
+</div>
+
+
+
+
+<!-- jQuery 3 -->
+<script src="{{url_for('static' , filename='bower_components/jquery/dist/jquery.min.js')}}"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="{{url_for('static' , filename='bower_components/bootstrap/dist/js/bootstrap.min.js')}}"></script>
+<!-- DataTables -->
+<script src="{{url_for('static' , filename='bower_components/datatables.net/js/jquery.dataTables.min.js')}}"></script>
+<script src="{{url_for('static' , filename='bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js')}}"></script>
+<!-- SlimScroll -->
+<script src="{{url_for('static' , filename='bower_components/jquery-slimscroll/jquery.slimscroll.min.js')}}"></script>
+<!-- FastClick -->
+<script src="{{url_for('static' , filename='bower_components/fastclick/lib/fastclick.js')}}"></script>
+<!-- AdminLTE App -->
+<script src="{{url_for('static' , filename='dist/js/adminlte.min.js')}}"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="{{url_for('static' , filename='dist/js/demo.js')}}"></script>
+
+
+
+
+<script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+<script src="{{url_for('static' , filename='dist/d3/d3.min.js')}}"></script>
+<script src="{{url_for('static' , filename='Graph.js')}}"></script>
+
+    <!-- tag input -->
+    
+    <script src="{{url_for('static' , filename='dist/tagsinput/bootstrap-tagsinput.js')}}"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput-typeahead.css')}}">
+
+    <!-- toast notifications --> 
+    <script src="{{url_for('static' , filename='dist/jquery_toast/jquery.toast.min.js')}}"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+
+
+    <script src="{{url_for('static' , filename='dist/air-datepicker/dist/js/datepicker.min.js')}}"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/air-datepicker/dist/css/datepicker.min.css')}}">
+    <script src="{{url_for('static' , filename='dist/air-datepicker/dist/js/i18n/datepicker.en.js')}}"></script>
+
+
+<!-- This will take the AdminLTE input style and use it with the tags input style -->
+<style type="text/css">
+
+
+.clickable {
+  cursor: pointer;
+}
+
+#container { margin: auto; }
+
+.link { stroke: red; }
+
+#flags {
+  position: absolute;
+}
+.flag {
+  width: 16px;
+  height: 11px;
+  position: absolute;
+  background: url(https://media.flag-sprites.com/veowpp/flags.png) no-repeat;
+}
+
+/*
+ * Footer
+ */
+
+.tableFooter{
+  margin-top: 15px;
+}
+.footerSvg{
+  width: 32px;
+}
+
+.active {
+  background: red;
+}
+.label {
+  color: gray;
+}
+
+
+/* nodes */
+.node {
+  fill: red;
+  stroke-width: 2px;
+  stroke: none;
+}
+.group_node .label {
+  fill: white;
+  text-shadow: 0px 0px 5px #333;
+  font-weight: bold;
+  font-family: 'Arial';
+  font-size: 12;
+  text-anchor:middle;
+  font: bold;
+}
+.group_node .label:hover {
+  cursor: -webkit-grabbing; 
+  cursor: grabbing;
+}
+
+
+
+
+.node_class_lightblue   { fill: #68bdf6; } 
+.node_class_green       { fill: #6dce9e; } 
+.node_class_lightpink   { fill: #faafc2; } 
+.node_class_purple      { fill: #f2baf6; } 
+.node_class_lightred    { fill: #ff928c; } 
+.node_class_lightyellow { fill: #fcea7e; } 
+.node_class_lightorange { fill: #ffc766; } 
+.node_class_navyblue    { fill: #405f9e; } 
+.node_class_darkgray    { fill: #a5abb6; } 
+.node_class_green2      { fill: #78cecb; } 
+.node_class_darkpurple  { fill: #b88cbb; } 
+.node_class_lightgray   { fill: #ced2d9; } 
+.node_class_darkred     { fill: #e84646; } 
+.node_class_darkpink    { fill: #fa5f86; } 
+.node_class_darkorange  { fill: #ffab1a; } 
+.node_class_darkyellow  { fill: #fcda19; } 
+.node_class_gblack      { fill: #797b80; } 
+.node_class_pistacchio  { fill: #c9d96f; } 
+.node_class_green3      { fill: #47991f; }
+.node_class_turquoise   { fill: #70edee; } 
+.node_class_pink        { fill: #ff75ea; } 
+
+/* links */
+.line {
+  stroke: grey;
+  stroke-width:2;
+}
+
+g.group_link text.label {
+  text-anchor: middle;
+  fill: #111;
+  text-shadow: 0px 0px 6px #FFF;
+  font-family: "Arial";
+  font-size: 12px;
+}
+
+#node_details {
+  width: 100%;
+}
+/* node details */ 
+#node_details td.value{
+  word-break: break-all;
+  table-layout:fixed;
+}
+
+</style>
+
+
+
+<!-- page script -->
+<script>
+
+// ============================== Variables
+var hight = ($(window).height() / 100 ); // 70% of the window size
+var records = ({{init_records|tojson|safe}})
+
+var nodes_list = []
+var links_list = []
+
+var margin  = {top: 10, right: 5, bottom: 10, left: 100};
+var width   = $("#container").width();
+var height  = 900-margin.top-margin.bottom;   
+
+var toast = $.toast;
+
+
+
+// ============================== Listeners
+$('#node_details').on('click' , '.expand_graph' , function(){
+  var field = $(this).attr('data-field')
+  var value = $(this).attr('data-value')
+  var node = $(this).attr('data-id')
+
+  $.ajax({
+    type : 'POST',
+    url : "/case/{{case_details['casename']}}/expand_graph",
+    contentType: 'application/json;charset=UTF-8',
+    data : JSON.stringify(
+      {'data': {
+        'field' : field , 
+        'value' : value 
+      } }),
+
+    success: function(result) {
+
+        var r = JSON.parse(result);
+        if(r['response'] == "error"){
+            toast_msg( "error" , type='error' , header='Error')  
+        } else {
+            toast_msg( "["+r["res_total"]+"] records for (" + field + ":" + value + ")" , type='info' , header='Graph expanded')  
+
+            var records = r['res_records']
+
+            records.forEach(function(d){
+                g.createNode(d['_id'] , d['_source']['data_type'] , d['_source'] )
+                g.createLink(node +"-"+ d['_id'] , node , d['_id'] , label=field)
+            })
+            records.forEach(function(d){
+                g.drawLink(node +"-"+ d['_id'])
+            })
+            records.forEach(function(d){
+                g.drawNode(d['_id'])  
+            })
+            
+
+        }
+        
+    },
+    error: function(error){
+      toast_msg( "error" , type='error' , header='Error')  
+    }
+  });
+
+
+})
+
+
+
+// ============================== Main code
+
+
+// resize the node details widget to be scrollable
+$('#node_details').parent().css('height', (hight*74) + 'px');
+
+for(var i = 0 ; i < records.length ; i++)
+  nodes_list.push([ records[i]['_id'] , records[i]['_source']['data_type'] , records[i]['_source'] ])
+
+
+var g = new graph("#container" , {
+    height: height, 
+    width: width,
+    // on click over a node
+    on_node_click: function(d){
+            var d = d3.select(d).data()
+            var node_details = convert_json_to_list(d[0]['properities'])
+
+            var table = '<tbody>'
+
+            for(var i = 0 ; i < node_details.length ; i++)
+              table += '<tr>\
+                  <td><span class="badge bg-light-blue">'+node_details[i][0]+'</span>\
+                  <a data-id="'+d[0]['id']+'" data-field="'+node_details[i][0]+'" data-value="'+node_details[i][1]+'" class="clickable expand_graph pull-right"><i class="fa fa-search-plus"></i></a>\
+                  </td>\
+                  <td class="value">'+node_details[i][1]+'</td>\
+                </tr>'
+
+            table += '</tbody>'
+
+            $('#node_details').html(table)
+    },
+
+  })
+
+// create note for each node record
+nodes_list.forEach(function(d){
+  g.createNode(d[0] , d[1] , d[2])
+})
+
+
+// create links between nodes
+links_list.forEach(function(d){
+  g.createLink(d[0] + "-" + d[1] , d[0] , d[1] , label=d[2])
+})
+
+// draw the links 
+for(var i = 0 ; i < links_list.length ; i++){
+  g.drawLink(links_list[i][0])
+}
+
+// draw the nodes
+for(var i = 0 ; i < nodes_list.length ; i++){
+  g.drawNode(nodes_list[i][0])
+}
+
+
+
+</script>
+
+
+
+{% endblock %}

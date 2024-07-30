@@ -1,0 +1,2 @@
+* * * * * root bash -c "/system_health/scheduler.sh mongodb" >> /var/log/cron_mongodb.log 2>&1
+# empty line

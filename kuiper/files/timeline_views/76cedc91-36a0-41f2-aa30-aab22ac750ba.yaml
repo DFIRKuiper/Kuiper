@@ -1,0 +1,16 @@
+- name: "UserAssist"
+  condition:
+    query: 'data_type:"UserAssist"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "UserAssist"
+    Details/Procedure: "Execution of ${Data.name}"
+    FileName/Path/URL: "${Data.name}"
+    Extra: "Run count ${Data.count}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

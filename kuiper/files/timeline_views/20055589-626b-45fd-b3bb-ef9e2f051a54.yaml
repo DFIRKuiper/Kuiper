@@ -1,0 +1,17 @@
+- name: "Events_BITS_Transfer_59"
+  condition: 
+    query: 'data_type:"Events" AND Data.Event.System.EventID.#text:"59" AND Data.Event.System.Channel:"Microsoft\-Windows\-Bits\-Client\/Operational"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "59"
+    Details/Procedure: "BITS Transfer job stopped ${Data.Event.EventData.name}"
+    Extra: "URL: ${Data.Event.EventData.url}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
+    User: "${Data.Event.System.Security.@UserID}"

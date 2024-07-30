@@ -1,0 +1,19 @@
+- name: "Events_Incoming_RDP_disconnection_24"
+  condition: 
+    query: 'data_type:"Events" AND Data.Event.System.EventID.#text:"24" AND Data.Event.System.Channel:"Microsoft\-Windows\-TerminalServices\-LocalSessionManager\/Operational"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "24"
+    Details/Procedure: "RDP disconnection from ${Data.Event.UserData.EventXML.Address}"
+    Extra: "ActivityID: ${Data.Event.System.Correlation.@ActivityID}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
+    Src: "${Data.Event.UserData.EventXML.Address}"
+    Dst: "${Data.Event.System.Computer}"
+    User: "${Data.Event.UserData.EventXML.User}"

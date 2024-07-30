@@ -1,0 +1,19 @@
+- name: "Events_WinRM_6"
+  condition: 
+    query: 'data_type:"Events" AND Data.Event.System.EventID.#text:"6" AND Data.Event.System.Channel:"Microsoft\-Windows\-WinRM\/Operational"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "6"
+    Details/Procedure: "WSMan Session initialize"
+    Src: "${machine}"
+    Dst: "${Data.Event.EventData.connection}"
+    User: "${Data.Event.System.Security.@UserID}"
+    Extra: "Channel: ${Data.Event.System.Channel}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

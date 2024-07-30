@@ -1,0 +1,15 @@
+- name: "OpenSaveMRU"
+  condition:
+    query: 'data_type:"OpenSaveMRU"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "OpenSaveMRU"
+    Details/Procedure: "Opened Path: ${Data.path}"
+    FileName/Path/URL: "${Data.path}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

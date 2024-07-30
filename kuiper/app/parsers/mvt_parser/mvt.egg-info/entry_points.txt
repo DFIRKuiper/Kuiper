@@ -1,0 +1,4 @@
+[console_scripts]
+mvt-android = mvt.android:cli
+mvt-ios = mvt.ios:cli
+

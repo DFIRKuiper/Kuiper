@@ -1,0 +1,16 @@
+- name: "amcache"
+  condition:
+    query: 'data_type:"Amcache"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Amcache"
+    Details/Procedure: "Execution of ${Data.Path}"
+    FileName/Path/URL: "${Data.Path}"
+    Extra: "${Data.Sha1}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

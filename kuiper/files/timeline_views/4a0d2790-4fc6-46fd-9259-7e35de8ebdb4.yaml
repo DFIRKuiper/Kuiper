@@ -1,0 +1,16 @@
+- name: "Events_BITS_service_3"
+  condition: 
+    query: 'data_type:"Events" AND Data.Event.System.EventID.#text:"3" AND Data.Event.System.Channel:"Microsoft\-Windows\-Bits\-Client\/Operational"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "3"
+    Details/Procedure: "BITS service created a new job ${Data.Event.EventData.string}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
+    User: "${Data.Event.EventData.string2}"

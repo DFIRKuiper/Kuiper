@@ -1,0 +1,3 @@
+six
+argparse
+python-registry
