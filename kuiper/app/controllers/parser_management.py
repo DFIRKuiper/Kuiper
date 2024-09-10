@@ -650,7 +650,7 @@ class Parser_Manager:
     def fix_issues_with_parsed_data(self, data):
         fixed       = 0    # this store the number of fixed records, or even if does not need to be fixed
         not_fixed   = 0    # this store the number of records failed to be fixed
-        iso_date = re.compile(r'^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z?$')
+        iso_date = re.compile(r'^\d{4}-\d{2}-\d{2}(T| )\d{2}:\d{2}:\d{2}(\.\d+)?Z?$')
 
         if data is not None and len(data) > 0:
             d = 0
