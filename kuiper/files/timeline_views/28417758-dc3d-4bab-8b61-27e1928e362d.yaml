@@ -1,0 +1,16 @@
+- name: "WER"
+  condition:
+    query: 'data_type:"WER"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "WER"
+    Details/Procedure: "Crashed App: ${Data.AppPath}, Hash: ${Data.hash}"
+    FileName/Path/URL: "${Data.AppPath}"
+    Extra: "Hash: ${Data.hash}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

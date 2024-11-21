@@ -1,0 +1,15 @@
+- name: "Recyclebin"
+  condition:
+    query: 'data_type:"Recyclebin"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Recyclebin"
+    Details/Procedure: "Name in RecycleBin: ${Data.Recycle_bin_file} Path: ${Data.Path}"
+    FileName/Path/URL: "${Data.Path}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

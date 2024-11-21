@@ -1,0 +1,14 @@
+- name: "ComputerName"
+  condition:
+    query: 'data_type:"ComputerName"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "ComputerName"
+    Details/Procedure: "Computer Name: ${Data.ComputerName}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

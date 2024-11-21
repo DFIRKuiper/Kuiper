@@ -1,0 +1,16 @@
+- name: "Events_TaskScheduler_106"
+  condition: 
+    query: 'Data.Event.System.EventID.#text:"106" AND Data.Event.System.Channel:"Microsoft\-Windows\-TaskScheduler\/Operational" AND data_type:"Events"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "106"
+    Details/Procedure: "Scheduled task creation ${Data.Event.EventData.TaskName}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
+    User: "${Data.Event.EventData.UserContext}"

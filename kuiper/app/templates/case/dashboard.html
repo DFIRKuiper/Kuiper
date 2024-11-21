@@ -1,0 +1,209 @@
+
+{% extends  "case/index.html" %}
+
+{% block content %}
+
+<div class="content">
+
+    <div class="row">
+
+        <section class="col-lg-6 connectedSortable ui-sortable">
+            <!-- ============== Alerts Start ============== -->
+            <div class="box nav-tabs-custom">
+                <div class="box-header nav-tabs with-border ui-sortable-handle">
+                    <h3 class="box-title"><i class="fa fa-bell"></i>  Alerts</h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i></button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="box-body">
+
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="chart-responsive">
+                                <div class="chart" id="alerts_chart" style="height: 300px; position: relative;"></div>
+                                <div id="alerts_char_message" class="text-center" style="display:none"></div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <table class="table chart-legend clearfix">
+                                <tbody>
+                                    <tr>
+                                        <td><i class="fa fa-circle-o text-gray"></i> Critical</td>
+                                        <td><span class="badge badge-pill bg-gray">{{dashboard_info['alerts']['Critical']}}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa fa-circle-o text-red"></i> High</td>
+                                        <td><span class="badge badge-pill bg-red">{{dashboard_info['alerts']['High']}}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa fa-circle-o text-yellow"></i> Medium</td>
+                                        <td><span class="badge badge-pill bg-yellow">{{dashboard_info['alerts']['Medium']}}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa fa-circle-o text-green"></i> Low</td>
+                                        <td><span class="badge badge-pill bg-green">{{dashboard_info['alerts']['Low']}}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa fa-circle-o text-light-blue"></i> Whitelist</td>
+                                        <td><span class="badge badge-pill bg-light-blue">{{dashboard_info['alerts']['Whitelist']}}</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+            <!-- ============== Alerts End ============== -->
+
+        </section>
+
+        <section class="col-lg-6 connectedSortable ui-sortable">
+
+            <!-- ============== Machines Start ============== -->
+            <div class="box nav-tabs-custom">
+                <div class="box-header nav-tabs with-border ui-sortable-handle" style="border-bottom-width: 0px;">
+                    <h3 class="box-title"><i class="fa fa-laptop"></i>  Machines</h3>
+
+                    <div class="box-tools pull-right">
+                        <button type="button" class="btn btn-box-tool" data-widget="collapse"><i class="fa fa-minus"></i>
+                        </button>
+                        <button type="button" class="btn btn-box-tool" data-widget="remove"><i class="fa fa-times"></i></button>
+                    </div>
+                </div>
+
+                <div class="box-body no-padding">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th width="10">#</th>
+                                <th>Machine Name</th>
+                                <th>IP Address</th>
+                                <th>detail</th>
+                            </tr>
+                            {% for m in dashboard_info['machines'] %}
+                            <tr>
+                                <td>{{loop.index}}</td>
+                                <td>{{m['machinename']}}</td>
+                                <td>{{m['ip']}}</td>
+                                <td>{{m['detail']}}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+            <!-- ============== Machines End ============== -->
+
+        </section>
+    </div>
+
+
+<!-- jQuery 3 -->
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- jQuery UI 1.11.4 -->
+<script src="../../static/bower_components/jquery-ui/jquery-ui.min.js"></script>
+<!-- prograsbar  -->
+<script src="../../static/dist/js/nanobar.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="../../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="../../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="../../static/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="../../static/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="../../static/dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../static/dist/js/demo.js"></script>
+
+
+
+
+<!-- Morris charts -->
+<link rel="stylesheet" href="{{url_for('static', filename='bower_components/morris.js/morris.css')}}">
+<!-- Morris.js charts -->
+<script src="../../static/bower_components/raphael/raphael.min.js"></script>
+<script src="../../static/bower_components/morris.js/morris.min.js"></script>
+
+    <!-- tag input -->
+    
+    <script src="../../static/dist/tagsinput/bootstrap-tagsinput.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput-typeahead.css')}}">
+
+    <!-- toast notifications --> 
+    <script src="../../static/dist/jquery_toast/jquery.toast.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+
+    
+    <script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+
+
+
+
+<script>
+
+var dashboard_info = ({{dashboard_info|tojson|safe}})
+
+// ======================== Sortable UI ========================= //
+
+  // Make the dashboard widgets sortable Using jquery UI
+  $('.connectedSortable').sortable({
+    placeholder         : 'sort-highlight',
+    connectWith         : '.connectedSortable',
+    handle              : '.box-header, .nav-tabs-custom',
+    forcePlaceholderSize: true,
+    zIndex              : 999999
+  });
+  $('.connectedSortable .box-header').css('cursor', 'move');
+
+
+
+
+// ======================== Alerts ============================== //
+
+var alerts_data = dashboard_info['alerts']
+var total_hits = 0
+for(var i in alerts_data)
+    total_hits += alerts_data[i]
+
+// check to avoid empty hits
+if(total_hits > 0){
+    var donut = new Morris.Donut({
+        element: 'alerts_chart',
+        resize: true,
+        colors: ["#d2d6de", "#dd4b39", "#f29e57", "#00a65a", "#3c8dbc"],
+        data: [
+        {label: "Critical",   value: alerts_data['Critical']},
+        {label: "High",       value: alerts_data['High']},
+        {label: "Medium",     value: alerts_data['Medium']},
+        {label: "Low",        value: alerts_data['Low']},
+        {label: "Whitelist",  value: alerts_data['Whitelist']}
+        ],
+        hideHover: 'auto',
+        labelColor: "#a7a7ba",
+    });
+} else {
+    $("#alerts_char_message").show()
+    $("#alerts_chart").hide()
+    $("#alerts_char_message").html("No Hits")
+
+}
+
+
+
+
+
+
+    </script>
+{% endblock %}

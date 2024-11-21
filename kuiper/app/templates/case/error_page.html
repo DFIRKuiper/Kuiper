@@ -1,0 +1,56 @@
+{% extends  "case/index.html" %}
+
+{% block content %}
+
+<div class="content">
+
+
+  <div class="row">
+
+<div class="callout callout-danger">
+                <h4>Error</h4>
+
+                <p>{{message}}</p>
+              </div>
+
+    </div>
+
+</div>
+
+<!-- jQuery 3 -->
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- jQuery UI 1.11.4 -->
+<script src="../../static/bower_components/jquery-ui/jquery-ui.min.js"></script>
+<!-- prograsbar  -->
+<script src="../../static/dist/js/nanobar.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="../../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="../../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="../../static/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="../../static/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="../../static/dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../static/dist/js/demo.js"></script>
+
+
+
+
+<!-- Morris charts -->
+<link rel="stylesheet" href="{{url_for('static', filename='bower_components/morris.js/morris.css')}}">
+<!-- Morris.js charts -->
+<script src="../../static/bower_components/raphael/raphael.min.js"></script>
+<script src="../../static/bower_components/morris.js/morris.min.js"></script>
+
+
+    <!-- toast notifications --> 
+    <script src="../../static/dist/jquery_toast/jquery.toast.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+    <script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+
+
+{% endblock %}

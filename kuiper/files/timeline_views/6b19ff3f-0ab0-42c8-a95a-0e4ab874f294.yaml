@@ -1,0 +1,16 @@
+- name: "Events_Application_0"
+  condition: 
+    query: 'data_type:"Events" AND Data.Event.System.EventID.#text:"0" AND Data.Event.System.Channel:"Application"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "0"
+    Details/Procedure: "Channel: ${Data.Event.System.Channel}, ${Data.Event.System.Provider.@Name}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"
+    Extra: "Data.Event.EventData.Data.#text"

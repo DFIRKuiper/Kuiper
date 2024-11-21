@@ -1,0 +1,18 @@
+- name: "Events_ProcessExecution_4688"
+  condition: 
+    query: 'data_type:"Events" AND Data.Event.System.EventID.#text:"4688" AND Data.Event.System.Channel:"Security"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "4688"
+    Details/Procedure: "Execution of: ${Data.Event.EventData.NewProcessName} ${Data.Event.EventData.CommandLine}"
+    FileName/Path/URL: "${Data.Event.EventData.NewProcessName}"
+    User: "${Data.Event.EventData.SubjectDomainName}\\${Data.Event.EventData.SubjectUserName}"
+    Extra: "Channel: ${Data.Event.System.Channel}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

@@ -1,0 +1,39 @@
+/**
+* bootstrap-treenav.js v1.0.0 by @morrissinger
+* Copyright 2013 Morris Singer
+* http://www.apache.org/licenses/LICENSE-2.0
+*/
+
+ul.nav-tree {
+  list-style: none;
+  margin-left: 20px;
+}
+ul.nav-tree ul.nav-tree {
+  margin-left: 45px;
+}
+ul.nav-tree li {
+  position: relative;
+  margin-left: -15px;
+}
+ul.nav-tree li a {
+  text-indent: 15px;
+}
+ul.nav-tree li span.opener {
+  position: absolute;
+  top: 5px;
+  left: 10px;
+  color: #444;
+  z-index: +1;
+}
+ul.nav-tree li span.opener.closed span.tree-icon-opened {
+  display: none;
+}
+ul.nav-tree li span.opener.closed span.tree-icon-closed {
+  display: block;
+}
+ul.nav-tree li span.opener.opened span.tree-icon-open {
+  display: block;
+}
+ul.nav-tree li span.opener.opened span.tree-icon-closed {
+  display: none;
+}

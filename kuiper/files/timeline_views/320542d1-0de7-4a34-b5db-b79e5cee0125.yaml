@@ -1,0 +1,16 @@
+- name: "MFT_parser"
+  condition:
+    query: 'data_type:"MFT_parser"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "MFT_parser"
+    Details/Procedure: "FNCreated: ${Data.FNCreated}, SICreated: ${Data.SICreated}, IsADirectory: ${Data.IsADirectory}, IsDeleted: ${Data.IsDeleted}"
+    FileName/Path/URL: "${Data.FullPath}"
+    Extra: "HasAlternateDataStreams: ${Data.HasAlternateDataStreams}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

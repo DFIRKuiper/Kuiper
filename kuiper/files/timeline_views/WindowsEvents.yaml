@@ -1,0 +1,18 @@
+
+- name: "Windows Clear Logs"
+  condition: 
+    query: 'data_type:"Events" AND Data.Event.System.EventID.#text:"104" AND Data.Event.System.Channel:"System"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "Events"
+    Event_ID: "104"
+    Details/Procedure: "System Logs cleared: ${Data.Event.UserData.LogFileCleared.Channel}"
+    User: "${Data.Event.UserData.LogFileCleared.SubjectUserName}"
+    Extra: "Channel: ${Data.Event.System.Channel}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

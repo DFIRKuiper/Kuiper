@@ -1,0 +1,14 @@
+- name: "RunMRU"
+  condition:
+    query: 'data_type:"RunMRU"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "RunMRU"
+    Details/Procedure: "Application Run:${Data.Command}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

@@ -1,0 +1,4 @@
+evtx==0.6.6
+ifaddr==0.1.6
+psutil==5.7.0
+PyYAML==5.3.1

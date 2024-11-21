@@ -1,0 +1,15 @@
+{
+  "name": "perfect-DateTimePicker",
+  "version": "1.0.0",
+  "author": "Sean",
+  "dependencies": {
+    "grunt": "*",
+    "grunt-contrib-clean": "*",
+    "grunt-contrib-jshint": "*",
+    "grunt-contrib-uglify": "*",
+    "grunt-contrib-concat": "*",
+    "grunt-contrib-copy": "*",
+    "grunt-contrib-less": "*",
+    "grunt-contrib-cssmin": "*"
+  }
+}

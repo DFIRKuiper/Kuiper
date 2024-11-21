@@ -1,0 +1,12 @@
+FROM itsthenetwork/nfs-server-alpine:12
+
+RUN mkdir -p /app/
+WORKDIR /app
+
+
+COPY ./kuiper/ /app/
+
+
+VOLUME [ "/app" ]
+
+EXPOSE 2049

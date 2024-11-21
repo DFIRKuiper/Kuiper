@@ -26,17 +26,14 @@
 
     
 
-
-<!-- /TOC -->
-
-
+  
 # Kuiper
 
 Digital Investigation Platform
 
 
 ## What is Kuiper?
-Kuiper is a digital investigation platform that provides a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast traige script like [Hoarder](https://github.com/muteb/Hoarder)). In additional, collaborate with other team members on the same platform by tagging artifacts and present it as a timeline, as well as setting rules for automating the detection. The main purpose of this project is to aid in streamlining digital investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
+Kuiper is a digital investigation platform that provides a capabilities for the investigation team and individuals to parse, search, visualize collected evidences (evidences could be collected by fast triage script like [Hoarder](https://github.com/muteb/Hoarder)). In additional, collaborate with other team members on the same platform by tagging artifacts and present it as a timeline, as well as setting rules for automating the detection. The main purpose of this project is to aid in streamlining digital investigation activities and allow advanced analytics capabilities with the ability to handle a large amounts of data. 
 
 ![diagram.png](https://github.com/DFIRKuiper/Kuiper/blob/master/img/v2.0.0/Diagram.png?raw=true)
 
@@ -54,7 +51,7 @@ With a large number of cases and a large number of team members, it becomes hard
 ## How Kuiper Will Help Optimize the Investigation?
 - **Centralized server**: Using a single centralized server (**Kuiper**) that do all the processing on the server-side reduce the needed hardware resources (CPU, RAM, Hard-disk) for the analysts team, no need for powerful laptop any more. In addition, all evidences stored in single server instead of copying it on different machines during the investigation.
 - **Consistency**: Depending on different parsers by team members to parse same artifacts might provide inconsistency on the generated results, using tested and trusted parsers increases the accuracy.
-- **Predefined rules**: Define rules on Kuiper will save a lot of time by triggering alerts on past, current, and future cases, for example, creating rule to trigger suspicious encoded powershell commands on all parsed artifacts, or suspicous binary executed from temp folder, within **Kuiper** you can defined these rules and more.
+- **Predefined rules**: Define rules on Kuiper will save a lot of time by triggering alerts on past, current, and future cases, for example, creating rule to trigger suspicious encoded PowerShell commands on all parsed artifacts, or suspicious binary executed from temp folder, within **Kuiper** you can defined these rules and more.
 - **Collaboration**: Browsing the parsed artifacts on same web interface by team members boost the collaboration among them using **tagging** and **timeline** feature instead of every analyst working on his/her own machine.
 
 
@@ -107,65 +104,125 @@ Kuiper use the following components:
 - **RAM:**  4GB (minimum), 64GB (preferred)
 - **Cores:** 4 (minimum)
 - **Disk:** 25GB for testing purposes and more disk space depends on the amount of data collected.
+- **Docker**: Docker version 20.10.17
+- **Docker-Compose**: docker-compose version 1.29.2
 
 **Notes**
 - If you want to use RAM more than 64GB to increase Elasticsearch performence, it is recommended to use multiple nodes for Elasticsearch cluster instead in different machines
 - For parsing, Celery generate workers based on CPU cores (worker per core), each core parse one machine at a time and when the machine finished, the other queued machines will start parsing, if you have large number of machines to process in the same time you have to increase the cores number
+- To install docker and docker-compose on Ubuntu run the following
+```shell
+# Install Docker
+sudo apt-get update
+sudo apt-get install ca-certificates curl gnupg lsb-release
+sudo mkdir -p /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+sudo apt-get update
+sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+sudo docker -v
+
+# Install Docker Compose
+sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+sudo docker-compose -v
+
+```
 
 ## Installation 
 
-Run the following commands to clone the Kuiper repo via git.
+Starting from version 2.2.0, Kuiper run over dockers, there are 7 docker images:
 
-```
-$ git clone https://github.com/DFIRKuiper/Kuiper.git
-```
+- **Flask**: the main docker which host the web application (check [docker image](https://hub.docker.com/r/dfirkuiper/dfir_kuiper)).
+- **Mongodb**: stores the cases and machines metadata.
+- **Elasticsearch (es01)**: stores the parsed artifacts data.
+- **Nginx**: reverse proxy for the flask container.
+- **Celery**: artifacts parser component check [docker image](https://hub.docker.com/r/dfirkuiper/dfir_kuiper).
+- **Redis**: queue for celery workers
+- **NFS (Network File System)**: container that stores the shared files between Flask and Celery containers.
 
-Change your current directory location to the new Kuiper directory, and run the **kuiper_install.sh** bash script as root.
+To run the docker use the following command:
 
-```
-$ sudo apt-get update && sudo apt-get upgrade
-$ cd Kuiper/
-$ sudo ./kuiper_install.sh -install 
-```
-
-The **kuiper_install.sh** bash script will install all Kuiper dependencies such as (python, pip, redis, elasticsearch, mongodb and many others used by Kuiper default parsers).
-
-If you want to change the default configuration of Kuiper, please visit the page [Configuration](https://github.com/DFIRKuiper/Kuiper/wiki/Configuration)
-
-Use the following bash file to launch Kuiper.
-
-```
-$ ./kuiper_install.sh -run 
+```shell
+sysctl -w vm.max_map_count=262144
+git clone https://github.com/DFIRKuiper/Kuiper.git
+cd Kuiper
+docker-compose pull
+docker-compose up -d
 ```
 
-If everything runs correctly now you should be able to use Kuiper through the link (http://[kuiper-ip]:[kuiper-port]/).
+### Issues
 
-Happy hunting :).
-
-#### Files Paths
-
-1. before installation, make sure to change the certificate paths if needed
-
-in `kuiper-nginx.conf` change the path of certificates
+1 - **Note**: when you first run the dockers, Elasticsearch will fail to run and give the following error
 
 ```
-    ssl_certificate     /home/kuiper/kuiper/cert/MyCertificate.crt;
-    ssl_certificate_key /home/kuiper/kuiper/cert/MyKey.key;
+ERROR: [1] bootstrap checks failed
+[1]: max virtual memory areas vm.max_map_count [65530] is too low, increase to at least [262144]
 ```
 
-2. also change the socket file path
+To solve the issue run the command
 
-```
-        proxy_pass              http://unix:/home/kuiper/kuiper/kuiper.sock;
+```shell
+sysctl -w vm.max_map_count=262144
 ```
 
-3. change mode permission for the following files
+2- Note: if you faced the following issue
 
+```shell
+Creating network "kuiper_kuiper" with driver "bridge"
+Creating kuiper_es01    ... done
+Creating kuiper_mongodb ... done
+Creating kuiper_redis   ... done
+Creating kuiper_flask   ... error
+Creating kuiper_nfs     ... done
+Creating kuiper_celery  ... 
+
+ERROR: for kuiper_flask  Cannot start service flask: error while mounting volume '/var/lib/docker/volumes/kuiper_kuiper_nfs/_data': failed to mount local volume: mount :/:/var/lib/docker/vCreating kuiper_celery  ... done
+
+ERROR: for flask  Cannot start service flask: error while mounting volume '/var/lib/docker/volumes/kuiper_kuiper_nfs/_data': failed to mount local volume: mount :/:/var/lib/docker/volumes/kuiper_kuiper_nfs/_data, data: addr=172.30.250.10: permission denied
+ERROR: Encountered errors while bringing up the project.
 ```
-chmod +x ./kuiper_install.sh
-chmod +x ./app/parsers/WinEvents/evtx_dump
-chmod +x ./app/parsers/MFT_Parser/mft_dump
+
+To solve the issue, run the command again 
+
+```shell
+docker-compose up -d
 ```
+
+
+### Troubleshooting
+
+To check the dockers, run the command
+```shell
+docker-compose ps -a
+```
+It should show the results
+```
+     Name                   Command               State                         Ports                       
+------------------------------------------------------------------------------------------------------------
+kuiper_celery    /bin/sh -c cron && python  ...   Up                                                        
+kuiper_es01      /bin/tini -- /usr/local/bi ...   Up      0.0.0.0:9200->9200/tcp,:::9200->9200/tcp, 9300/tcp
+kuiper_flask     /bin/sh -c cron && gunicor ...   Up      0.0.0.0:5000->5000/tcp,:::5000->5000/tcp          
+kuiper_mongodb   docker-entrypoint.sh /bin/ ...   Up      0.0.0.0:27017->27017/tcp,:::27017->27017/tcp      
+kuiper_nfs       /usr/bin/nfsd.sh                 Up      0.0.0.0:2049->2049/tcp,:::2049->2049/tcp          
+kuiper_nginx     /docker-entrypoint.sh ngin ...   Up      0.0.0.0:443->443/tcp,:::443->443/tcp, 80/tcp      
+kuiper_redis     docker-entrypoint.sh /bin/ ...   Up      0.0.0.0:6379->6379/tcp,:::6379->6379/tcp          
+```
+
+if anyone failed, check the logs for the service that failed
+```shell
+docker-compose logs -f --tail=100 <service>
+```
+
+
+# Kuiper API
+
+Kuiper has a limited feature API, check the repo [DFIRKuiperAPI](https://github.com/DFIRKuiper/DFIRKuiperAPI). 
+
+- [GetFieldsScript](https://github.com/DFIRKuiper/DFIRKuiperAPI#GetFieldsScript): Retrieves parsed data from Kuiper.
+- [UploadMachines](https://github.com/DFIRKuiper/DFIRKuiperAPI#UploadMachines): Upload new machine (.zip file) to specific case.
+
+
 
 # Issues Tracking and Contribution
 
@@ -176,7 +233,7 @@ we appreciate sharing any parsers you develop, please send a pull request to be 
 
 # Licenses
 
-- Each parser has its own license, all parsers placed in the following folder  `parsers/`.
+- Each parser has its own license, all parsers placed in the following folder  `/kuiper/parsers/`.
 
 - All files in this project under GPL-3.0 license, unless mentioned otherwise.
 

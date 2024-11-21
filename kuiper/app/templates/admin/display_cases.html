@@ -1,0 +1,319 @@
+{% extends	"admin/index.html" %}
+
+{% block content %}
+
+
+
+<!-- =============== START CREATE/UPDATE CASE dialog ================ -->
+<div class="modal fade in" id="edit_case_info_modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">×</span></button>
+        <h4 class="modal-title">Case Details</h4>
+      </div>
+      <form action="/admin/create_case" class="form-horizontal" method=post enctype="multipart/form-data" >
+      <div class="modal-body">
+
+
+        <!-- =============== Dialog Enter Case ============== -->
+
+        
+          <div class="input-group col-md-12">
+                <label >Case  Name</label>
+                  <div >
+                    <input type="text" id="edit_case_casename" name="casename" class="form-control" placeholder="Enter Case Name:" required>
+                  </div>
+          </div>
+
+          
+
+
+          <div class="input-group col-md-12">
+              <label >Status</label>
+
+
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="status" id="status_active" value="active" checked>
+                <label class="form-check-label" for="status_active">
+                  Active
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="radio" name="status" id="status_not_active" value="not_active" >
+                <label class="form-check-label" for="status_not_active">
+                  Not Active
+                </label>
+              </div>
+
+          </div>
+          <input type="hidden" name="update_or_create_case" id="update_or_create_case" value="create">
+          <div class="divider"></div>
+
+        
+
+        <!-- ============================================================== -->
+      </div>
+
+
+      <div class="modal-footer">
+        <div class="btn-group">
+            <button type="button" class="btn btn-default pull-left" data-dismiss="modal"><i class="fa  fa-close"></i> Close</button>
+            <button type="submit" class="btn btn-success"><i class="fa fa-edit"></i> Submit</button>
+        </div>
+      </div>
+
+
+      </form>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+
+<!-- =============== END CREATE/UPDATE CASE dialog ================ -->
+
+
+<section class="content">
+
+
+
+
+  <div class="row">
+
+    <div id="cases_cards">
+
+
+    <!-- ================== Info/Error Messages =================== -->
+    {% if message is not none %}
+            <div class="alert alert-dismissible alert-success">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+              <h4>Message</h4>
+              <p>{{message}}</p>
+            </div>
+          {% endif %}
+
+          {% if err_msg is not none %}
+            <div class="alert alert-dismissible alert-danger">
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+              <h4>Alert</h4>
+              <p>{{err_msg}}</p>
+            </div>
+    {% endif %}
+
+
+    <!-- ================== Case cards =================== -->
+
+    {% for c in all_cases%}
+
+      <a class=" col-md-3 col-sm-6 col-xs-12"  style="min-width: max-content;">
+        <div class="info-box case_card clickable" data="{{c['casename']}}">
+        
+        
+
+          <div class="info-box-content">
+
+
+            <span class="info-box-number">{{c['casename']}}</span>
+
+            {% if c['status'] == "active" %}
+                <span class="label pull-right bg-green">Active</i></span>
+            {% elif c['status'] == "not_active" %}
+                <span class="label pull-right bg-yellow">Not Active</i></span>
+                
+            {% endif %}
+            
+            <span class="info-box-text" title="Case creation time"><i class="fa fa-clock-o"></i> {{c['date']}}</span>
+            <br />
+            <div class="buttons btn-group pull-right">
+              <button type="button" data="{{c['casename']}}" class="edit_case_info float_right btn btn-default btn-xs" data-toggle="modal" data-target="#edit_case_info_modal"><i class="fa  fa-edit"></i> Edit</button>
+              <button type="button" data="{{c['casename']}}" class="remove_case_info float_right btn btn-danger btn-xs" ><i class="fa fa-remove"></i> Remove</button>
+            </div>
+
+          </div>
+          <!-- /.info-box-content -->
+        </div>
+        <!-- /.info-box -->
+      </a>
+      <!-- /.col -->
+          
+
+    {% endfor %}
+
+
+    <!-- ================== Add case card =================== -->
+
+    <a class="col-md-3 col-sm-6 col-xs-12">
+      <div class="clickable">
+        <span class="info-box-icon bg-light" id="add_case_info" data-toggle="modal" data-target="#edit_case_info_modal"><i class="fa fa-plus"></i></span>
+      </div>
+    </a>
+
+    </div>
+
+  </div>
+</section>
+
+
+<!-- jQuery 3 -->
+<script src="../../static/bower_components/jquery/dist/jquery.min.js"></script>
+<!-- Bootstrap 3.3.7 -->
+<script src="../../static/bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- DataTables -->
+<script src="../../static/bower_components/datatables.net/js/jquery.dataTables.min.js"></script>
+<script src="../../static/bower_components/datatables.net-bs/js/dataTables.bootstrap.min.js"></script>
+<!-- SlimScroll -->
+<script src="../../static/bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="../../static/bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="../../static/dist/js/adminlte.min.js"></script>
+<!-- AdminLTE for demo purposes -->
+<script src="../../static/dist/js/demo.js"></script>
+
+
+
+
+
+    <!-- tag input -->
+    
+    <script src="../../static/dist/tagsinput/bootstrap-tagsinput.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/tagsinput/bootstrap-tagsinput-typeahead.css')}}">
+
+    <!-- toast notifications --> 
+    <script src="../../static/dist/jquery_toast/jquery.toast.min.js"></script>
+    <link rel="stylesheet" href="{{url_for('static', filename='dist/jquery_toast/jquery.toast.min.css')}}">
+
+
+
+<script src="{{url_for('static' , filename='Kuiper.js')}}"></script>
+
+
+
+<!-- This will take the AdminLTE input style and use it with the tags input style -->
+<style type="text/css">
+.bootstrap-tagsinput {
+    display: table-cell;
+    z-index: 2;
+    width: 100%;
+
+    height: 44px;
+    padding: 4px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.float_right {
+  float: right;
+}
+.jq-toast-single {
+    font-size: 12px;
+    width: fit-content;
+    white-space: nowrap;
+}
+.jq-toast-single h2{
+    font-size: 14px;
+        font-weight: bold;
+
+}
+.clickable {
+  cursor: pointer;
+}
+.clickable:hover, #add_case_info:hover {
+    background: #33354e;
+  cursor: pointer;
+}
+
+.edit_case_info, .remove_case_info{
+  position: relative;
+  bottom: 15px;
+}
+
+
+
+
+</style>
+
+
+
+
+<script type="text/javascript">
+
+// ======================= Variables
+var all_cases = ({{ all_cases|tojson|safe }}); // cases details 
+var stop_moving_to_case_page = false; // this used to stop moving to case page when click on the buttons (edit, delete) on case card 
+
+
+// ======================= Listeners
+
+
+/*
+// change background color of case cards on hover
+$('.case_card').hover(function(){
+  //$(this).css("background-color", "gray");
+}, function(){
+  //$(this).removeStyle("background-color");
+})
+*/
+
+// when click on add case, reset the data on inputs for case dialog
+$('#cases_cards').on('click' , '#add_case_info' , function(){
+        $('#edit_case_casename').val( '' );
+        $('#edit_case_casename').attr( 'readonly' , false );
+        $('#status_active' ).prop('checked' , true)
+        $('#status_not_active' ).prop('checked' , false)
+        $('#update_or_create_case').val('create')
+})
+
+// when click on edit case, fill the data of the case on case edit dialog inputs
+$('#cases_cards').on('click' , '.edit_case_info' , function(){ 
+    stop_moving_to_case_page = true;
+    var casename = $(this).attr('data')
+    for(var i =0; i< all_cases.length;i++){
+      if(all_cases[i]['casename'] == casename){
+        $('#edit_case_casename').val( all_cases[i]['casename'] );
+        $('#edit_case_casename').attr( 'readonly' , true );
+        $('#status_' + all_cases[i]['status'] ).prop('checked' , true)
+        $('#update_or_create_case').val('update')
+      }
+    }
+})
+
+
+
+// when dialog of edit close, enable moving to case page
+$('#edit_case_info_modal').on('hidden.bs.modal' , function(){
+    stop_moving_to_case_page = false;
+})
+
+// stop moving to case page when delete button on case card clicked
+$('#cases_cards').on('click' , '.remove_case_info' , function(){ 
+    stop_moving_to_case_page = true;
+    var casename = $(this).attr('data')
+    $(this).closest('.col-md-3').remove()
+
+    var link = "../admin/delete_case/" + casename;
+    window.location.href=link;
+
+});
+
+// on click over case card, move to case page if not disabled
+$('#cases_cards').on('click' , '.case_card' , function(){
+  if(stop_moving_to_case_page ){
+      stop_moving_to_case_page = false;
+      return;
+  }
+
+  var casename = $(this).attr('data');
+  var link = "../case/" + casename;
+  window.location.href=link;
+  
+})
+
+</script>
+
+
+
+{% endblock %}

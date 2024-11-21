@@ -1,0 +1,15 @@
+- name: "LNK"
+  condition:
+    query: 'data_type:"LNK"'
+  sheet: Timeline
+  fields:
+    Time(UTC +0): "${Data.@timestamp}"
+    Hostname/IP: "${machine}"
+    Data_Source: "LNK"
+    Details/Procedure: "LNK Name: ${Data.Source_Name}, Path: ${Data.Local_Path}"
+    FileName/Path/URL: "${Data.Local_Path}"
+    Raw_Data: "${Data}"
+    KuiperID: "${_id}"
+    Tag: "${tag_type}"
+    Export_Version: "${_Export_Version}"
+    Export_Date: "${_Export_Date}"

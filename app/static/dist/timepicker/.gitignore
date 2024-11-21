@@ -1,7 +1,0 @@
-# Installed node modules
-node_modules/
-
-# Eclipse project file
-.project
-
-.idea/
